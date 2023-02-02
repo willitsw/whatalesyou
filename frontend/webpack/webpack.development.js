@@ -15,7 +15,6 @@ module.exports = merge(sharedConfig, {
   plugins: [
     new webpack.EnvironmentPlugin({
       APP_ENV: "development",
-      NODE_ENV: "development",
     }),
     new BundleAnalyzerPlugin({
       analyzerMode: "static",
