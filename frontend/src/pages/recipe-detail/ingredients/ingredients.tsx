@@ -254,7 +254,7 @@ const Ingredients = ({
         onOk={handleDeleteClick}
         visible={!!ingredientToDelete}
       >
-        Are you sure you want to delete this ingredient?
+        <>Are you sure you want to delete this ingredient?</>
       </Modal>
     </ConfigProvider>
   );

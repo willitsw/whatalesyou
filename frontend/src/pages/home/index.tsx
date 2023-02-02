@@ -50,7 +50,7 @@ const HomePage = () => {
         </Col>
         <Col xs={24} sm={24} md={12} lg={12} xl={12}>
           <Typography.Title level={4}>
-            Make a Donation Via Paypal
+            Make a Donation Via Paypal!
           </Typography.Title>
           <Button
             type="primary"

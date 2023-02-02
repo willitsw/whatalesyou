@@ -205,7 +205,9 @@ const BrewLogDetailPage = () => {
                   initialValue={moment()}
                 >
                   <DatePicker
-                    format={(date) => moment(date).format(DATE_FORMAT)}
+                    format={(date) =>
+                      moment(date.toISOString()).format(DATE_FORMAT)
+                    }
                   />
                 </Form.Item>
               </Col>
@@ -276,7 +278,9 @@ const BrewLogDetailPage = () => {
                                   >
                                     <DatePicker
                                       format={(date) =>
-                                        moment(date).format(DATE_FORMAT)
+                                        moment(date.toISOString()).format(
+                                          DATE_FORMAT
+                                        )
                                       }
                                     />
                                   </Form.Item>

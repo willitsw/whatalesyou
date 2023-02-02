@@ -8,7 +8,7 @@ import {
 } from "../../redux/recipe-list/slice";
 import OkCancelModal from "../../components/ok-cancel-modal";
 
-import { Breakpoint } from "antd/lib/_util/responsiveObserve";
+import { Breakpoint } from "antd/lib/_util/responsiveObserver";
 import {
   CopyOutlined,
   DeleteOutlined,

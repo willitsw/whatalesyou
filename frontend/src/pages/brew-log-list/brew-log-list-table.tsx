@@ -8,7 +8,6 @@ import {
 } from "../../redux/brew-log/slice";
 import OkCancelModal from "../../components/ok-cancel-modal";
 
-import { Breakpoint } from "antd/lib/_util/responsiveObserve";
 import { DeleteOutlined } from "@ant-design/icons";
 import { getBrewLogsByUser } from "../../utils/api-calls";
 import { BrewingTypes as BT } from "brewing-shared";
@@ -16,6 +15,7 @@ import React from "react";
 import moment from "moment";
 import { DATE_FORMAT } from "../../constants";
 import { useAnalytics } from "../../utils/analytics";
+import { Breakpoint } from "antd/es/_util/responsiveObserver";
 
 const BrewLogListTable = () => {
   const dispatch = useAppDispatch();
