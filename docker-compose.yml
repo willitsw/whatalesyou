@@ -15,6 +15,14 @@ services:
     build:
       context: .
       dockerfile: ./backend/Dockerfile
+    environment:
+      - DJANGO_DEBUG=${DJANGO_DEBUG}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - PG_NAME=${PG_NAME}
+      - PG_USER=${PG_USER}
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_HOST=${PG_HOST}
+      - PG_PORT=${PG_PORT}
     ports:
       - "8000:8000"
     command: python ./backend/manage.py runserver 0.0.0.0:8000
