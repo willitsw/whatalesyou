@@ -18,10 +18,11 @@ from django.urls import path
 from django.urls import include, path
 from rest_framework import routers
 from recipes.views import RecipesViewSet
+from user_profiles.views import UserProfileViewSet
 
 router = routers.DefaultRouter()
 router.register(r"recipes", RecipesViewSet)
-# router.register(r"recipe", RecipeDetail)
+router.register(r"users", UserProfileViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),

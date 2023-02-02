@@ -1,6 +1,5 @@
 from django.db import models
 from user_profiles.models import UserProfile
-import datetime
 
 
 class RecipeTypes(models.TextChoices):
