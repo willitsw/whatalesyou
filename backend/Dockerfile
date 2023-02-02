@@ -14,11 +14,11 @@ RUN pip install "poetry==$POETRY_VERSION"
 WORKDIR /code
 
 # Copy requirements
-COPY poetry.lock pyproject.toml ./
+COPY backend/poetry.lock backend/pyproject.toml ./
 
 # Project initialization:
 RUN poetry config virtualenvs.create false \
   && poetry install $(test "$YOUR_ENV" == production && echo "--no-dev") --no-interaction --no-ansi
 
 # Copy project
-COPY . .
+COPY /backend .
