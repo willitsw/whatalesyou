@@ -1,5 +1,5 @@
 from django.db import models
-from user_profiles.models import UserProfile
+from user_profiles.models import UserProfile, MeasurementTypes
 
 
 class RecipeTypes(models.TextChoices):
@@ -7,11 +7,6 @@ class RecipeTypes(models.TextChoices):
     Extract = "extract"
     Partial_Mash = "partial_mash"
     All_Grain = "all_grain"
-
-
-class MeasurementTypes(models.TextChoices):
-    Imperial = "imperial"
-    Metric = "metric"
 
 
 class IngredientSteps(models.TextChoices):
@@ -31,23 +26,25 @@ class IngredientAmountTypes(models.TextChoices):
 
 
 class Recipe(models.Model):
-    name = models.CharField(max_length=200, default="")
+    name = models.CharField(max_length=200)
     type = models.CharField(
         max_length=20, choices=RecipeTypes.choices, default=RecipeTypes.All_Grain
     )
-    description = models.TextField(default="")
-    author = models.CharField(max_length=100, default="")
+    description = models.TextField(blank=True, null=True)
+    author = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    batch_size = models.FloatField(default=5)
-    efficiency = models.FloatField(default=65)
+    batch_size = models.FloatField(blank=True, null=True)
+    efficiency = models.FloatField(blank=True, null=True)
     measurement_type = models.CharField(
         max_length=10,
         choices=MeasurementTypes.choices,
         default=MeasurementTypes.Imperial,
     )
 
-    owner = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        UserProfile, related_name="recipes", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return f"{self.name} - {self.owner.user.email} - {self.created_at.strftime('%d/%m/%Y')}"
@@ -56,8 +53,8 @@ class Recipe(models.Model):
 class IngredientMixin(models.Model):
     name = models.CharField(max_length=200)
     step = models.CharField(max_length=20, choices=IngredientSteps.choices)
-    timing = models.FloatField()
-    notes = models.TextField()
+    timing = models.FloatField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
     amount = models.FloatField()
     amount_type = models.CharField(max_length=5, choices=IngredientAmountTypes.choices)
 
