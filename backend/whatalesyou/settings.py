@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "recipes.apps.RecipesConfig",
     "user_profiles.apps.UserProfilesConfig",
+    "brew_log.apps.BrewLogConfig",
 ]
 
 MIDDLEWARE = [

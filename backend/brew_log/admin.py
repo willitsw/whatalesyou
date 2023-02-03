@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import BrewLog, GravityReading
 
-# Register your models here.
+admin.site.register(BrewLog)
+admin.site.register(GravityReading)

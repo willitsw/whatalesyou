@@ -16,7 +16,7 @@ class BrewLog(models.Model):
         choices=BrewLogStatuses.choices,
         default=BrewLogStatuses.InProgress,
     )
-    brew_date = models.DateField(auto_now_add=True)
+    brew_date = models.DateField(blank=True, null=True)
     secondary_date = models.DateField(blank=True, null=True)
     packaging_date = models.DateField(blank=True, null=True)
     brewing_notes = models.TextField(blank=True, null=True)
@@ -27,13 +27,19 @@ class BrewLog(models.Model):
     tasting_notes = models.TextField(blank=True, null=True)
     other_notes = models.TextField(blank=True, null=True)
 
-    recipe = models.ForeignKey(Recipe, related_name="brew_logs", blank=True, null=True)
+    recipe = models.ForeignKey(
+        Recipe,
+        related_name="brew_logs",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
     owner = models.ForeignKey(
         UserProfile, related_name="brew_logs", on_delete=models.CASCADE
     )
 
     def __str__(self):
-        return f"{self.name} - {self.owner.user.email} - {self.created_at.strftime('%d/%m/%Y')}"
+        return f"{self.name} - {self.owner.user.email} - {self.brew_date.strftime('%d/%m/%Y')}"
 
 
 class GravityReading(models.Model):
