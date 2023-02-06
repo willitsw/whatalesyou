@@ -8,12 +8,9 @@ WORKDIR /usr/app
 ENV PATH /app/node_modules/.bin:$PATH
 
 # install app dependencies
-COPY ./frontend/package.json ./frontend/package-lock.json /usr/app/
+COPY ./package.json ./package-lock.json /usr/app/
 RUN npm update -g
 RUN npm ci
 
 # add app
 COPY . ./
-
-# # start app
-CMD ["npm", "dev"]

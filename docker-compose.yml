@@ -2,8 +2,7 @@ version: "3.9"
 services:
   frontend:
     build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
+      context: ./frontend
     ports:
       - "8080:8080"
     command: npm run dev
@@ -13,8 +12,7 @@ services:
       - backend
   backend:
     build:
-      context: .
-      dockerfile: ./backend/Dockerfile
+      context: ./backend
     environment:
       - DJANGO_DEBUG=${DJANGO_DEBUG}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
@@ -25,7 +23,6 @@ services:
       - PG_PORT=${PG_PORT}
     ports:
       - "8000:8000"
-    command: python ./backend/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     depends_on:
