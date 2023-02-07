@@ -13,6 +13,8 @@ services:
   backend:
     build:
       context: ./backend
+      args:
+        - PORT=8000
     environment:
       - DJANGO_DEBUG=${DJANGO_DEBUG}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
