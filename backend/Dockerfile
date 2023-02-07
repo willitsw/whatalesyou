@@ -35,10 +35,12 @@ COPY poetry.lock pyproject.toml ./
 
 # Project initialization:
 RUN poetry config virtualenvs.create false \
-  && poetry install $(test "$ENVIRONMENT" == production && echo "--no-dev") --no-interaction --no-ansi
+  && poetry install --no-interaction --no-ansi
 
 # Copy project
 COPY . .
 
 # collect static files
 RUN python manage.py collectstatic --noinput
+
+CMD gunicorn whatalesyou.wsgi:application --bind "0.0.0.0:$PORT"
