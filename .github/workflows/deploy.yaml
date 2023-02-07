@@ -5,6 +5,7 @@ name: Deploy BE to Heroku
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 # Your workflows jobs.
 jobs:
