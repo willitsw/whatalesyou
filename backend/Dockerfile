@@ -1,6 +1,7 @@
 # Pull base image
 FROM python:3.11.1-bullseye
 
+ARG ENVIRONMENT
 ARG DJANGO_DEBUG
 ARG DJANGO_SECRET_KEY
 ARG PG_NAME
@@ -14,6 +15,7 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV POETRY_VERSION 1.3.2
+ENV ENVIRONMENT ${ENVIRONMENT}
 ENV DJANGO_DEBUG ${DJANGO_DEBUG}
 ENV DJANGO_SECRET_KEY ${DJANGO_SECRET_KEY}
 ENV PG_NAME ${PG_NAME}
@@ -33,7 +35,7 @@ COPY poetry.lock pyproject.toml ./
 
 # Project initialization:
 RUN poetry config virtualenvs.create false \
-  && poetry install $(test "$YOUR_ENV" == production && echo "--no-dev") --no-interaction --no-ansi
+  && poetry install $(test "$ENVIRONMENT" == production && echo "--no-dev") --no-interaction --no-ansi
 
 # Copy project
 COPY . .

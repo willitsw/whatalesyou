@@ -17,6 +17,7 @@ jobs:
       - name: Create .env file
         run: |
           touch .env
+          echo ENVIRONMENT=production >> .env
           echo DJANGO_DEBUG=False >> .env
           echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
           echo PG_NAME=${{ secrets.PG_NAME }} >> .env
