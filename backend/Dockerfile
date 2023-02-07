@@ -9,6 +9,7 @@ ARG PG_USER
 ARG PG_PASSWORD
 ARG PG_HOST
 ARG PG_PORT
+ARG PORT
 
 # Set environment variables
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
@@ -23,6 +24,7 @@ ENV PG_USER ${PG_USER}
 ENV PG_PASSWORD ${PG_PASSWORD}
 ENV PG_HOST ${PG_HOST}
 ENV PG_PORT ${PG_PORT}
+ENV PORT ${PORT}
 
 # Install poetry
 RUN pip install "poetry==$POETRY_VERSION"
@@ -35,7 +37,7 @@ COPY poetry.lock pyproject.toml ./
 
 # Project initialization:
 RUN poetry config virtualenvs.create false \
-  && poetry install $(test "$ENVIRONMENT" == production && echo "--no-dev") --no-interaction --no-ansi
+  && poetry install --no-interaction --no-ansi
 
 # Copy project
 COPY . .
@@ -43,4 +45,4 @@ COPY . .
 # collect static files
 RUN python manage.py collectstatic --noinput
 
-CMD gunicorn whatalesyou.wsgi:application --bind 0.0.0.0:8000
+CMD gunicorn whatalesyou.wsgi:application --bind 0.0.0.0:$PORT
