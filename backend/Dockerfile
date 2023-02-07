@@ -43,4 +43,4 @@ COPY . .
 # collect static files
 RUN python manage.py collectstatic --noinput
 
-CMD cd backend && gunicorn whatalesyou.wsgi:application --bind 0.0.0.0:8000
+CMD gunicorn whatalesyou.wsgi:application --bind 0.0.0.0:8000
