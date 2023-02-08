@@ -13,8 +13,6 @@ services:
   backend:
     build:
       context: ./backend
-      args:
-        - PORT=8000
     environment:
       - DJANGO_DEBUG=${DJANGO_DEBUG}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
@@ -29,6 +27,7 @@ services:
       - .:/code
     depends_on:
       - db
+    command: python ./backend/manage.py runserver 0.0.0.0:8000
   db:
     image: postgres:13
     volumes:
