@@ -6,7 +6,7 @@ export interface MiscState {
 }
 
 const initialState: MiscState = {
-  globalIsLoading: true,
+  globalIsLoading: false,
 };
 
 export const miscSlice = createSlice({

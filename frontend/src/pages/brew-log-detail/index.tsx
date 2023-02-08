@@ -126,7 +126,7 @@ const BrewLogDetailPage = () => {
     const newBrewLog: BrewLogForm = {
       ...brewLogForm,
       id: brewLog?.id ?? "",
-      userId: brewSettings.id ?? "",
+      // userId: brewSettings.id ?? "",
       brewDate: brewLogForm.workingBrewDate.toISOString(),
       recipe: selectedRecipe ?? null,
     };

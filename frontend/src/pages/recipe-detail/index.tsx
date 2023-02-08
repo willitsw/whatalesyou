@@ -86,13 +86,13 @@ const RecipeDetailPage = () => {
       } else {
         workingRecipe = { ...defaultRecipe };
 
-        workingRecipe.author = brewSettings.displayName;
+        // workingRecipe.author = brewSettings.displayName;
         workingRecipe.batchSize = brewSettings.batchSize;
         workingRecipe.efficiency = brewSettings.brewhouseEfficiency;
         workingRecipe.measurementType = brewSettings.measurementType;
       }
 
-      setStats(getStats(workingRecipe, brewSettings));
+      // setStats(getStats(workingRecipe, brewSettings));
       setIngredients(workingRecipe.ingredients);
 
       form.setFieldsValue(workingRecipe);
@@ -112,7 +112,7 @@ const RecipeDetailPage = () => {
     const newRecipe: BT.Recipe = {
       ...recipeForm,
       id: recipe?.id ?? "",
-      userId: brewSettings.id ?? "",
+      // userId: brewSettings.id ?? "",
       updatedDate: moment().toISOString(),
       createdDate: recipe.createdDate,
       ingredients,
@@ -169,7 +169,7 @@ const RecipeDetailPage = () => {
     if (newIngredients !== null) {
       workingRecipe.ingredients = newIngredients;
     }
-    setStats(getStats(workingRecipe, brewSettings));
+    // setStats(getStats(workingRecipe, brewSettings));
   };
 
   const formSections = (

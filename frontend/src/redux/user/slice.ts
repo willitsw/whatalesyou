@@ -1,49 +1,82 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
-import constants from "../../constants";
-import { BrewingTypes as BT } from "brewing-shared";
+import { TokenRequest, User } from "../../types/user";
+import { getCurrentUser, getToken } from "../../utils/api-calls";
+import { ACCESS_TOKEN_KEY } from "../../constants";
+import jwt from "jwt-decode";
+import { setBrewSettings } from "../brew-settings/slice";
 
-const defaultCurrentUser: BT.BeerUser | null = constants.useAuth
-  ? null
-  : {
-      displayName: "Local Dev User",
-      email: "localDevUser@whatalesyou.net",
-      photoUrl: null,
-      uid: "123456789",
-    };
 export interface UserState {
-  currentUser: BT.BeerUser | null;
+  currentUser: User;
   isAuthenticated: boolean;
 }
 
 const initialState: UserState = {
-  currentUser: defaultCurrentUser,
-  isAuthenticated: !!defaultCurrentUser,
+  currentUser: null,
+  isAuthenticated: !!localStorage.getItem(ACCESS_TOKEN_KEY),
 };
 
-export enum RecipeActionTypes {
-  SetUser = "user/setUser",
-  ClearUser = "user/clearUser",
-}
+export const loadUserData = createAsyncThunk(
+  "users/loadUserData",
+  async (_, { getState, dispatch }) => {
+    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+    const { user_id } = jwt(token) as any;
+    const currentUser = await getCurrentUser(user_id);
+    dispatch(
+      setUser({
+        bio: currentUser.bio,
+        id: currentUser.id,
+        username: currentUser.user.username,
+      })
+    );
+    dispatch(
+      setBrewSettings({
+        batchSize: currentUser.batch_size,
+        boilOffWaterLossRate: currentUser.water_loss_per_boil_unit,
+        boilTime: currentUser.boil_time,
+        brewhouseEfficiency: currentUser.brewhouse_efficiency,
+        fermentorTrubWaterLoss: currentUser.water_loss_fermentor_trub,
+        kettleTrubWaterLoss: currentUser.water_loss_kettle_trub,
+        mashThickness: currentUser.mash_thickness_target,
+        measurementType: currentUser.measurement_type,
+        sparge: currentUser.do_sparge,
+        waterLossPerGrain: currentUser.water_loss_per_grain_unit,
+      })
+    );
+  }
+);
+
+export const loginUser = createAsyncThunk(
+  "users/login",
+  async (payload: TokenRequest, { getState, dispatch }) => {
+    const tokenPayload = await getToken(payload);
+    localStorage.setItem(ACCESS_TOKEN_KEY, tokenPayload.access);
+    dispatch(loadUserData());
+  }
+);
 
 export const userSlice = createSlice({
   name: "users",
   initialState,
   reducers: {
-    setUser: (state, action: { payload: BT.BeerUser }) => {
-      const newUser = action.payload;
-      state.currentUser = newUser;
-      state.isAuthenticated = !!newUser;
+    setUser: (state, action: { payload: User }) => {
+      state.currentUser = action.payload;
+      state.isAuthenticated = !!action.payload;
+      return state;
     },
     clearUser: (state) => {
-      const newUser = null;
-      state.currentUser = newUser;
-      state.isAuthenticated = !!newUser;
+      state.currentUser = null;
+      state.isAuthenticated = false;
+      return state;
+    },
+    setIsAuthenticated: (state, action: { payload: boolean }) => {
+      state.isAuthenticated = action.payload;
+      return state;
     },
   },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, clearUser, setIsAuthenticated } = userSlice.actions;
 
 export const selectCurrentUser = (state: RootState) => state.user.currentUser;
 export const userIsAuthenticated = (state: RootState) =>

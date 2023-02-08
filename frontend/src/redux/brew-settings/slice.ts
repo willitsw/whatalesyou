@@ -2,34 +2,15 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { createUpdateBrewSettings } from "../../utils/api-calls";
 import { BrewingTypes as BT } from "brewing-shared";
+import { BrewSettings } from "../../types/brew-settings";
 
-const defaultSettings: BT.User = {
-  id: "",
-  batchSize: 5,
-  boilTime: 60,
-  brewhouseEfficiency: 70,
-  measurementType: "imperial",
-  kettleTrubWaterLoss: 0.25,
-  fermentorTrubWaterLoss: 0.25,
-  boilOffWaterLossRate: 1.5,
-  waterLossPerGrain: 0.5,
-  displayName: "",
-  email: "",
-  sparge: false,
-  mashThickness: 1.3,
-};
 export interface BrewSettingsState {
-  brewSettings: BT.User;
+  brewSettings: BrewSettings;
 }
 
 const initialState: BrewSettingsState = {
-  brewSettings: defaultSettings,
+  brewSettings: null,
 };
-
-export enum RecipeActionTypes {
-  SetBrewSettings = "brew-settings/setUser",
-  ClearBrewSettings = "brew-settings/clearUser",
-}
 
 export const processCreateUpdateBrewSettings = createAsyncThunk(
   "brewSettings/updateBrewSettings",
@@ -43,16 +24,13 @@ export const brewSettingsSlice = createSlice({
   name: "brew-settings",
   initialState,
   reducers: {
-    setBrewSettings: (state, action: { payload: BT.User }) => {
+    setBrewSettings: (state, action: { payload: BrewSettings }) => {
       state.brewSettings = action.payload;
-    },
-    clearBrewSettings: (state) => {
-      state.brewSettings = defaultSettings;
     },
   },
 });
 
-export const { setBrewSettings, clearBrewSettings } = brewSettingsSlice.actions;
+export const { setBrewSettings } = brewSettingsSlice.actions;
 
 export const selectBrewSettings = (state: RootState) =>
   state.brewSettings.brewSettings;

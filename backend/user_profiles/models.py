@@ -10,7 +10,7 @@ class MeasurementTypes(models.TextChoices):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name="profile", on_delete=models.CASCADE)
     bio = models.TextField(max_length=500, blank=True, null=True)
     measurement_type = models.TextField(
         max_length=10,
@@ -20,12 +20,12 @@ class UserProfile(models.Model):
     batch_size = models.FloatField(default=5)
     boil_time = models.FloatField(default=60)
     brewhouse_efficiency = models.FloatField(default=65)
-    water_loss_per_grain_unit = models.FloatField(default=1)
-    water_loss_fermentor_trub = models.FloatField(default=1)
-    water_loss_kettle_trub = models.FloatField(default=1)
-    water_loss_per_boil_unit = models.FloatField(default=1)
+    water_loss_per_grain_unit = models.FloatField(default=0.5)
+    water_loss_fermentor_trub = models.FloatField(default=0.25)
+    water_loss_kettle_trub = models.FloatField(default=0.25)
+    water_loss_per_boil_unit = models.FloatField(default=1.5)
     do_sparge = models.BooleanField(default=False)
-    mash_thickness_target = models.FloatField(default=1)
+    mash_thickness_target = models.FloatField(default=1.3)
 
     @receiver(post_save, sender=User)
     def create_user_profile(sender, instance, created, **kwargs):
@@ -37,4 +37,4 @@ class UserProfile(models.Model):
         instance.userprofile.save()
 
     def __str__(self):
-        return f"{self.user.email}"
+        return f"{self.pk} {self.user.email}"

@@ -18,11 +18,6 @@ const initialState: RecipeState = {
   currentRecipe: null,
 };
 
-export enum RecipeActionTypes {
-  SetRecipeList = "recipes/setRecipeList",
-  SetCurrentRecipe = "recipes/setCurrentRecipe",
-}
-
 export const refreshRecipeList = createAsyncThunk(
   "recipes/refreshRecipeList",
   async () => {

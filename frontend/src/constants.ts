@@ -1,45 +1,21 @@
-const useAuthLocally = true;
-
+type EnvironmentType = "production" | "development";
 interface Constants {
-  isLocal: boolean;
-  useAuth: boolean;
   apiUrl: string;
-  environment: "production" | "staging" | "development";
+  environment: EnvironmentType;
 }
 
-let constants: Constants;
+let constants: Constants = {
+  apiUrl: "http://localhost:8000",
+  environment: process.env.APP_ENV as EnvironmentType,
+};
 
-switch (process.env.APP_ENV) {
-  case "production":
-    constants = {
-      isLocal: false,
-      useAuth: true,
-      apiUrl:
-        "https://6l89tf8fp2.execute-api.us-east-2.amazonaws.com/beer-backend",
-      environment: process.env.APP_ENV,
-    };
-    break;
-  case "staging":
-    constants = {
-      isLocal: false,
-      useAuth: true,
-      apiUrl:
-        "https://uvefvxdro8.execute-api.us-east-2.amazonaws.com/beer-backend",
-      environment: process.env.APP_ENV,
-    };
-    break;
-  case "development":
-    constants = {
-      isLocal: true,
-      useAuth: useAuthLocally,
-      apiUrl: "http://localhost:5000",
-      environment: process.env.APP_ENV,
-    };
-    break;
-  default:
-    throw Error(`Invalid environment specified: ${process.env.APP_ENV}`);
+if (constants.environment === "production") {
+  constants.apiUrl =
+    "https://6l89tf8fp2.execute-api.us-east-2.amazonaws.com/beer-backend";
 }
 
 export const DATE_FORMAT = "MM/DD/YYYY";
+export const ACCESS_TOKEN_KEY = "whatalesyou-access-token";
+export const REFRESH_TOKEN_KEY = "whatalesyou-refresh-token";
 
 export default constants;

@@ -18,7 +18,6 @@ import {
   UserOutlined,
   MoneyCollectOutlined,
 } from "@ant-design/icons";
-import { getAuth, signOut } from "firebase/auth";
 import {
   selectPageIsClean,
   setPageIsClean,
@@ -28,7 +27,6 @@ import React from "react";
 import { useAnalytics } from "../../utils/analytics";
 
 const Header = () => {
-  const auth = getAuth();
   const { Header } = Layout;
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
@@ -65,7 +63,6 @@ const Header = () => {
   };
 
   const handleSignOut = () => {
-    signOut(auth);
     navigate("/home");
   };
 
@@ -189,11 +186,11 @@ const Header = () => {
         </div>
         <Dropdown overlay={getUserMenu()} trigger={["click"]}>
           <div style={{ paddingTop: 0, cursor: "pointer" }}>
-            {currentUser?.photoUrl ? (
+            {/* {currentUser?.photoUrl ? (
               <Avatar size="large" src={currentUser?.photoUrl} />
-            ) : (
-              <Avatar size="large" icon={<UserOutlined />} />
-            )}
+            ) : ( */}
+            <Avatar size="large" icon={<UserOutlined />} />
+            {/* )} */}
           </div>
         </Dropdown>
       </div>

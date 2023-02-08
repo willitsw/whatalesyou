@@ -1,4 +1,5 @@
 import { BrewingTypes as BT } from "brewing-shared";
+import { TokenRequest, TokenResponse, UserResponse } from "../types/user";
 import makeRequest from "./request";
 
 // RECIPE ENDPOINTS
@@ -43,7 +44,9 @@ export const getBrewLogsByUser = async (): Promise<BT.BrewLog[]> => {
   return await makeRequest("/brew-logs", "GET");
 };
 
-export const getBrewLogById = async (brewLogId: string): Promise<BT.BrewLog> => {
+export const getBrewLogById = async (
+  brewLogId: string
+): Promise<BT.BrewLog> => {
   return await makeRequest(`/brew-logs/${brewLogId}`, "GET");
 };
 
@@ -55,4 +58,14 @@ export const createUpdateBrewLog = async (
   brewLog: BT.BrewLog
 ): Promise<BT.BrewLog> => {
   return await makeRequest("/brew-logs", "POST", brewLog);
+};
+
+// USER ENDPOINTS
+
+export const getToken = async (body: TokenRequest): Promise<TokenResponse> => {
+  return await makeRequest("/token/", "POST", body);
+};
+
+export const getCurrentUser = async (id: number): Promise<UserResponse> => {
+  return await makeRequest(`/users/${id}/`, "GET");
 };

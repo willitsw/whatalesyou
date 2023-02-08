@@ -48,7 +48,7 @@ const BrewSettings = () => {
   const handleSave = (form: BT.User) => {
     const updatedBrewSettings: BT.User = {
       ...form,
-      id: brewSettings.id,
+      // id: brewSettings.id,
     };
     dispatch(processCreateUpdateBrewSettings(updatedBrewSettings));
     message.success("Brew Settings have been updated.");

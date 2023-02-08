@@ -12,21 +12,16 @@ interface AnalyticsProviderProps {
 }
 
 interface AnalyticsData {
-  firebaseId: string;
-  userId: string;
-  email: string;
-  displayName: string;
+  userId: number;
+  username: string;
   environment: string;
   userAgent: string;
 }
 
 function getDefaultAnalyticsData(): AnalyticsData {
-  const id = uuid();
   return {
-    firebaseId: id,
-    userId: id,
-    email: "",
-    displayName: "Unauthenticated User",
+    userId: -1,
+    username: "",
     environment: constants.environment,
     userAgent: window.navigator.userAgent,
   };
@@ -60,10 +55,8 @@ export const AnalyticsProvider = ({ children }: AnalyticsProviderProps) => {
     let newData: AnalyticsData;
     if (user) {
       newData = {
-        firebaseId: user.uid ?? "",
-        userId: brewSettings.id ?? "",
-        email: brewSettings.email ?? "",
-        displayName: brewSettings.displayName ?? "",
+        userId: user.id,
+        username: user.username,
         environment: constants.environment,
         userAgent: window.navigator.userAgent,
       };

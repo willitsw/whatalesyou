@@ -4,14 +4,14 @@ import HomePage from "../../pages/home";
 import RecipeDetailPage from "../../pages/recipe-detail";
 import RecipeListPage from "../../pages/recipe-list";
 import BrewSettingsPage from "../../pages/brew-settings";
-import { useAppSelector } from "../../redux/hooks";
-import { userIsAuthenticated } from "../../redux/user/slice";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { loadUserData, userIsAuthenticated } from "../../redux/user/slice";
 import Footer from "../footer";
 import Header from "../header";
 import GlobalModals from "../global-modals";
 import { selectGlobalIsLoading } from "../../redux/misc/slice";
 import Loading from "../loading";
-import React from "react";
+import React, { useEffect } from "react";
 import RecipePrinterFriendly from "../../pages/recipe-printer-friendly";
 import BrewLogListPage from "../../pages/brew-log-list";
 import BrewLogDetailPage from "../../pages/brew-log-detail";
@@ -19,6 +19,13 @@ import BrewLogDetailPage from "../../pages/brew-log-detail";
 const PageLayout = () => {
   const isAuthenticated = useAppSelector(userIsAuthenticated);
   const isLoading = useAppSelector(selectGlobalIsLoading);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(loadUserData());
+    }
+  }, []);
 
   return (
     <Layout className="layout beer-layout">

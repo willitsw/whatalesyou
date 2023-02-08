@@ -1,5 +1,4 @@
 import { Button, Col, Row, Space, Typography } from "antd";
-import { getAuth, signOut } from "firebase/auth";
 import Content from "../../components/content";
 import { setShowLoginModal } from "../../redux/global-modals/slice";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
@@ -9,7 +8,6 @@ import { useAnalytics } from "../../utils/analytics";
 import YoutubeEmbed from "./youtube-container";
 
 const HomePage = () => {
-  const auth = getAuth();
   const isAuthenticated = useAppSelector(userIsAuthenticated);
   const currentUser = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
@@ -26,11 +24,9 @@ const HomePage = () => {
           {isAuthenticated ? (
             <>
               <Typography.Title level={4}>
-                Welcome {currentUser?.displayName ?? currentUser?.email}
+                Welcome {currentUser?.username ?? "User"}
               </Typography.Title>
-              <Button type="primary" onClick={() => signOut(auth)}>
-                Log out
-              </Button>
+              <Button type="primary">Log out</Button>
             </>
           ) : (
             <>
