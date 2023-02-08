@@ -579,7 +579,7 @@ const IngredientModal = ({
   return (
     <Modal
       title="Add/Edit Ingredient"
-      visible={!!ingredientId}
+      open={!!ingredientId}
       onOk={handleSaveForm}
       onCancel={handleCancelClick}
       destroyOnClose

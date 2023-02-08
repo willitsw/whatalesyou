@@ -28,7 +28,7 @@ const OkCancelModal = ({
   return (
     <Modal
       title={title}
-      visible={showModal}
+      open={showModal}
       onOk={handleSubmit}
       onCancel={onCancel}
       confirmLoading={modalLoading}

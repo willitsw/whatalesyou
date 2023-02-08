@@ -441,7 +441,7 @@ const BrewLogDetailPage = () => {
         title="Delete Gravity Reading?"
         onCancel={() => setGravityReadingToDelete(null)}
         onOk={handleDeleteClick}
-        visible={gravityReadingToDelete !== null}
+        open={gravityReadingToDelete !== null}
       >
         Are you sure you want to delete this gravity reading?
       </Modal>

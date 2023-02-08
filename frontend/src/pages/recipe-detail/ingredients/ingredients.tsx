@@ -252,7 +252,7 @@ const Ingredients = ({
         title="Delete Ingredient?"
         onCancel={() => setIngredientToDelete(null)}
         onOk={handleDeleteClick}
-        visible={!!ingredientToDelete}
+        open={!!ingredientToDelete}
       >
         <>Are you sure you want to delete this ingredient?</>
       </Modal>

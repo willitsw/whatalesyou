@@ -8,6 +8,7 @@ import {
   Dropdown,
   Button,
   Typography,
+  MenuProps,
 } from "antd";
 import beerIcon from "./beer-icon.png";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
@@ -66,19 +67,25 @@ const Header = () => {
     navigate("/home");
   };
 
-  const getUserMenu = () => {
+  const getUserMenuItems = (): MenuProps["items"] => {
     if (!isAuthenticated) {
-      return (
-        <Menu>
-          <Menu.Item key="login" icon={<LoginOutlined />}>
+      return [
+        {
+          key: "login",
+          icon: <LoginOutlined />,
+          label: (
             <Button
               type="link"
               onClick={() => dispatch(setShowLoginModal(true))}
             >
               Login
             </Button>
-          </Menu.Item>
-          <Menu.Item key="donate" icon={<MoneyCollectOutlined />}>
+          ),
+        },
+        {
+          key: "donate",
+          icon: <MoneyCollectOutlined />,
+          label: (
             <Button
               type="link"
               href="https://www.paypal.com/donate/?hosted_button_id=UJZ4HJW2BWWLG"
@@ -91,18 +98,24 @@ const Header = () => {
             >
               Donate
             </Button>
-          </Menu.Item>
-        </Menu>
-      );
+          ),
+        },
+      ];
     } else {
-      return (
-        <Menu>
-          <Menu.Item key="logout" icon={<LogoutOutlined />}>
+      return [
+        {
+          key: "logout",
+          icon: <LogoutOutlined />,
+          label: (
             <Button type="link" onClick={handleSignOut}>
               Logout
             </Button>
-          </Menu.Item>
-          <Menu.Item key="donate" icon={<MoneyCollectOutlined />}>
+          ),
+        },
+        {
+          key: "donate",
+          icon: <MoneyCollectOutlined />,
+          label: (
             <Button
               type="link"
               href="https://www.paypal.com/donate/?hosted_button_id=UJZ4HJW2BWWLG"
@@ -115,11 +128,13 @@ const Header = () => {
             >
               Donate
             </Button>
-          </Menu.Item>
-        </Menu>
-      );
+          ),
+        },
+      ];
     }
   };
+
+  const userMenuItems = getUserMenuItems();
 
   const menuStyle: any = { justifyContent: "flex-end", flexGrow: 1 };
   if (isPhone) {
@@ -171,26 +186,29 @@ const Header = () => {
             onClick={handleMenuClick}
             selectedKeys={[currentPage]}
             style={menuStyle}
-          >
-            <Menu.Item key={"/home"}>Home</Menu.Item>
-            <Menu.Item key={"/recipes/list"} disabled={!isAuthenticated}>
-              Recipes
-            </Menu.Item>
-            <Menu.Item key={"/brew-log/list"} disabled={!isAuthenticated}>
-              Brew Log
-            </Menu.Item>
-            <Menu.Item key={"/brew-settings"} disabled={!isAuthenticated}>
-              Brew Settings
-            </Menu.Item>
-          </Menu>
+            items={[
+              { key: "/home", label: "Home", disabled: !isAuthenticated },
+              {
+                key: "/recipes/list",
+                label: "Recipes",
+                disabled: !isAuthenticated,
+              },
+              {
+                key: "/brew-log/list",
+                label: "Brew Log",
+                disabled: !isAuthenticated,
+              },
+              {
+                key: "/brew-settings",
+                label: "Brew Settings",
+                disabled: !isAuthenticated,
+              },
+            ]}
+          />
         </div>
-        <Dropdown overlay={getUserMenu()} trigger={["click"]}>
+        <Dropdown menu={{ items: userMenuItems }} trigger={["click"]}>
           <div style={{ paddingTop: 0, cursor: "pointer" }}>
-            {/* {currentUser?.photoUrl ? (
-              <Avatar size="large" src={currentUser?.photoUrl} />
-            ) : ( */}
             <Avatar size="large" icon={<UserOutlined />} />
-            {/* )} */}
           </div>
         </Dropdown>
       </div>

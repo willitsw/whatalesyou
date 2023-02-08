@@ -1,11 +1,14 @@
 import React from "react";
-import * as ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 
 import App from "./App";
 
 import "./global-styles.css";
 import "antd/dist/reset.css";
 
-const mountNode = document.getElementById("root");
-
-ReactDOM.render(<App />, mountNode);
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <React.StrictMode>
+    <App />,
+  </React.StrictMode>
+);

@@ -77,7 +77,7 @@ const LoginModal = () => {
   return (
     <Modal
       title="Sign In"
-      visible={showLoginModal}
+      open={showLoginModal}
       onOk={handleSubmit}
       onCancel={onCancel}
       confirmLoading={modalLoading}
