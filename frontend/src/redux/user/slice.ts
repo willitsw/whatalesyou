@@ -18,7 +18,7 @@ const initialState: UserState = {
 
 export const loadUserData = createAsyncThunk(
   "users/loadUserData",
-  async (_, { getState, dispatch }) => {
+  async (_, { dispatch }) => {
     const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     const { user_id } = jwt(token) as any;
     const currentUser = await getCurrentUser(user_id);
@@ -48,10 +48,20 @@ export const loadUserData = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
   "users/login",
-  async (payload: TokenRequest, { getState, dispatch }) => {
+  async (payload: TokenRequest, { dispatch }) => {
     const tokenPayload = await getToken(payload);
     localStorage.setItem(ACCESS_TOKEN_KEY, tokenPayload.access);
     dispatch(loadUserData());
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  "users/logout",
+  async (_, { dispatch }) => {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    dispatch(clearUser);
+    dispatch(setIsAuthenticated(false));
+    dispatch(setBrewSettings(null));
   }
 );
 

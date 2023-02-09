@@ -29,24 +29,6 @@ const LoginModal = () => {
 
   const onCancel = () => dispatch(setShowLoginModal(false));
 
-  const handleGoogleSignIn = async () => {
-    try {
-      fireAnalyticsEvent("Google Sign In");
-    } catch (error) {
-      console.log("google signup failed:", error);
-    }
-    onCancel();
-  };
-
-  const handleFacebookSignIn = async () => {
-    try {
-      fireAnalyticsEvent("Facebook Sign In");
-    } catch (error) {
-      console.log("facebook signup failed:", error);
-    }
-    onCancel();
-  };
-
   const handleCreateAccount = async () => {
     setModalLoading(true);
     try {

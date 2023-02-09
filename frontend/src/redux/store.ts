@@ -1,23 +1,26 @@
-import { AnyAction, configureStore, Reducer } from "@reduxjs/toolkit";
-import RecipesReducer, { RecipeState } from "./recipe-list/slice";
-import UserReducer, { UserState } from "./user/slice";
-import BrewSettingsReducer, { BrewSettingsState } from "./brew-settings/slice";
-import GlobalModalsReducer, { GlobalModalsState } from "./global-modals/slice";
-import MiscReducer, { MiscState } from "./misc/slice";
-import BrewLogReducer, { BrewLogState } from "./brew-log/slice";
+import { configureStore } from "@reduxjs/toolkit";
+import RecipesReducer from "./recipe-list/slice";
+import UserReducer from "./user/slice";
+import BrewSettingsReducer from "./brew-settings/slice";
+import GlobalModalsReducer from "./global-modals/slice";
+import MiscReducer from "./misc/slice";
+import BrewLogReducer from "./brew-log/slice";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({
   reducer: {
-    recipes: RecipesReducer as Reducer<RecipeState, AnyAction>,
-    user: UserReducer as Reducer<UserState, AnyAction>,
-    brewSettings: BrewSettingsReducer as Reducer<BrewSettingsState, AnyAction>,
-    globalModals: GlobalModalsReducer as Reducer<GlobalModalsState, AnyAction>,
-    misc: MiscReducer as Reducer<MiscState, AnyAction>,
-    brewLogs: BrewLogReducer as Reducer<BrewLogState, AnyAction>,
+    recipes: RecipesReducer,
+    user: UserReducer,
+    brewSettings: BrewSettingsReducer,
+    globalModals: GlobalModalsReducer,
+    misc: MiscReducer,
+    brewLogs: BrewLogReducer,
   },
 });
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
+export type Store = typeof store;
 export type RootState = ReturnType<typeof store.getState>;
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch;
+
+export const useAppDispatch: () => AppDispatch = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

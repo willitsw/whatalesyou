@@ -12,14 +12,16 @@ const initialState: GlobalModalsState = {
 };
 
 export const globalModalsSlice = createSlice({
-  name: "global-modals",
+  name: "globalModals",
   initialState,
   reducers: {
     setShowLoginModal: (state, action: { payload: boolean }) => {
       state.showLoginModal = action.payload;
+      return state;
     },
     setPageIsClean: (state, action: { payload: boolean }) => {
       state.pageIsClean = action.payload;
+      return state;
     },
   },
 });

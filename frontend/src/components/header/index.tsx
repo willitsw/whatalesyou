@@ -12,7 +12,11 @@ import {
 } from "antd";
 import beerIcon from "./beer-icon.png";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { selectCurrentUser, userIsAuthenticated } from "../../redux/user/slice";
+import {
+  logoutUser,
+  selectCurrentUser,
+  userIsAuthenticated,
+} from "../../redux/user/slice";
 import {
   LoginOutlined,
   LogoutOutlined,
@@ -32,7 +36,6 @@ const Header = () => {
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
   const isAuthenticated = useAppSelector(userIsAuthenticated);
-  const currentUser = useAppSelector(selectCurrentUser);
   const pageIsClean = useAppSelector(selectPageIsClean);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -64,6 +67,7 @@ const Header = () => {
   };
 
   const handleSignOut = () => {
+    dispatch(logoutUser());
     navigate("/home");
   };
 
