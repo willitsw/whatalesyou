@@ -1,7 +1,7 @@
 from django.db import models
 
 from recipes.models import Recipe
-from user_profiles.models import UserProfile
+from user.models import User
 
 
 class BrewLogStatuses(models.TextChoices):
@@ -35,9 +35,7 @@ class BrewLog(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
-    owner = models.ForeignKey(
-        UserProfile, related_name="brew_logs", on_delete=models.CASCADE
-    )
+    owner = models.ForeignKey(User, related_name="brew_logs", on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.name} - {self.owner.user.email} - {self.brew_date.strftime('%d/%m/%Y')}"

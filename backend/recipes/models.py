@@ -1,6 +1,7 @@
 from django.db import models
 
-from user_profiles.models import MeasurementTypes, UserProfile
+from shared.models import MeasurementTypes
+from user.models import User
 
 
 class RecipeTypes(models.TextChoices):
@@ -43,9 +44,7 @@ class Recipe(models.Model):
         default=MeasurementTypes.Imperial,
     )
 
-    owner = models.ForeignKey(
-        UserProfile, related_name="recipes", on_delete=models.CASCADE
-    )
+    owner = models.ForeignKey(User, related_name="recipes", on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.name} - {self.owner.user.email} - {self.created_at.strftime('%d/%m/%Y')}"
