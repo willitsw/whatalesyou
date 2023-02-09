@@ -1,6 +1,7 @@
 from django.db import models
-from user_profiles.models import UserProfile
+
 from recipes.models import Recipe
+from user_profiles.models import UserProfile
 
 
 class BrewLogStatuses(models.TextChoices):

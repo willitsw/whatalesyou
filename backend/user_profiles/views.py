@@ -1,7 +1,8 @@
-from rest_framework import viewsets, mixins
-from user_profiles.serializers import UserProfileSerializer
-from user_profiles.models import UserProfile
+from rest_framework import mixins, viewsets
 from rest_framework.exceptions import PermissionDenied
+
+from user_profiles.models import UserProfile
+from user_profiles.serializers import UserProfileSerializer
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):

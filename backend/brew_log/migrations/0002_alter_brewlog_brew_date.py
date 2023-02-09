@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('brew_log', '0001_initial'),
+        ("brew_log", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='brewlog',
-            name='brew_date',
+            model_name="brewlog",
+            name="brew_date",
             field=models.DateField(blank=True, null=True),
         ),
     ]

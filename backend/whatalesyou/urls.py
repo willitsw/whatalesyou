@@ -14,16 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
 from django.urls import include, path
 from rest_framework import routers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from brew_log.views import BrewLogViewSet
 from recipes.views import RecipesViewSet
 from user_profiles.views import UserProfileViewSet
-from brew_log.views import BrewLogViewSet
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
 
 router = routers.DefaultRouter()
 router.register(r"recipes", RecipesViewSet)

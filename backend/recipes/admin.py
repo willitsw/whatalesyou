@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Recipe, Fermentable, Hop, Culture, Chemistry, NonFermentable
+
+from .models import Chemistry, Culture, Fermentable, Hop, NonFermentable, Recipe
 
 admin.site.register(Recipe)
 admin.site.register(Fermentable)

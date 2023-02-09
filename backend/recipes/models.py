@@ -1,5 +1,6 @@
 from django.db import models
-from user_profiles.models import UserProfile, MeasurementTypes
+
+from user_profiles.models import MeasurementTypes, UserProfile
 
 
 class RecipeTypes(models.TextChoices):

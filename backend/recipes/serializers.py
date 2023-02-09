@@ -1,5 +1,6 @@
-from recipes.models import Recipe, Fermentable, Chemistry, NonFermentable, Hop, Culture
 from rest_framework import serializers
+
+from recipes.models import Chemistry, Culture, Fermentable, Hop, NonFermentable, Recipe
 
 
 class FermentableSerializer(serializers.ModelSerializer):

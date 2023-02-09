@@ -1,15 +1,10 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+
+from shared.models import MeasurementTypes
 
 
-class MeasurementTypes(models.TextChoices):
-    Imperial = "imperial"
-    Metric = "metric"
-
-
-class UserProfile(models.Model):
+class UserProfile(User):
     user = models.OneToOneField(User, related_name="profile", on_delete=models.CASCADE)
     bio = models.TextField(max_length=500, blank=True, null=True)
     measurement_type = models.TextField(
@@ -26,15 +21,6 @@ class UserProfile(models.Model):
     water_loss_per_boil_unit = models.FloatField(default=1.5)
     do_sparge = models.BooleanField(default=False)
     mash_thickness_target = models.FloatField(default=1.3)
-
-    @receiver(post_save, sender=User)
-    def create_user_profile(sender, instance, created, **kwargs):
-        if created:
-            UserProfile.objects.create(user=instance)
-
-    @receiver(post_save, sender=User)
-    def save_user_profile(sender, instance, **kwargs):
-        instance.userprofile.save()
 
     def __str__(self):
         return f"{self.pk} {self.user.email}"
