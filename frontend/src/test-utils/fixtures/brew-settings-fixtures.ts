@@ -1,38 +1,34 @@
-import { BrewingTypes as BT } from "brewing-shared";
+import { BrewSettings } from "../../types/brew-settings";
 
-const getImperialSettings = (): BT.User => {
+const getImperialSettings = (): BrewSettings => {
   return {
-    id: "",
-    batchSize: 5,
-    boilTime: 60,
-    brewhouseEfficiency: 70,
-    measurementType: "imperial",
-    kettleTrubWaterLoss: 0.25,
-    fermentorTrubWaterLoss: 0.25,
-    boilOffWaterLossRate: 1.5,
-    waterLossPerGrain: 0.5,
-    displayName: "",
-    email: "",
-    sparge: false,
-    mashThickness: 1.3,
+    id: 1,
+    batch_size: 5,
+    boil_time: 60,
+    brewhouse_efficiency: 70,
+    measurement_type: "imperial",
+    water_loss_kettle_trub: 0.25,
+    water_loss_fermentor_trub: 0.25,
+    water_loss_per_boil_unit: 1.5,
+    water_loss_per_grain_unit: 0.5,
+    do_sparge: false,
+    mash_thickness_target: 1.3,
   };
 };
 
-const getMetricSettings = (): BT.User => {
+const getMetricSettings = (): BrewSettings => {
   return {
-    id: "",
-    batchSize: 18.93,
-    boilTime: 60,
-    brewhouseEfficiency: 70,
-    measurementType: "metric",
-    kettleTrubWaterLoss: 0.95,
-    fermentorTrubWaterLoss: 0.95,
-    boilOffWaterLossRate: 5.68,
-    waterLossPerGrain: 1,
-    displayName: "",
-    email: "",
-    sparge: false,
-    mashThickness: 1.3,
+    id: 2,
+    batch_size: 18.93,
+    boil_time: 60,
+    brewhouse_efficiency: 70,
+    measurement_type: "metric",
+    water_loss_kettle_trub: 0.95,
+    water_loss_fermentor_trub: 0.95,
+    water_loss_per_boil_unit: 5.68,
+    water_loss_per_grain_unit: 1,
+    do_sparge: false,
+    mash_thickness_target: 1.3,
   };
 };
 

@@ -1,4 +1,5 @@
 import { BrewingTypes as BT } from "brewing-shared";
+import { BrewSettings } from "../types/brew-settings";
 
 export const gallonsToLiters = (gallons: number): number => {
   const rawLiters = gallons * 3.78541;
@@ -83,45 +84,49 @@ export const recipeToImperial = (recipe: BT.Recipe): BT.Recipe => {
 };
 
 export const brewSettingsToMetric = (
-  imperialBrewSettings: BT.User
-): BT.User => {
+  imperialBrewSettings: BrewSettings
+): BrewSettings => {
   return {
     ...imperialBrewSettings,
-    batchSize: gallonsToLiters(imperialBrewSettings.batchSize),
-    boilOffWaterLossRate: gallonsToLiters(
-      imperialBrewSettings.boilOffWaterLossRate
+    batch_size: gallonsToLiters(imperialBrewSettings.batch_size),
+    water_loss_per_boil_unit: gallonsToLiters(
+      imperialBrewSettings.water_loss_per_boil_unit
     ),
-    fermentorTrubWaterLoss: gallonsToLiters(
-      imperialBrewSettings.fermentorTrubWaterLoss
+    water_loss_fermentor_trub: gallonsToLiters(
+      imperialBrewSettings.water_loss_fermentor_trub
     ),
-    kettleTrubWaterLoss: gallonsToLiters(
-      imperialBrewSettings.kettleTrubWaterLoss
+    water_loss_kettle_trub: gallonsToLiters(
+      imperialBrewSettings.water_loss_kettle_trub
     ),
-    waterLossPerGrain: quartPoundsToLiterKilos(
-      imperialBrewSettings.waterLossPerGrain
+    water_loss_per_grain_unit: quartPoundsToLiterKilos(
+      imperialBrewSettings.water_loss_per_grain_unit
     ),
-    mashThickness: quartPoundsToLiterKilos(imperialBrewSettings.mashThickness),
+    mash_thickness_target: quartPoundsToLiterKilos(
+      imperialBrewSettings.mash_thickness_target
+    ),
   };
 };
 
 export const brewSettingsToImperial = (
-  metricBrewSettings: BT.User
-): BT.User => {
+  metricBrewSettings: BrewSettings
+): BrewSettings => {
   return {
     ...metricBrewSettings,
-    batchSize: litersToGallons(metricBrewSettings.batchSize),
-    boilOffWaterLossRate: litersToGallons(
-      metricBrewSettings.boilOffWaterLossRate
+    batch_size: litersToGallons(metricBrewSettings.batch_size),
+    water_loss_per_boil_unit: litersToGallons(
+      metricBrewSettings.water_loss_per_boil_unit
     ),
-    fermentorTrubWaterLoss: litersToGallons(
-      metricBrewSettings.fermentorTrubWaterLoss
+    water_loss_fermentor_trub: litersToGallons(
+      metricBrewSettings.water_loss_fermentor_trub
     ),
-    kettleTrubWaterLoss: litersToGallons(
-      metricBrewSettings.kettleTrubWaterLoss
+    water_loss_kettle_trub: litersToGallons(
+      metricBrewSettings.water_loss_kettle_trub
     ),
-    waterLossPerGrain: literKilosToQuartPounds(
-      metricBrewSettings.waterLossPerGrain
+    water_loss_per_grain_unit: literKilosToQuartPounds(
+      metricBrewSettings.water_loss_per_grain_unit
     ),
-    mashThickness: literKilosToQuartPounds(metricBrewSettings.mashThickness),
+    mash_thickness_target: literKilosToQuartPounds(
+      metricBrewSettings.mash_thickness_target
+    ),
   };
 };

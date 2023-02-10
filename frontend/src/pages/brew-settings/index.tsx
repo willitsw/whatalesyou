@@ -25,17 +25,18 @@ import {
   brewSettingsToMetric,
   brewSettingsToImperial,
 } from "../../utils/converters";
-import { BrewingTypes as BT } from "brewing-shared";
 import React from "react";
+import { MeasurementType } from "../../types/shared";
+import { BrewSettings } from "../../types/brew-settings";
 
 const BrewSettings = () => {
   const brewSettings = useAppSelector(selectBrewSettings);
-  const [measurementType, setMeasurementType] = useState<BT.MeasurementType>(
-    brewSettings.measurementType
+  const [measurementType, setMeasurementType] = useState<MeasurementType>(
+    brewSettings.measurement_type
   );
-  const [sparge, setSparge] = useState<boolean>(brewSettings.sparge);
+  const [sparge, setSparge] = useState<boolean>(brewSettings.do_sparge);
 
-  const [form] = Form.useForm<BT.User>();
+  const [form] = Form.useForm<BrewSettings>();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -45,8 +46,8 @@ const BrewSettings = () => {
     onComponentLoad();
   }, []);
 
-  const handleSave = (form: BT.User) => {
-    const updatedBrewSettings: BT.User = {
+  const handleSave = (form: BrewSettings) => {
+    const updatedBrewSettings: BrewSettings = {
       ...form,
       // id: brewSettings.id,
     };
@@ -71,11 +72,11 @@ const BrewSettings = () => {
     if (changedFields[0].name[0] === "measurementType") {
       // measurement type was changed, lets convert the recipe
       if (changedFields[0].value === "metric") {
-        const oldSettings: BT.User = form.getFieldsValue();
+        const oldSettings: BrewSettings = form.getFieldsValue();
         form.setFieldsValue(brewSettingsToMetric(oldSettings));
         setMeasurementType("metric");
       } else {
-        const oldSettings: BT.User = form.getFieldsValue();
+        const oldSettings: BrewSettings = form.getFieldsValue();
         form.setFieldsValue(brewSettingsToImperial(oldSettings));
         setMeasurementType("imperial");
       }

@@ -1,4 +1,6 @@
 import { BrewingTypes as BT } from "brewing-shared";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
+import { BrewSettings } from "../types/brew-settings";
 import { TokenRequest, TokenResponse, UserResponse } from "../types/user";
 import makeRequest from "./request";
 
@@ -33,8 +35,8 @@ export const deleteBrewSettings = async (id: string): Promise<void> => {
 };
 
 export const createUpdateBrewSettings = async (
-  brewSettings: BT.User
-): Promise<BT.User> => {
+  brewSettings: BrewSettings
+): Promise<BrewSettings> => {
   return await makeRequest("/users", "POST", brewSettings);
 };
 
@@ -62,8 +64,31 @@ export const createUpdateBrewLog = async (
 
 // USER ENDPOINTS
 
-export const getToken = async (body: TokenRequest): Promise<TokenResponse> => {
-  return await makeRequest("/token/", "POST", body);
+export const getToken = async (body: TokenRequest): Promise<void> => {
+  const tokenPayload: TokenResponse = await makeRequest(
+    "/token/",
+    "POST",
+    body,
+    { useAuth: false }
+  );
+  localStorage.setItem(ACCESS_TOKEN_KEY, tokenPayload.access);
+  localStorage.setItem(REFRESH_TOKEN_KEY, tokenPayload.refresh);
+  console.log("logged in with new token");
+};
+
+export const refreshToken = async (): Promise<void> => {
+  const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
+  const tokenPayload: TokenResponse = await makeRequest(
+    "/token/refresh/",
+    "POST",
+    {
+      refresh,
+    },
+    { useAuth: false }
+  );
+  localStorage.setItem(ACCESS_TOKEN_KEY, tokenPayload.access);
+  localStorage.setItem(REFRESH_TOKEN_KEY, tokenPayload.refresh);
+  console.log("refreshed the token");
 };
 
 export const getCurrentUser = async (id: number): Promise<UserResponse> => {

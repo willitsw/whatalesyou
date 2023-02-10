@@ -29,8 +29,8 @@ import { selectBrewSettings } from "../../redux/brew-settings/slice";
 import { BrewingTypes as BT } from "brewing-shared";
 import React from "react";
 import Ingredients from "./ingredients/ingredients";
-import moment from "moment";
 import { useAnalytics } from "../../utils/analytics";
+import dayjs from "dayjs";
 
 const defaultRecipe: BT.Recipe = {
   name: "New Recipe",
@@ -43,8 +43,8 @@ const defaultRecipe: BT.Recipe = {
   measurementType: "imperial",
   efficiency: 70,
   ingredients: [],
-  createdDate: moment().toISOString(),
-  updatedDate: moment().toISOString(),
+  createdDate: dayjs().toISOString(),
+  updatedDate: dayjs().toISOString(),
 };
 
 const defaultStats: BT.Stats = {
@@ -87,9 +87,9 @@ const RecipeDetailPage = () => {
         workingRecipe = { ...defaultRecipe };
 
         // workingRecipe.author = brewSettings.displayName;
-        workingRecipe.batchSize = brewSettings.batchSize;
-        workingRecipe.efficiency = brewSettings.brewhouseEfficiency;
-        workingRecipe.measurementType = brewSettings.measurementType;
+        workingRecipe.batchSize = brewSettings.batch_size;
+        workingRecipe.efficiency = brewSettings.brewhouse_efficiency;
+        workingRecipe.measurementType = brewSettings.measurement_type;
       }
 
       // setStats(getStats(workingRecipe, brewSettings));
@@ -113,7 +113,7 @@ const RecipeDetailPage = () => {
       ...recipeForm,
       id: recipe?.id ?? "",
       // userId: brewSettings.id ?? "",
-      updatedDate: moment().toISOString(),
+      updatedDate: dayjs().toISOString(),
       createdDate: recipe.createdDate,
       ingredients,
     };

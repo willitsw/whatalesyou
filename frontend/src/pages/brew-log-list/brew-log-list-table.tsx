@@ -12,7 +12,7 @@ import { DeleteOutlined } from "@ant-design/icons";
 import { getBrewLogsByUser } from "../../utils/api-calls";
 import { BrewingTypes as BT } from "brewing-shared";
 import React from "react";
-import moment from "moment";
+import dayjs from "dayjs";
 import { DATE_FORMAT } from "../../constants";
 import { useAnalytics } from "../../utils/analytics";
 import { Breakpoint } from "antd/es/_util/responsiveObserver";
@@ -63,7 +63,7 @@ const BrewLogListTable = () => {
       dataIndex: "brewDate",
       key: "brewDate",
       responsive: showOnlyDesktop,
-      render: (text: string) => moment(text).format(DATE_FORMAT),
+      render: (text: string) => dayjs(text).format(DATE_FORMAT),
     },
     {
       title: "Action",

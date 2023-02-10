@@ -1,14 +1,15 @@
 import { MeasurementType } from "./shared";
 
 export interface BrewSettings {
-  measurementType: MeasurementType;
-  batchSize: number;
-  boilTime: number;
-  brewhouseEfficiency: number;
-  waterLossPerGrain: number;
-  fermentorTrubWaterLoss: number;
-  kettleTrubWaterLoss: number;
-  boilOffWaterLossRate: number;
-  sparge: boolean;
-  mashThickness: number;
+  id: number;
+  measurement_type: MeasurementType;
+  batch_size: number;
+  boil_time: number;
+  brewhouse_efficiency: number;
+  water_loss_per_grain_unit: number;
+  water_loss_fermentor_trub: number;
+  water_loss_kettle_trub: number;
+  water_loss_per_boil_unit: number;
+  do_sparge: boolean;
+  mash_thickness_target: number;
 }

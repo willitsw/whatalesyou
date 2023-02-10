@@ -1,4 +1,4 @@
-import { MeasurementType } from "./shared";
+import { BrewSettings } from "./brew-settings";
 
 export interface TokenResponse {
   refresh: string;
@@ -6,32 +6,24 @@ export interface TokenResponse {
 }
 
 export interface TokenRequest {
-  username: string;
+  email: string;
   password: string;
+}
+
+export interface TokenPayload {
+  token_type: "access" | "refresh";
+  exp: number;
+  user_id: number;
 }
 
 export interface User {
   id: number;
-  bio: string;
-  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_staff: boolean;
 }
 
-export interface UserResponse {
-  id: number;
-  user: {
-    id: number;
-    username: string;
-    is_staff: boolean;
-  };
-  bio: string;
-  measurement_type: MeasurementType;
-  batch_size: number;
-  boil_time: number;
-  brewhouse_efficiency: number;
-  water_loss_per_grain_unit: number;
-  water_loss_fermentor_trub: number;
-  water_loss_kettle_trub: number;
-  water_loss_per_boil_unit: number;
-  do_sparge: boolean;
-  mash_thickness_target: number;
+export interface UserResponse extends User {
+  settings: BrewSettings;
 }

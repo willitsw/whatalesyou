@@ -12,13 +12,7 @@ import { useAppSelector, useAppDispatch } from "../../../redux/hooks";
 import React from "react";
 import { useAnalytics } from "../../../utils/analytics";
 import { loginUser } from "../../../redux/user/slice";
-
-declare const window: any;
-
-interface FormValues {
-  username: string;
-  password: string;
-}
+import { TokenRequest } from "../../../types/user";
 
 const LoginModal = () => {
   const [form] = Form.useForm();
@@ -33,7 +27,7 @@ const LoginModal = () => {
     setModalLoading(true);
     try {
       await form.validateFields();
-      const values: FormValues = form.getFieldsValue();
+      const values: TokenRequest = form.getFieldsValue();
       fireAnalyticsEvent("Email/Password Account Created");
     } catch (error) {
       console.log("email / password signup failed:", error);
@@ -46,7 +40,7 @@ const LoginModal = () => {
     setModalLoading(true);
     try {
       await form.validateFields();
-      const values: FormValues = form.getFieldsValue();
+      const values: TokenRequest = form.getFieldsValue();
       dispatch(loginUser(values));
       fireAnalyticsEvent("Email/Password Sign In");
     } catch (error) {
@@ -67,9 +61,12 @@ const LoginModal = () => {
     >
       <Form name="sign-up" form={form} autoComplete="off">
         <Form.Item
-          label="User Name"
-          name="username"
-          rules={[{ required: true, message: "Username is required" }]}
+          label="Email"
+          name="email"
+          rules={[
+            { required: true, message: "Email is required" },
+            { type: "email", message: "Email is invalid" },
+          ]}
         >
           <Input />
         </Form.Item>

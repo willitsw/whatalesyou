@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
-import { TokenRequest, User } from "../../types/user";
+import { TokenPayload, TokenRequest, User } from "../../types/user";
 import { getCurrentUser, getToken } from "../../utils/api-calls";
-import { ACCESS_TOKEN_KEY } from "../../constants";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../../constants";
 import jwt from "jwt-decode";
 import { setBrewSettings } from "../brew-settings/slice";
 
@@ -20,37 +20,21 @@ export const loadUserData = createAsyncThunk(
   "users/loadUserData",
   async (_, { dispatch }) => {
     const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-    const { user_id } = jwt(token) as any;
-    const currentUser = await getCurrentUser(user_id);
-    dispatch(
-      setUser({
-        bio: currentUser.bio,
-        id: currentUser.id,
-        username: currentUser.user.username,
-      })
-    );
-    dispatch(
-      setBrewSettings({
-        batchSize: currentUser.batch_size,
-        boilOffWaterLossRate: currentUser.water_loss_per_boil_unit,
-        boilTime: currentUser.boil_time,
-        brewhouseEfficiency: currentUser.brewhouse_efficiency,
-        fermentorTrubWaterLoss: currentUser.water_loss_fermentor_trub,
-        kettleTrubWaterLoss: currentUser.water_loss_kettle_trub,
-        mashThickness: currentUser.mash_thickness_target,
-        measurementType: currentUser.measurement_type,
-        sparge: currentUser.do_sparge,
-        waterLossPerGrain: currentUser.water_loss_per_grain_unit,
-      })
-    );
+    const { user_id } = jwt(token) as TokenPayload;
+    const userResponse = await getCurrentUser(user_id);
+
+    const { settings, ...user } = userResponse;
+
+    dispatch(setUser(user));
+    dispatch(setBrewSettings(settings));
   }
 );
 
 export const loginUser = createAsyncThunk(
   "users/login",
   async (payload: TokenRequest, { dispatch }) => {
-    const tokenPayload = await getToken(payload);
-    localStorage.setItem(ACCESS_TOKEN_KEY, tokenPayload.access);
+    await getToken(payload);
+    dispatch(setIsAuthenticated(!!localStorage.getItem(ACCESS_TOKEN_KEY)));
     dispatch(loadUserData());
   }
 );
@@ -59,9 +43,11 @@ export const logoutUser = createAsyncThunk(
   "users/logout",
   async (_, { dispatch }) => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
     dispatch(clearUser);
     dispatch(setIsAuthenticated(false));
     dispatch(setBrewSettings(null));
+    console.log("logged out");
   }
 );
 

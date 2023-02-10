@@ -68,11 +68,6 @@ What would it take to make this app more useful to hoochers and wine makers? Is 
 
 # Tech Debt
 
-### Get rid of moment.js in the FE
-**Effort - small**
-
-Moment.js is no longer being developed and should be switched out for Luxon
-
 ### Spike - Node api frameworks for lambda
 **Effort - medium**
 

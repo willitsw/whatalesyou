@@ -24,7 +24,7 @@ const HomePage = () => {
           {isAuthenticated ? (
             <>
               <Typography.Title level={4}>
-                Welcome {currentUser?.username ?? "User"}
+                Welcome {currentUser?.email ?? "User"}
               </Typography.Title>
               <Button type="primary">Log out</Button>
             </>

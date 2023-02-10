@@ -38,16 +38,16 @@ import {
   getRecipesByUser,
 } from "../../utils/api-calls";
 import { setPageIsClean } from "../../redux/global-modals/slice";
-import moment, { Moment } from "moment";
 import { DATE_FORMAT } from "../../constants";
 import { selectRecipeList, setRecipeList } from "../../redux/recipe-list/slice";
 import ReadOnlyRecipe from "../../components/read-only-recipe";
 import OkCancelModal from "../../components/ok-cancel-modal";
 import { DeleteOutlined } from "@ant-design/icons";
+import dayjs, { Dayjs } from "dayjs";
 
 const defaultBrewLog: BT.BrewLog = {
   name: "New Brew Log Entry",
-  brewDate: moment().toISOString(),
+  brewDate: dayjs().toISOString(),
   id: uuid(),
   status: "In Progress",
   userId: "",
@@ -63,7 +63,7 @@ const defaultBrewLog: BT.BrewLog = {
 };
 
 interface BrewLogForm extends BT.BrewLog {
-  workingBrewDate: Moment;
+  workingBrewDate: Dayjs;
 }
 
 const BrewLogDetailPage = () => {
@@ -104,7 +104,7 @@ const BrewLogDetailPage = () => {
 
       form.setFieldsValue({
         ...workingBrewLog,
-        workingBrewDate: moment(workingBrewLog.brewDate),
+        workingBrewDate: dayjs(workingBrewLog.brewDate),
       });
       dispatch(setCurrentBrewLog(workingBrewLog));
 
@@ -202,11 +202,11 @@ const BrewLogDetailPage = () => {
                       message: "A Brew Date is required",
                     },
                   ]}
-                  initialValue={moment()}
+                  initialValue={dayjs()}
                 >
                   <DatePicker
                     format={(date) =>
-                      moment(date.toISOString()).format(DATE_FORMAT)
+                      dayjs(date.toISOString()).format(DATE_FORMAT)
                     }
                   />
                 </Form.Item>
@@ -274,11 +274,11 @@ const BrewLogDetailPage = () => {
                                     {...field}
                                     name={[field.name, "date"]}
                                     label="Date"
-                                    initialValue={moment()}
+                                    initialValue={dayjs()}
                                   >
                                     <DatePicker
                                       format={(date) =>
-                                        moment(date.toISOString()).format(
+                                        dayjs(date.toISOString()).format(
                                           DATE_FORMAT
                                         )
                                       }

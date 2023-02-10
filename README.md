@@ -18,5 +18,5 @@ export PORT=8000
 # Useful commands
 
 - exec into docker container: `docker-compose exec backend python backend/manage.py blah blah`
-- enter postgres container: `docker-compose exec db psql -U postgres -W postgres`
+- enter postgres container: `docker-compose exec db psql -U postgres -W postgres` (password also postgres)
 - see docker containers: `docker ps`

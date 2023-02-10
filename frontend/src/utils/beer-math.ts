@@ -4,6 +4,7 @@ import {
   recipeToImperial,
 } from "./converters";
 import { BrewingTypes as BT, RecipeUtils } from "brewing-shared";
+import { BrewSettings } from "../types/brew-settings";
 
 export const calculateSrm = (
   batchSizeGallons: number,
@@ -143,60 +144,58 @@ const getGrainPounds = (grains: BT.Fermentable[]): number => {
 };
 
 export const calculateWaterLoss = (
-  brewSettings: BT.User,
+  brewSettings: BrewSettings,
   fermentables: BT.Fermentable[]
 ) => {
   let waterLoss = 0;
 
-  waterLoss += brewSettings.fermentorTrubWaterLoss;
-  waterLoss += brewSettings.kettleTrubWaterLoss;
+  waterLoss += brewSettings.water_loss_fermentor_trub;
+  waterLoss += brewSettings.water_loss_kettle_trub;
 
-  const boilHours = brewSettings.boilTime / 60;
-  const evaporationLoss = brewSettings.boilOffWaterLossRate * boilHours;
+  const boilHours = brewSettings.boil_time / 60;
+  const evaporationLoss = brewSettings.water_loss_per_boil_unit * boilHours;
   waterLoss += evaporationLoss;
 
   const grainPounds = getGrainPounds(fermentables);
-  const quartsLostFromGrain = grainPounds * brewSettings.waterLossPerGrain;
+  const quartsLostFromGrain =
+    grainPounds * brewSettings.water_loss_per_grain_unit;
   waterLoss += quartsLostFromGrain / 4;
 
   return waterLoss;
 };
 
 export const calculateStrikeWater = (
-  brewSettings: BT.User,
+  brewSettings: BrewSettings,
   waterLoss: number,
   fermentables: BT.Fermentable[],
   batchSize: number
 ) => {
-  if (!brewSettings.sparge) {
+  if (!brewSettings.do_sparge) {
     return batchSize + waterLoss;
   }
 
   const grainPounds = getGrainPounds(fermentables);
-  const quartsNeeded = grainPounds * brewSettings.mashThickness;
+  const quartsNeeded = grainPounds * brewSettings.mash_thickness_target;
   return quartsNeeded / 4;
 };
 
 export const calculateHotLiquor = (
   recipe: BT.Recipe,
-  brewSettings: BT.User,
+  brewSettings: BrewSettings,
   strikeWater: number,
   waterLoss: number
 ) => {
-  if (!brewSettings.sparge) return 0;
+  if (!brewSettings.do_sparge) return 0;
 
   const totalWater = recipe.batchSize + waterLoss;
 
   return totalWater - strikeWater;
 };
 
-export const getStats = (
-  recipe: BT.Recipe,
-  brewSettings: BT.User
-): BT.Stats => {
+export const getStats = (recipe: BT.Recipe, brewSettings: BrewSettings): BT.Stats => {
   const adjustedRecipe = recipeToImperial(recipe);
   const adjustedBrewSettings =
-    brewSettings.measurementType === "imperial"
+    brewSettings.measurement_type === "imperial"
       ? brewSettings
       : brewSettingsToImperial(brewSettings);
 

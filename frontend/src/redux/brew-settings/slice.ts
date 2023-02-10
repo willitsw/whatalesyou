@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import { createUpdateBrewSettings } from "../../utils/api-calls";
-import { BrewingTypes as BT } from "brewing-shared";
 import { BrewSettings } from "../../types/brew-settings";
 
 export interface BrewSettingsState {
@@ -14,7 +13,7 @@ const initialState: BrewSettingsState = {
 
 export const processCreateUpdateBrewSettings = createAsyncThunk(
   "brewSettings/updateBrewSettings",
-  async (brewSettings: BT.User, { dispatch }) => {
+  async (brewSettings: BrewSettings, { dispatch }) => {
     await createUpdateBrewSettings(brewSettings);
     dispatch(setBrewSettings(brewSettings));
   }

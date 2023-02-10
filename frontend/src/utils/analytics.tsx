@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import ReactGA from "react-ga4";
 import { useLocation } from "react-router-dom";
-import { v4 as uuid } from "uuid";
 import constants from "../constants";
 import { selectBrewSettings } from "../redux/brew-settings/slice";
 import { useAppSelector } from "../redux/hooks";
@@ -13,7 +12,7 @@ interface AnalyticsProviderProps {
 
 interface AnalyticsData {
   userId: number;
-  username: string;
+  email: string;
   environment: string;
   userAgent: string;
 }
@@ -21,7 +20,7 @@ interface AnalyticsData {
 function getDefaultAnalyticsData(): AnalyticsData {
   return {
     userId: -1,
-    username: "",
+    email: "",
     environment: constants.environment,
     userAgent: window.navigator.userAgent,
   };
@@ -56,7 +55,7 @@ export const AnalyticsProvider = ({ children }: AnalyticsProviderProps) => {
     if (user) {
       newData = {
         userId: user.id,
-        username: user.username,
+        email: user.email,
         environment: constants.environment,
         userAgent: window.navigator.userAgent,
       };
