@@ -1,3 +1,21 @@
-from django.shortcuts import render
+from rest_framework import viewsets
 
-# Create your views here.
+from .models import BrewSetting
+from .serializers import BrewSettingSerializer
+
+
+class BrewSettingViewSet(viewsets.ModelViewSet):
+    """
+    Brew Settings CRUD
+    """
+
+    queryset = BrewSetting.objects.all()
+    serializer_class = BrewSettingSerializer
+
+    def list(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            self.queryset = BrewSetting.objects.filter(owner=request.user)
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)

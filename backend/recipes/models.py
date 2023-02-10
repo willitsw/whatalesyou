@@ -47,7 +47,9 @@ class Recipe(models.Model):
     owner = models.ForeignKey(User, related_name="recipes", on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.name} - {self.owner.user.email} - {self.created_at.strftime('%d/%m/%Y')}"
+        return (
+            f"{self.name} - {self.owner.email} - {self.created_at.strftime('%d/%m/%Y')}"
+        )
 
 
 class IngredientMixin(models.Model):
