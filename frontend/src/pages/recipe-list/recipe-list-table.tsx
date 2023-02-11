@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tooltip } from "antd";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { processDeleteRecipe, setRecipeList } from "../../redux/recipe-list";
+import {
+  processDeleteRecipe,
+  refreshRecipeList,
+} from "../../redux/recipe-list";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 
 import { Breakpoint } from "antd/lib/_util/responsiveObserver";
@@ -11,15 +14,14 @@ import {
   DeleteOutlined,
   PrinterOutlined,
 } from "@ant-design/icons";
-import { getRecipesByUser } from "../../utils/api-calls";
-import { BrewingTypes as BT } from "brewing-shared";
 import React from "react";
 import { useAnalytics } from "../../utils/analytics";
+import { Recipe } from "../../types/recipe";
 
 const RecipeListTable = () => {
   const dispatch = useAppDispatch();
   const recipeList = useAppSelector((state) => state.recipes.recipeList);
-  const [idToDelete, setIdToDelete] = useState<string | null>(null);
+  const [idToDelete, setIdToDelete] = useState<number>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { fireAnalyticsEvent } = useAnalytics();
@@ -30,8 +32,7 @@ const RecipeListTable = () => {
 
   useEffect(() => {
     const getRecipeList = async () => {
-      const recipeList = await getRecipesByUser();
-      dispatch(setRecipeList(recipeList));
+      dispatch(refreshRecipeList());
       setLoading(false);
     };
     getRecipeList();
@@ -52,7 +53,7 @@ const RecipeListTable = () => {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text: string, record: BT.Recipe) => (
+      render: (text: string, record: Recipe) => (
         <Link to={"/recipes/edit/" + record.id}>{text}</Link>
       ),
     },
@@ -71,7 +72,7 @@ const RecipeListTable = () => {
     {
       title: "Action",
       key: "action",
-      render: (text: string, record: BT.Recipe) => (
+      render: (text: string, record: Recipe) => (
         <Space>
           <Tooltip title="Printer Friendly Version">
             <Link to={"/recipes/print/" + record.id} target="_blank">

@@ -13,5 +13,5 @@ class BrewLogViewSet(viewsets.ModelViewSet):
     serializer_class = BrewLogSerializer
 
     def list(self, request, *args, **kwargs):
-        self.queryset = BrewLog.objects.filter(recipe__owner__user=request.user)
+        self.queryset = BrewLog.objects.filter(recipe__owner=request.user)
         return super().list(request, *args, **kwargs)

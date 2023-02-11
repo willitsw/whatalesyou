@@ -26,28 +26,28 @@ import StatsSection from "./statistics/stats";
 import { setPageIsClean } from "../../redux/global-modals";
 import { gallonsToLiters, litersToGallons } from "../../utils/converters";
 import { selectBrewSettings } from "../../redux/brew-settings";
-import { BrewingTypes as BT } from "brewing-shared";
 import React from "react";
 import Ingredients from "./ingredients/ingredients";
 import { useAnalytics } from "../../utils/analytics";
 import dayjs from "dayjs";
+import { Recipe } from "../../types/recipe";
+import { Stats } from "../../types/stats";
 
-const defaultRecipe: BT.Recipe = {
+const defaultRecipe: Recipe = {
   name: "New Recipe",
   description: "",
   author: "",
-  batchSize: 5,
-  id: uuid(),
-  userId: "",
+  batch_size: 5,
+  id: 0,
+  owner: 0,
   type: "All grain",
-  measurementType: "imperial",
+  measurement_type: "imperial",
   efficiency: 70,
-  ingredients: [],
-  createdDate: dayjs().toISOString(),
-  updatedDate: dayjs().toISOString(),
+  created_at: dayjs().toISOString(),
+  updated_at: dayjs().toISOString(),
 };
 
-const defaultStats: BT.Stats = {
+const defaultStats: Stats = {
   abv: 0,
   ibu: 0,
   og: 0,
@@ -60,14 +60,14 @@ const defaultStats: BT.Stats = {
 
 const RecipeDetailPage = () => {
   const brewSettings = useAppSelector(selectBrewSettings);
-  const [form] = Form.useForm<BT.Recipe>();
+  const [form] = Form.useForm<Recipe>();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const recipe = useAppSelector(selectCurrentRecipe);
-  const [stats, setStats] = useState<BT.Stats>(defaultStats);
-  const [ingredients, setIngredients] = useState<BT.ValidIngredient[]>([]);
+  const [stats, setStats] = useState<Stats>(defaultStats);
+  const [ingredients, setIngredients] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDesktop] = useState<boolean>(
     window.matchMedia("(min-width: 1200px)").matches
@@ -76,24 +76,24 @@ const RecipeDetailPage = () => {
 
   useEffect(() => {
     const onComponentLoad = async () => {
-      let workingRecipe: BT.Recipe;
+      let workingRecipe: Recipe;
       if (location.pathname.includes("/recipes/duplicate") && id) {
         workingRecipe = await getRecipeById(id);
         workingRecipe.name = `Copy of ${workingRecipe.name}`;
-        workingRecipe.id = uuid();
+        workingRecipe.id = 0;
       } else if (location.pathname.includes("/recipes/edit") && id) {
         workingRecipe = await getRecipeById(id);
       } else {
         workingRecipe = { ...defaultRecipe };
 
         // workingRecipe.author = brewSettings.displayName;
-        workingRecipe.batchSize = brewSettings.batch_size;
+        workingRecipe.batch_size = brewSettings.batch_size;
         workingRecipe.efficiency = brewSettings.brewhouse_efficiency;
-        workingRecipe.measurementType = brewSettings.measurement_type;
+        workingRecipe.measurement_type = brewSettings.measurement_type;
       }
 
       // setStats(getStats(workingRecipe, brewSettings));
-      setIngredients(workingRecipe.ingredients);
+      // setIngredients(workingRecipe.ingredients);
 
       form.setFieldsValue(workingRecipe);
       dispatch(setCurrentRecipe(workingRecipe));
@@ -108,14 +108,13 @@ const RecipeDetailPage = () => {
     );
   };
 
-  const handleSave = (recipeForm: BT.Recipe) => {
-    const newRecipe: BT.Recipe = {
+  const handleSave = (recipeForm: Recipe) => {
+    const newRecipe: Recipe = {
       ...recipeForm,
-      id: recipe?.id ?? "",
+      id: recipe?.id ?? 0,
       // userId: brewSettings.id ?? "",
-      updatedDate: dayjs().toISOString(),
-      createdDate: recipe.createdDate,
-      ingredients,
+      updated_at: dayjs().toISOString(),
+      created_at: recipe.created_at,
     };
     dispatch(processCreateUpdateRecipe(newRecipe));
     dispatch(setPageIsClean(true));
@@ -138,12 +137,12 @@ const RecipeDetailPage = () => {
         const metricBatchSize: number = gallonsToLiters(
           form.getFieldValue("batchSize")
         );
-        form.setFieldsValue({ batchSize: metricBatchSize });
+        form.setFieldsValue({ batch_size: metricBatchSize });
       } else {
         const imperialBatchSize: number = litersToGallons(
           form.getFieldValue("batchSize")
         );
-        form.setFieldsValue({ batchSize: imperialBatchSize });
+        form.setFieldsValue({ batch_size: imperialBatchSize });
       }
       updateStats(ingredients);
     }
@@ -158,16 +157,16 @@ const RecipeDetailPage = () => {
     }
   };
 
-  const handleSetIngredients = (newIngredients: BT.ValidIngredient[]) => {
+  const handleSetIngredients = (newIngredients: any[]) => {
     dispatch(setPageIsClean(false));
     updateStats(newIngredients);
     setIngredients(newIngredients);
   };
 
-  const updateStats = (newIngredients: BT.ValidIngredient[] = null) => {
-    const workingRecipe: BT.Recipe = form.getFieldsValue();
+  const updateStats = (newIngredients: any[] = null) => {
+    const workingRecipe: Recipe = form.getFieldsValue();
     if (newIngredients !== null) {
-      workingRecipe.ingredients = newIngredients;
+      // workingRecipe.ingredients = newIngredients;
     }
     // setStats(getStats(workingRecipe, brewSettings));
   };

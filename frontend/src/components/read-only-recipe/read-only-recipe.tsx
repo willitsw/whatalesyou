@@ -1,21 +1,22 @@
 import React from "react";
 import { BrewingTypes as BT, RecipeUtils as RU } from "brewing-shared";
 import { Col, Descriptions, Divider, List, Row, Typography } from "antd";
+import { Recipe } from "../../types/recipe";
 
 interface ReadOnlyRecipeProps {
-  recipe: BT.Recipe;
+  recipe: Recipe;
 }
 
 const ReadOnlyRecipe = ({ recipe }: ReadOnlyRecipeProps) => {
-  const { Fermentable, Hop, Misc, Culture, Chemistry } =
-    RU.sortIngredientsByType(recipe.ingredients);
+  // const { Fermentable, Hop, Misc, Culture, Chemistry } =
+  // RU.sortIngredientsByType(recipe.ingredients);
 
-  const { StrikeWater, Mash, Boil, Fermentor, Bottle } =
-    RU.sortIngredientsByStep(recipe.ingredients);
+  // const { StrikeWater, Mash, Boil, Fermentor, Bottle } =
+  // RU.sortIngredientsByStep(recipe.ingredients);
 
   return (
     <>
-      <style type="text/css" media="print">
+      {/* <style type="text/css" media="print">
         {"@page { size: auto; margin: 10mm !important; }"}
       </style>
       <Typography.Title level={2}>{recipe.name}</Typography.Title>
@@ -215,7 +216,7 @@ const ReadOnlyRecipe = ({ recipe }: ReadOnlyRecipeProps) => {
           />
           <Divider />
         </>
-      )}
+      )} */}
     </>
   );
 };

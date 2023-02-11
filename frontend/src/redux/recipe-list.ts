@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { BrewingTypes as BT } from "brewing-shared";
+import { Recipe, RecipeListResponse } from "../types/recipe";
 import {
   createUpdateRecipe,
   deleteRecipe,
@@ -9,25 +9,32 @@ import { deepCloneObject } from "../utils/helpers";
 import type { RootState } from "./store";
 
 export interface RecipeState {
-  recipeList: BT.Recipe[];
-  currentRecipe: BT.Recipe | null;
+  recipeCount: number;
+  nextPage: string;
+  prevPage: string;
+  recipeList: Recipe[];
+  currentRecipe: Recipe;
 }
 
 const initialState: RecipeState = {
+  recipeCount: 0,
+  nextPage: null,
+  prevPage: null,
   recipeList: [],
   currentRecipe: null,
 };
 
 export const refreshRecipeList = createAsyncThunk(
   "recipes/refreshRecipeList",
-  async () => {
-    return await getRecipesByUser();
+  async (_, { dispatch }) => {
+    const recipeListResponse = await getRecipesByUser();
+    dispatch(setRecipeListResponse(recipeListResponse));
   }
 );
 
 export const processDeleteRecipe = createAsyncThunk(
   "recipes/deleteRecipe",
-  async (recipeId: string, { getState, dispatch }) => {
+  async (recipeId: number, { getState, dispatch }) => {
     await deleteRecipe(recipeId);
     const state = getState() as RootState;
     const newRecipes = state.recipes.recipeList.filter(
@@ -40,12 +47,10 @@ export const processDeleteRecipe = createAsyncThunk(
 
 export const processCreateUpdateRecipe = createAsyncThunk(
   "recipes/createUpdateRecipe",
-  async (recipe: BT.Recipe, { getState, dispatch }) => {
+  async (recipe: Recipe, { getState, dispatch }) => {
     await createUpdateRecipe(recipe);
     const state = getState() as RootState;
-    const newRecipeList: BT.Recipe[] = deepCloneObject(
-      state.recipes.recipeList
-    );
+    const newRecipeList: Recipe[] = deepCloneObject(state.recipes.recipeList);
     const currentRecipeIndex = newRecipeList.findIndex(
       ({ id }) => id === recipe.id
     );
@@ -65,21 +70,26 @@ export const recipeSlice = createSlice({
   name: "recipes",
   initialState,
   reducers: {
-    setRecipeList: (state, action) => {
-      state.recipeList = action.payload;
+    setRecipeListResponse: (state, action: { payload: RecipeListResponse }) => {
+      state.recipeList = action.payload.results;
+      state.recipeCount = action.payload.count;
+      state.nextPage = action.payload.next;
+      state.prevPage = action.payload.previous;
+      return state;
     },
-    setCurrentRecipe: (state, action) => {
+    setRecipeList: (state, action: { payload: Recipe[] }) => {
+      state.recipeList = action.payload;
+      return state;
+    },
+    setCurrentRecipe: (state, action: { payload: Recipe }) => {
       state.currentRecipe = action.payload;
+      return state;
     },
-  },
-  extraReducers: (builder) => {
-    builder.addCase(refreshRecipeList.fulfilled, (state, action) => {
-      state.recipeList = action.payload;
-    });
   },
 });
 
-export const { setRecipeList, setCurrentRecipe } = recipeSlice.actions;
+export const { setRecipeList, setCurrentRecipe, setRecipeListResponse } =
+  recipeSlice.actions;
 
 export const selectRecipeList = (state: RootState) => state.recipes.recipeList;
 export const selectCurrentRecipe = (state: RootState) =>

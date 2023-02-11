@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { BrewingTypes as BT } from "brewing-shared";
+import { BrewLog, BrewLogListResponse } from "../types/brew-log";
 import {
   createUpdateBrewLog,
   deleteBrewLog,
@@ -9,13 +9,19 @@ import { deepCloneObject } from "../utils/helpers";
 import type { RootState } from "./store";
 
 export interface BrewLogState {
-  brewLogList: BT.BrewLog[];
-  currentBrewLog: BT.BrewLog | null;
+  brewLogList: BrewLog[];
+  currentBrewLog: BrewLog;
+  brewLogCount: number;
+  nextPage: string;
+  prevPage: string;
 }
 
 const initialState: BrewLogState = {
   brewLogList: [],
   currentBrewLog: null,
+  brewLogCount: 0,
+  nextPage: null,
+  prevPage: null,
 };
 
 export enum BrewLogActionTypes {
@@ -25,14 +31,15 @@ export enum BrewLogActionTypes {
 
 export const refreshBrewLogList = createAsyncThunk(
   "brew-log/refreshBrewLogList",
-  async () => {
-    return await getBrewLogsByUser();
+  async (_, { dispatch }) => {
+    const brewLogs = await getBrewLogsByUser();
+    dispatch(setBrewLogListResponse(brewLogs));
   }
 );
 
 export const processDeleteBrewLog = createAsyncThunk(
   "brew-log/deleteBrewLog",
-  async (brewLogId: string, { getState, dispatch }) => {
+  async (brewLogId: number, { getState, dispatch }) => {
     await deleteBrewLog(brewLogId);
     const state = getState() as RootState;
     const newBrewLogs = state.brewLogs.brewLogList.filter(
@@ -45,10 +52,10 @@ export const processDeleteBrewLog = createAsyncThunk(
 
 export const processCreateUpdateBrewLog = createAsyncThunk(
   "brew-log/createUpdateBrewLog",
-  async (brewLog: BT.BrewLog, { getState, dispatch }) => {
+  async (brewLog: BrewLog, { getState, dispatch }) => {
     await createUpdateBrewLog(brewLog);
     const state = getState() as RootState;
-    const newBrewLogList: BT.BrewLog[] = deepCloneObject(
+    const newBrewLogList: BrewLog[] = deepCloneObject(
       state.brewLogs.brewLogList
     );
     const currentBrewLogIndex = newBrewLogList.findIndex(
@@ -70,6 +77,15 @@ export const brewLogSlice = createSlice({
   name: "brew-log",
   initialState,
   reducers: {
+    setBrewLogListResponse: (
+      state,
+      action: { payload: BrewLogListResponse }
+    ) => {
+      state.brewLogList = action.payload.results;
+      state.brewLogCount = action.payload.count;
+      state.nextPage = action.payload.next;
+      state.prevPage = action.payload.previous;
+    },
     setBrewLogList: (state, action) => {
       state.brewLogList = action.payload;
     },
@@ -77,14 +93,10 @@ export const brewLogSlice = createSlice({
       state.currentBrewLog = action.payload;
     },
   },
-  extraReducers: (builder) => {
-    builder.addCase(refreshBrewLogList.fulfilled, (state, action) => {
-      state.brewLogList = action.payload;
-    });
-  },
 });
 
-export const { setBrewLogList, setCurrentBrewLog } = brewLogSlice.actions;
+export const { setBrewLogList, setCurrentBrewLog, setBrewLogListResponse } =
+  brewLogSlice.actions;
 
 export const selectBrewLogList = (state: RootState) =>
   state.brewLogs.brewLogList;

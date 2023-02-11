@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Content from "../../components/content/content";
-import { BrewingTypes as BT } from "brewing-shared";
-import { v4 as uuid } from "uuid";
 import { selectBrewSettings } from "../../redux/brew-settings";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
@@ -26,43 +24,41 @@ import {
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   processCreateUpdateBrewLog,
+  refreshBrewLogList,
   selectBrewLogList,
   selectCurrentBrewLog,
-  setBrewLogList,
   setCurrentBrewLog,
 } from "../../redux/brew-log";
-import {
-  getBrewLogById,
-  getBrewLogsByUser,
-  getRecipeById,
-  getRecipesByUser,
-} from "../../utils/api-calls";
+import { getBrewLogById, getRecipeById } from "../../utils/api-calls";
 import { setPageIsClean } from "../../redux/global-modals";
 import { DATE_FORMAT } from "../../constants";
-import { selectRecipeList, setRecipeList } from "../../redux/recipe-list";
+import { refreshRecipeList, selectRecipeList } from "../../redux/recipe-list";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 import { DeleteOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
+import { Recipe } from "../../types/recipe";
+import { BrewLog } from "../../types/brew-log";
 
-const defaultBrewLog: BT.BrewLog = {
+const defaultBrewLog: BrewLog = {
   name: "New Brew Log Entry",
-  brewDate: dayjs().toISOString(),
-  id: uuid(),
+  brew_date: dayjs().toISOString(),
+  id: 1,
   status: "In Progress",
-  userId: "",
-  batchNumber: 0,
-  gravityReadings: [],
-  brewingNotes: "",
-  fermentationNotes: "",
-  hopNotes: "",
-  otherNotes: "",
-  packagingNotes: "",
-  tastingNotes: "",
-  yeastNotes: "",
+  owner: 1,
+  batch_number: 0,
+  gravity_readings: [],
+  brewing_notes: "",
+  fermentation_notes: "",
+  hop_notes: "",
+  other_notes: "",
+  packaging_date: "",
+  tasting_notes: "",
+  yeast_notes: "",
+  packaging_notes: "",
 };
 
-interface BrewLogForm extends BT.BrewLog {
+interface BrewLogForm extends BrewLog {
   workingBrewDate: Dayjs;
 }
 
@@ -76,7 +72,7 @@ const BrewLogDetailPage = () => {
   const brewLog = useAppSelector(selectCurrentBrewLog);
   const brewLogList = useAppSelector(selectBrewLogList);
   const recipeList = useAppSelector(selectRecipeList);
-  const [selectedRecipe, setSelectedRecipe] = useState<BT.Recipe>(null);
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [potentialNewId, setPotentialNewId] = useState<string>(null);
   const [gravityReadingToDelete, setGravityReadingToDelete] =
@@ -85,31 +81,29 @@ const BrewLogDetailPage = () => {
   useEffect(() => {
     const onComponentLoad = async () => {
       if (recipeList?.length === 0) {
-        const newRecipeList = await getRecipesByUser();
-        dispatch(setRecipeList(newRecipeList));
+        dispatch(refreshRecipeList());
       }
       if (brewLogList?.length === 0) {
-        const newBrewLogs = await getBrewLogsByUser();
-        dispatch(setBrewLogList(newBrewLogs));
+        dispatch(refreshBrewLogList());
       }
-      let workingBrewLog: BT.BrewLog;
+      let workingBrewLog: BrewLog;
       if (location.pathname.includes("/brew-log/edit") && id) {
         workingBrewLog = await getBrewLogById(id);
       } else {
         workingBrewLog = {
           ...defaultBrewLog,
-          batchNumber: brewLogList.length + 1,
+          batch_number: brewLogList.length + 1,
         };
       }
 
       form.setFieldsValue({
         ...workingBrewLog,
-        workingBrewDate: dayjs(workingBrewLog.brewDate),
+        workingBrewDate: dayjs(workingBrewLog.brew_date),
       });
       dispatch(setCurrentBrewLog(workingBrewLog));
 
       if (workingBrewLog.recipe) {
-        setSelectedRecipe(workingBrewLog.recipe);
+        // setSelectedRecipe(workingBrewLog.recipe);
       }
       setLoading(false);
     };
@@ -125,10 +119,10 @@ const BrewLogDetailPage = () => {
   const handleSave = (brewLogForm: BrewLogForm) => {
     const newBrewLog: BrewLogForm = {
       ...brewLogForm,
-      id: brewLog?.id ?? "",
+      id: brewLog?.id ?? 0,
       // userId: brewSettings.id ?? "",
-      brewDate: brewLogForm.workingBrewDate.toISOString(),
-      recipe: selectedRecipe ?? null,
+      brew_date: brewLogForm.workingBrewDate.toISOString(),
+      recipe: selectedRecipe.id ?? null,
     };
     delete newBrewLog.workingBrewDate;
     dispatch(processCreateUpdateBrewLog(newBrewLog));
@@ -139,13 +133,13 @@ const BrewLogDetailPage = () => {
   const handleChangeRecipe = async (newRecipeId: string) => {
     dispatch(setPageIsClean(false));
     const newRecipe = await getRecipeById(newRecipeId);
-    setSelectedRecipe(newRecipe);
+    // setSelectedRecipe(newRecipe);
   };
 
   const handleDeleteClick = () => {
     const gravityReadings = [...form.getFieldValue("gravityReadings")];
     gravityReadings.splice(gravityReadingToDelete, 1);
-    form.setFieldsValue({ gravityReadings });
+    form.setFieldsValue({ gravity_readings: gravityReadings });
     setGravityReadingToDelete(null);
   };
 

@@ -25,7 +25,7 @@ from user.views import UserViewSet
 router = routers.DefaultRouter()
 router.register(r"recipes", RecipesViewSet)
 router.register(r"users", UserViewSet)
-router.register(r"brew-log", BrewLogViewSet)
+router.register(r"brew-logs", BrewLogViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),

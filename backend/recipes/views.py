@@ -13,6 +13,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeDetailSerializer
 
     def list(self, request, *args, **kwargs):
-        self.queryset = Recipe.objects.filter(owner__user=request.user)
+        self.queryset = Recipe.objects.filter(owner__pk=request.user.pk)
         self.serializer_class = RecipeSerializer
         return super().list(request, *args, **kwargs)

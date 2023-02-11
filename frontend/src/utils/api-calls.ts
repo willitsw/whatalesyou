@@ -1,6 +1,7 @@
-import { BrewingTypes as BT } from "brewing-shared";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
+import { BrewLog, BrewLogListResponse } from "../types/brew-log";
 import { BrewSettings } from "../types/brew-settings";
+import { Recipe, RecipeListResponse } from "../types/recipe";
 import {
   CreateUserRequest,
   TokenRequest,
@@ -11,27 +12,25 @@ import makeRequest from "./request";
 
 // RECIPE ENDPOINTS
 
-export const getRecipesByUser = async (): Promise<BT.Recipe[]> => {
-  return await makeRequest("/recipes", "GET");
+export const getRecipesByUser = async (): Promise<RecipeListResponse> => {
+  return await makeRequest("/recipes/", "GET");
 };
 
-export const getRecipeById = async (recipeId: string): Promise<BT.Recipe> => {
+export const getRecipeById = async (recipeId: string): Promise<Recipe> => {
   return await makeRequest(`/recipes/${recipeId}`, "GET");
 };
 
-export const deleteRecipe = async (recipeId: string): Promise<void> => {
+export const deleteRecipe = async (recipeId: number): Promise<void> => {
   return await makeRequest(`/recipes/${recipeId}`, "DELETE");
 };
 
-export const createUpdateRecipe = async (
-  recipe: BT.Recipe
-): Promise<BT.Recipe> => {
+export const createUpdateRecipe = async (recipe: Recipe): Promise<Recipe> => {
   return await makeRequest("/recipes", "POST", recipe);
 };
 
 // BREW SETTINGS ENDPOINTS
 
-export const getBrewSettings = async (): Promise<BT.User> => {
+export const getBrewSettings = async (): Promise<BrewSettings> => {
   return await makeRequest("/users", "GET");
 };
 
@@ -47,23 +46,19 @@ export const createUpdateBrewSettings = async (
 
 // BREW LOG ENDPOINTS
 
-export const getBrewLogsByUser = async (): Promise<BT.BrewLog[]> => {
+export const getBrewLogsByUser = async (): Promise<BrewLogListResponse> => {
   return await makeRequest("/brew-logs", "GET");
 };
 
-export const getBrewLogById = async (
-  brewLogId: string
-): Promise<BT.BrewLog> => {
+export const getBrewLogById = async (brewLogId: string): Promise<BrewLog> => {
   return await makeRequest(`/brew-logs/${brewLogId}`, "GET");
 };
 
-export const deleteBrewLog = async (brewLogId: string): Promise<void> => {
+export const deleteBrewLog = async (brewLogId: number): Promise<void> => {
   return await makeRequest(`/brew-logs/${brewLogId}`, "DELETE");
 };
 
-export const createUpdateBrewLog = async (
-  brewLog: BT.BrewLog
-): Promise<BT.BrewLog> => {
+export const createUpdateBrewLog = async (brewLog: BrewLog): Promise<BrewLog> => {
   return await makeRequest("/brew-logs", "POST", brewLog);
 };
 

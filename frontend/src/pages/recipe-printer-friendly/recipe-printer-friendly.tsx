@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { BrewingTypes as BT } from "brewing-shared";
 import { getRecipeById } from "../../utils/api-calls";
 import Content from "../../components/content/content";
 import { Button } from "antd";
 import { useReactToPrint } from "react-to-print";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
+import { Recipe } from "../../types/recipe";
 
 const RecipePrinterFriendly = () => {
   const { id } = useParams();
@@ -14,7 +14,7 @@ const RecipePrinterFriendly = () => {
     content: () => printRef.current,
   });
 
-  const [recipe, setRecipe] = useState<BT.Recipe>(null);
+  const [recipe, setRecipe] = useState<Recipe>(null);
 
   useEffect(() => {
     const setNewRecipe = async () => {
