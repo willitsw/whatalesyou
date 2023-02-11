@@ -14,7 +14,7 @@ import {
   Typography,
 } from "antd";
 import { useEffect, useState } from "react";
-import Content from "../../components/content";
+import Content from "../../components/content/content";
 import {
   processCreateUpdateBrewSettings,
   selectBrewSettings,

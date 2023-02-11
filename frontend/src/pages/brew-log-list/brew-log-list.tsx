@@ -1,4 +1,4 @@
-import Content from "../../components/content";
+import Content from "../../components/content/content";
 import BrewLogListTable from "./brew-log-list-table";
 import React from "react";
 

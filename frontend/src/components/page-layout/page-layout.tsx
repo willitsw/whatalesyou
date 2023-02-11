@@ -1,20 +1,20 @@
 import { Layout } from "antd";
 import { Route, Routes } from "react-router-dom";
-import HomePage from "../../pages/home";
-import RecipeDetailPage from "../../pages/recipe-detail";
-import RecipeListPage from "../../pages/recipe-list";
-import BrewSettingsPage from "../../pages/brew-settings";
+import HomePage from "../../pages/home/home";
+import RecipeDetailPage from "../../pages/recipe-detail/ingredients";
+import RecipeListPage from "../../pages/recipe-list/recipe-list";
+import BrewSettingsPage from "../../pages/brew-settings/brew-settings";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { loadUserData, userIsAuthenticated } from "../../redux/user";
-import Footer from "../footer";
-import Header from "../header";
+import Footer from "../footer/footer";
+import Header from "../header/header";
 import { selectGlobalIsLoading } from "../../redux/misc";
-import Loading from "../loading";
+import Loading from "../loading/loading";
 import React, { useEffect } from "react";
-import RecipePrinterFriendly from "../../pages/recipe-printer-friendly";
-import BrewLogListPage from "../../pages/brew-log-list";
-import BrewLogDetailPage from "../../pages/brew-log-detail";
-import LoginModal from "../modals/login";
+import RecipePrinterFriendly from "../../pages/recipe-printer-friendly/recipe-printer-friendly";
+import BrewLogListPage from "../../pages/brew-log-list/brew-log-list";
+import BrewLogDetailPage from "../../pages/brew-log-detail/brew-log-detail";
+import LoginModal from "../modals/login/login";
 
 const PageLayout = () => {
   const isAuthenticated = useAppSelector(userIsAuthenticated);

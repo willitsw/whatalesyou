@@ -1,7 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
-import PageLayout from "./components/page-layout";
+import PageLayout from "./components/page-layout/page-layout";
 import React from "react";
 import { AnalyticsProvider } from "./utils/analytics";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./constants";

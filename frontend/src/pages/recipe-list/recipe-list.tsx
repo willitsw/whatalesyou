@@ -1,4 +1,4 @@
-import Content from "../../components/content";
+import Content from "../../components/content/content";
 import RecipeListTable from "./recipe-list-table";
 import React from "react";
 

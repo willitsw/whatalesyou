@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Content from "../../components/content";
+import Content from "../../components/content/content";
 import { BrewingTypes as BT } from "brewing-shared";
 import { v4 as uuid } from "uuid";
 import { selectBrewSettings } from "../../redux/brew-settings";
@@ -40,8 +40,8 @@ import {
 import { setPageIsClean } from "../../redux/global-modals";
 import { DATE_FORMAT } from "../../constants";
 import { selectRecipeList, setRecipeList } from "../../redux/recipe-list";
-import ReadOnlyRecipe from "../../components/read-only-recipe";
-import OkCancelModal from "../../components/ok-cancel-modal";
+import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
+import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 import { DeleteOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 

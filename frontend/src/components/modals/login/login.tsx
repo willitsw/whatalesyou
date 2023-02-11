@@ -3,7 +3,7 @@ import { Button, Form, Input, Modal, Space, Typography } from "antd";
 import { useState } from "react";
 import { FacebookOutlined, GoogleOutlined } from "@ant-design/icons";
 
-import styles from "./index.module.css";
+import styles from "./login.module.css";
 import {
   selectShowLoginModal,
   setShowLoginModal,

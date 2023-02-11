@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import Content from "../../components/content";
+import Content from "../../components/content/content";
 import { v4 as uuid } from "uuid";
 import { getRecipeById } from "../../utils/api-calls";
 import {

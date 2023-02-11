@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BrewingTypes as BT } from "brewing-shared";
 import { getRecipeById } from "../../utils/api-calls";
-import Content from "../../components/content";
+import Content from "../../components/content/content";
 import { Button } from "antd";
 import { useReactToPrint } from "react-to-print";
-import ReadOnlyRecipe from "../../components/read-only-recipe";
+import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
 
 const RecipePrinterFriendly = () => {
   const { id } = useParams();

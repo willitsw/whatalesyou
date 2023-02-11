@@ -1,4 +1,4 @@
-import styles from "./index.module.css";
+import styles from "./loading.module.css";
 import { Spin } from "antd";
 import React from "react";
 

@@ -1,6 +1,6 @@
 import { Layout, Typography, Space } from "antd";
-import Loading from "../loading";
-import styles from "./index.module.css";
+import Loading from "../loading/loading";
+import styles from "./content.module.css";
 import React from "react";
 
 interface ContentProps {
