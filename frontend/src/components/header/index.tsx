@@ -16,7 +16,7 @@ import {
   logoutUser,
   selectCurrentUser,
   userIsAuthenticated,
-} from "../../redux/user/slice";
+} from "../../redux/user";
 import {
   LoginOutlined,
   LogoutOutlined,
@@ -27,7 +27,7 @@ import {
   selectPageIsClean,
   setPageIsClean,
   setShowLoginModal,
-} from "../../redux/global-modals/slice";
+} from "../../redux/global-modals";
 import React from "react";
 import { useAnalytics } from "../../utils/analytics";
 

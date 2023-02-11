@@ -27,3 +27,8 @@ export interface User {
 export interface UserResponse extends User {
   settings: BrewSettings;
 }
+
+export interface CreateUserRequest {
+  email: string;
+  password: string;
+}

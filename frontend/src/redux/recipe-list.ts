@@ -4,9 +4,9 @@ import {
   createUpdateRecipe,
   deleteRecipe,
   getRecipesByUser,
-} from "../../utils/api-calls";
-import { deepCloneObject } from "../../utils/helpers";
-import type { RootState } from "../store";
+} from "../utils/api-calls";
+import { deepCloneObject } from "../utils/helpers";
+import type { RootState } from "./store";
 
 export interface RecipeState {
   recipeList: BT.Recipe[];

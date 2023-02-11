@@ -19,13 +19,13 @@ import {
   processCreateUpdateRecipe,
   selectCurrentRecipe,
   setCurrentRecipe,
-} from "../../redux/recipe-list/slice";
+} from "../../redux/recipe-list";
 import { getStats } from "../../utils/beer-math";
 import GeneralInfo from "./general/general-info";
 import StatsSection from "./statistics/stats";
-import { setPageIsClean } from "../../redux/global-modals/slice";
+import { setPageIsClean } from "../../redux/global-modals";
 import { gallonsToLiters, litersToGallons } from "../../utils/converters";
-import { selectBrewSettings } from "../../redux/brew-settings/slice";
+import { selectBrewSettings } from "../../redux/brew-settings";
 import { BrewingTypes as BT } from "brewing-shared";
 import React from "react";
 import Ingredients from "./ingredients/ingredients";

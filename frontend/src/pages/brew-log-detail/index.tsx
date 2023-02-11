@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Content from "../../components/content";
 import { BrewingTypes as BT } from "brewing-shared";
 import { v4 as uuid } from "uuid";
-import { selectBrewSettings } from "../../redux/brew-settings/slice";
+import { selectBrewSettings } from "../../redux/brew-settings";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
   Affix,
@@ -30,16 +30,16 @@ import {
   selectCurrentBrewLog,
   setBrewLogList,
   setCurrentBrewLog,
-} from "../../redux/brew-log/slice";
+} from "../../redux/brew-log";
 import {
   getBrewLogById,
   getBrewLogsByUser,
   getRecipeById,
   getRecipesByUser,
 } from "../../utils/api-calls";
-import { setPageIsClean } from "../../redux/global-modals/slice";
+import { setPageIsClean } from "../../redux/global-modals";
 import { DATE_FORMAT } from "../../constants";
-import { selectRecipeList, setRecipeList } from "../../redux/recipe-list/slice";
+import { selectRecipeList, setRecipeList } from "../../redux/recipe-list";
 import ReadOnlyRecipe from "../../components/read-only-recipe";
 import OkCancelModal from "../../components/ok-cancel-modal";
 import { DeleteOutlined } from "@ant-design/icons";

@@ -4,9 +4,9 @@ import {
   createUpdateBrewLog,
   deleteBrewLog,
   getBrewLogsByUser,
-} from "../../utils/api-calls";
-import { deepCloneObject } from "../../utils/helpers";
-import type { RootState } from "../store";
+} from "../utils/api-calls";
+import { deepCloneObject } from "../utils/helpers";
+import type { RootState } from "./store";
 
 export interface BrewLogState {
   brewLogList: BT.BrewLog[];

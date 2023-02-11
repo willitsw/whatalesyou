@@ -1,10 +1,15 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { RootState } from "../store";
-import { TokenPayload, TokenRequest, User } from "../../types/user";
-import { getCurrentUser, getToken } from "../../utils/api-calls";
-import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../../constants";
+import type { RootState } from "./store";
+import {
+  CreateUserRequest,
+  TokenPayload,
+  TokenRequest,
+  User,
+} from "../types/user";
+import { createUser, getCurrentUser, getToken } from "../utils/api-calls";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
 import jwt from "jwt-decode";
-import { setBrewSettings } from "../brew-settings/slice";
+import { setBrewSettings } from "./brew-settings";
 
 export interface UserState {
   currentUser: User;
@@ -36,6 +41,14 @@ export const loginUser = createAsyncThunk(
     await getToken(payload);
     dispatch(setIsAuthenticated(!!localStorage.getItem(ACCESS_TOKEN_KEY)));
     dispatch(loadUserData());
+  }
+);
+
+export const createNewUser = createAsyncThunk(
+  "users/create",
+  async (payload: CreateUserRequest, { dispatch }) => {
+    await createUser(payload);
+    dispatch(loginUser(payload));
   }
 );
 

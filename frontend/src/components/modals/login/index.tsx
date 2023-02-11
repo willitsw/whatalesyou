@@ -7,11 +7,11 @@ import styles from "./index.module.css";
 import {
   selectShowLoginModal,
   setShowLoginModal,
-} from "../../../redux/global-modals/slice";
+} from "../../../redux/global-modals";
 import { useAppSelector, useAppDispatch } from "../../../redux/hooks";
 import React from "react";
 import { useAnalytics } from "../../../utils/analytics";
-import { loginUser } from "../../../redux/user/slice";
+import { createNewUser, loginUser } from "../../../redux/user";
 import { TokenRequest } from "../../../types/user";
 
 const LoginModal = () => {
@@ -28,6 +28,7 @@ const LoginModal = () => {
     try {
       await form.validateFields();
       const values: TokenRequest = form.getFieldsValue();
+      dispatch(createNewUser(values));
       fireAnalyticsEvent("Email/Password Account Created");
     } catch (error) {
       console.log("email / password signup failed:", error);

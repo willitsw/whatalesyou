@@ -1,7 +1,12 @@
 import { BrewingTypes as BT } from "brewing-shared";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
 import { BrewSettings } from "../types/brew-settings";
-import { TokenRequest, TokenResponse, UserResponse } from "../types/user";
+import {
+  CreateUserRequest,
+  TokenRequest,
+  TokenResponse,
+  UserResponse,
+} from "../types/user";
 import makeRequest from "./request";
 
 // RECIPE ENDPOINTS
@@ -24,7 +29,7 @@ export const createUpdateRecipe = async (
   return await makeRequest("/recipes", "POST", recipe);
 };
 
-// BREW SETTInGS ENDPOINTS
+// BREW SETTINGS ENDPOINTS
 
 export const getBrewSettings = async (): Promise<BT.User> => {
   return await makeRequest("/users", "GET");
@@ -62,7 +67,7 @@ export const createUpdateBrewLog = async (
   return await makeRequest("/brew-logs", "POST", brewLog);
 };
 
-// USER ENDPOINTS
+// TOKEN ENDPOINTS
 
 export const getToken = async (body: TokenRequest): Promise<void> => {
   const tokenPayload: TokenResponse = await makeRequest(
@@ -91,6 +96,14 @@ export const refreshToken = async (): Promise<void> => {
   console.log("refreshed the token");
 };
 
+// USER ENDPOINTS
+
 export const getCurrentUser = async (id: number): Promise<UserResponse> => {
   return await makeRequest(`/users/${id}/`, "GET");
+};
+
+export const createUser = async (
+  body: CreateUserRequest
+): Promise<UserResponse> => {
+  return await makeRequest("/users/", "POST", body, { useAuth: false });
 };

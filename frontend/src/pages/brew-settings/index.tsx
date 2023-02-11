@@ -18,8 +18,8 @@ import Content from "../../components/content";
 import {
   processCreateUpdateBrewSettings,
   selectBrewSettings,
-} from "../../redux/brew-settings/slice";
-import { setPageIsClean } from "../../redux/global-modals/slice";
+} from "../../redux/brew-settings";
+import { setPageIsClean } from "../../redux/global-modals";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
   brewSettingsToMetric,

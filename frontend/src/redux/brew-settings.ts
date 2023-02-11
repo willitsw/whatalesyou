@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { RootState } from "../store";
-import { createUpdateBrewSettings } from "../../utils/api-calls";
-import { BrewSettings } from "../../types/brew-settings";
+import type { RootState } from "./store";
+import { createUpdateBrewSettings } from "../utils/api-calls";
+import { BrewSettings } from "../types/brew-settings";
 
 export interface BrewSettingsState {
   brewSettings: BrewSettings;

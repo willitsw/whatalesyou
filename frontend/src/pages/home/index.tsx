@@ -1,8 +1,8 @@
 import { Button, Col, Row, Space, Typography } from "antd";
 import Content from "../../components/content";
-import { setShowLoginModal } from "../../redux/global-modals/slice";
+import { setShowLoginModal } from "../../redux/global-modals";
 import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import { selectCurrentUser, userIsAuthenticated } from "../../redux/user/slice";
+import { selectCurrentUser, userIsAuthenticated } from "../../redux/user";
 import React from "react";
 import { useAnalytics } from "../../utils/analytics";
 import YoutubeEmbed from "./youtube-container";

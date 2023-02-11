@@ -1,10 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import RecipesReducer from "./recipe-list/slice";
-import UserReducer from "./user/slice";
-import BrewSettingsReducer from "./brew-settings/slice";
-import GlobalModalsReducer from "./global-modals/slice";
-import MiscReducer from "./misc/slice";
-import BrewLogReducer from "./brew-log/slice";
+import RecipesReducer from "./recipe-list";
+import UserReducer from "./user";
+import BrewSettingsReducer from "./brew-settings";
+import GlobalModalsReducer from "./global-modals";
+import MiscReducer from "./misc";
+import BrewLogReducer from "./brew-log";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({

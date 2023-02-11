@@ -2,9 +2,9 @@ import React, { useContext, useEffect, useState } from "react";
 import ReactGA from "react-ga4";
 import { useLocation } from "react-router-dom";
 import constants from "../constants";
-import { selectBrewSettings } from "../redux/brew-settings/slice";
+import { selectBrewSettings } from "../redux/brew-settings";
 import { useAppSelector } from "../redux/hooks";
-import { selectCurrentUser } from "../redux/user/slice";
+import { selectCurrentUser } from "../redux/user";
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
