@@ -1,9 +1,9 @@
-import { MeasurementType, PagedResponse } from "./shared";
+import { MeasurementType, PagedResponse, RecipeTypes } from "./shared";
 
 export interface Recipe {
   id: number;
   name: string;
-  type: string;
+  type: RecipeTypes;
   description: string;
   author: string;
   created_at: string;

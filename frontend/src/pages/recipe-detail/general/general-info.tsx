@@ -1,12 +1,13 @@
 import { Typography, Form, Input, InputNumber, Radio, Col, Row } from "antd";
-import { BrewingTypes as BT } from "brewing-shared";
 import React from "react";
+import { MeasurementType } from "../../../types/shared";
 
 interface GeneralInfoProps {
-  measurementType: BT.MeasurementType;
+  measurementType: MeasurementType;
 }
 
 const GeneralInfo = ({ measurementType }: GeneralInfoProps) => {
+  console.log(`measurement type: ${measurementType}`);
   return (
     <>
       <Typography.Title level={4}>General Info</Typography.Title>
@@ -45,7 +46,7 @@ const GeneralInfo = ({ measurementType }: GeneralInfoProps) => {
         <Col xs={12} sm={12} md={4} lg={4} xl={4}>
           <Form.Item
             label="Batch Size"
-            name="batchSize"
+            name="batch_size"
             rules={[{ required: true, message: "A batch size is required." }]}
             style={{ width: 105 }}
             labelCol={{ span: 30, offset: 0 }}
@@ -80,11 +81,11 @@ const GeneralInfo = ({ measurementType }: GeneralInfoProps) => {
             name="type"
             labelCol={{ span: 30, offset: 0 }}
             style={{ width: "250px" }}
-            initialValue="All grain"
+            initialValue="all_grain"
           >
             <Radio.Group>
-              <Radio.Button value="All grain">All Grain</Radio.Button>
-              <Radio.Button value="Extract">Extract</Radio.Button>
+              <Radio.Button value="all_grain">All Grain</Radio.Button>
+              <Radio.Button value="extract">Extract</Radio.Button>
             </Radio.Group>
           </Form.Item>
         </Col>

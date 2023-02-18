@@ -40,7 +40,7 @@ const defaultRecipe: Recipe = {
   batch_size: 5,
   id: 0,
   owner: 0,
-  type: "All grain",
+  type: "all_grain",
   measurement_type: "imperial",
   efficiency: 70,
   created_at: dayjs().toISOString(),
@@ -174,12 +174,12 @@ const RecipeDetailPage = () => {
   const formSections = (
     <Tabs defaultActiveKey="1">
       <Tabs.TabPane tab="General Info" key="1">
-        <GeneralInfo measurementType={form.getFieldValue("measurementType")} />
+        <GeneralInfo measurementType={form.getFieldValue("measurement_type")} />
       </Tabs.TabPane>
       <Tabs.TabPane tab="Ingredients" key="2">
         <Ingredients
           ingredients={ingredients}
-          measurementType={form.getFieldValue("measurementType")}
+          measurementType={form.getFieldValue("measurement_type")}
           setIngredients={handleSetIngredients}
         />
       </Tabs.TabPane>
