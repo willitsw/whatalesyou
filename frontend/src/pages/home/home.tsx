@@ -1,7 +1,7 @@
 import { Button, Col, Row, Space, Typography } from "antd";
 import Content from "../../components/content/content";
 import { setShowLoginModal } from "../../redux/global-modals";
-import { useAppSelector, useAppDispatch } from "../../redux/hooks";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { selectCurrentUser, userIsAuthenticated } from "../../redux/user";
 import React from "react";
 import { useAnalytics } from "../../utils/analytics";

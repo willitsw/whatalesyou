@@ -8,6 +8,20 @@ export interface PagedResponse {
   previous?: string;
 }
 
+export type FermentableType =
+  | "other"
+  | "liquid_extract"
+  | "dry_extract"
+  | "grain"
+  | "sugar"
+  | "fruit"
+  | "juice"
+  | "honey";
+
+export type Step = "strikewater" | "mash" | "boil" | "fermentor" | "bottle";
+
+export type IngredientAmountType = "g" | "oz" | "kg" | "lb" | "each";
+
 // class RecipeTypes(models.TextChoices):
 //     Other = "other"
 //     Extract = "extract"

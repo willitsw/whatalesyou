@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Content from "../../components/content/content";
 import { selectBrewSettings } from "../../redux/brew-settings";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import {
   Affix,
   Button,
@@ -32,13 +31,14 @@ import {
 import { getBrewLogById, getRecipeById } from "../../utils/api-calls";
 import { setPageIsClean } from "../../redux/global-modals";
 import { DATE_FORMAT } from "../../constants";
-import { refreshRecipeList, selectRecipeList } from "../../redux/recipe-list";
+import { refreshRecipeList, selectRecipeList } from "../../redux/recipe";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 import { DeleteOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import { Recipe } from "../../types/recipe";
 import { BrewLog } from "../../types/brew-log";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
 
 const defaultBrewLog: BrewLog = {
   name: "New Brew Log Entry",

@@ -11,7 +11,7 @@ import {
 import { BrewingTypes as BT } from "brewing-shared";
 import React, { useEffect, useState } from "react";
 import { setPageIsClean } from "../../../redux/global-modals";
-import { useAppDispatch } from "../../../redux/hooks";
+import { useAppDispatch } from "../../../redux/store";
 import DefaultGrains from "../../../data/default-grains";
 import DefaultHops from "../../../data/default-hops";
 

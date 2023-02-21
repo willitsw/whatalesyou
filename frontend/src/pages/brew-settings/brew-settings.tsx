@@ -20,7 +20,7 @@ import {
   selectBrewSettings,
 } from "../../redux/brew-settings";
 import { setPageIsClean } from "../../redux/global-modals";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import {
   brewSettingsToMetric,
   brewSettingsToImperial,

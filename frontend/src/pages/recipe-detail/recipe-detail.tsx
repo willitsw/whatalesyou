@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Content from "../../components/content/content";
-import { v4 as uuid } from "uuid";
 import { getRecipeById } from "../../utils/api-calls";
 import {
   Form,
@@ -14,12 +13,11 @@ import {
   Row,
   Tabs,
 } from "antd";
-import { useAppSelector, useAppDispatch } from "../../redux/hooks";
 import {
   processCreateUpdateRecipe,
   selectCurrentRecipe,
   setCurrentRecipe,
-} from "../../redux/recipe-list";
+} from "../../redux/recipe";
 import { getStats } from "../../utils/beer-math";
 import GeneralInfo from "./general/general-info";
 import StatsSection from "./statistics/stats";
@@ -30,10 +28,11 @@ import React from "react";
 import Ingredients from "./ingredients/ingredients";
 import { useAnalytics } from "../../utils/analytics";
 import dayjs from "dayjs";
-import { Recipe } from "../../types/recipe";
+import { Recipe, RecipeDetailed } from "../../types/recipe";
 import { Stats } from "../../types/stats";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 
-const defaultRecipe: Recipe = {
+const defaultRecipe: RecipeDetailed = {
   name: "New Recipe",
   description: "",
   author: "",
@@ -45,6 +44,11 @@ const defaultRecipe: Recipe = {
   efficiency: 70,
   created_at: dayjs().toISOString(),
   updated_at: dayjs().toISOString(),
+  chemistry: [],
+  cultures: [],
+  fermentables: [],
+  hops: [],
+  non_fermentables: [],
 };
 
 const defaultStats: Stats = {
@@ -60,7 +64,7 @@ const defaultStats: Stats = {
 
 const RecipeDetailPage = () => {
   const brewSettings = useAppSelector(selectBrewSettings);
-  const [form] = Form.useForm<Recipe>();
+  const [form] = Form.useForm<RecipeDetailed>();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -76,7 +80,7 @@ const RecipeDetailPage = () => {
 
   useEffect(() => {
     const onComponentLoad = async () => {
-      let workingRecipe: Recipe;
+      let workingRecipe: RecipeDetailed;
       if (location.pathname.includes("/recipes/duplicate") && id) {
         workingRecipe = await getRecipeById(id);
         workingRecipe.name = `Copy of ${workingRecipe.name}`;
@@ -108,8 +112,8 @@ const RecipeDetailPage = () => {
     );
   };
 
-  const handleSave = (recipeForm: Recipe) => {
-    const newRecipe: Recipe = {
+  const handleSave = (recipeForm: RecipeDetailed) => {
+    const newRecipe: RecipeDetailed = {
       ...recipeForm,
       id: recipe?.id ?? 0,
       // userId: brewSettings.id ?? "",
@@ -164,7 +168,7 @@ const RecipeDetailPage = () => {
   };
 
   const updateStats = (newIngredients: any[] = null) => {
-    const workingRecipe: Recipe = form.getFieldsValue();
+    const workingRecipe: RecipeDetailed = form.getFieldsValue();
     if (newIngredients !== null) {
       // workingRecipe.ingredients = newIngredients;
     }
@@ -178,7 +182,6 @@ const RecipeDetailPage = () => {
       </Tabs.TabPane>
       <Tabs.TabPane tab="Ingredients" key="2">
         <Ingredients
-          ingredients={ingredients}
           measurementType={form.getFieldValue("measurement_type")}
           setIngredients={handleSetIngredients}
         />

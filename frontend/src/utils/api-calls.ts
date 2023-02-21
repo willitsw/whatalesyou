@@ -1,7 +1,7 @@
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
 import { BrewLog, BrewLogListResponse } from "../types/brew-log";
 import { BrewSettings } from "../types/brew-settings";
-import { Recipe, RecipeListResponse } from "../types/recipe";
+import { Recipe, RecipeDetailed, RecipeListResponse } from "../types/recipe";
 import {
   CreateUserRequest,
   TokenRequest,
@@ -16,7 +16,9 @@ export const getRecipesByUser = async (): Promise<RecipeListResponse> => {
   return await makeRequest("/recipes/", "GET");
 };
 
-export const getRecipeById = async (recipeId: string): Promise<Recipe> => {
+export const getRecipeById = async (
+  recipeId: string
+): Promise<RecipeDetailed> => {
   return await makeRequest(`/recipes/${recipeId}`, "GET");
 };
 
@@ -58,7 +60,9 @@ export const deleteBrewLog = async (brewLogId: number): Promise<void> => {
   return await makeRequest(`/brew-logs/${brewLogId}`, "DELETE");
 };
 
-export const createUpdateBrewLog = async (brewLog: BrewLog): Promise<BrewLog> => {
+export const createUpdateBrewLog = async (
+  brewLog: BrewLog
+): Promise<BrewLog> => {
   return await makeRequest("/brew-logs", "POST", brewLog);
 };
 

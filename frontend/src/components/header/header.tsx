@@ -11,7 +11,7 @@ import {
   MenuProps,
 } from "antd";
 import beerIcon from "./beer-icon.png";
-import { useAppSelector, useAppDispatch } from "../../redux/hooks";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
 import {
   logoutUser,
   selectCurrentUser,

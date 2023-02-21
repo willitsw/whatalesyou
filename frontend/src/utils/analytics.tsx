@@ -3,7 +3,7 @@ import ReactGA from "react-ga4";
 import { useLocation } from "react-router-dom";
 import constants from "../constants";
 import { selectBrewSettings } from "../redux/brew-settings";
-import { useAppSelector } from "../redux/hooks";
+import { useAppSelector } from "../redux/store";
 import { selectCurrentUser } from "../redux/user";
 
 interface AnalyticsProviderProps {

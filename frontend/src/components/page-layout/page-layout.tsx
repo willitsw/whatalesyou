@@ -1,10 +1,10 @@
 import { Layout } from "antd";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "../../pages/home/home";
-import RecipeDetailPage from "../../pages/recipe-detail/ingredients";
+import RecipeDetailPage from "../../pages/recipe-detail/recipe-detail";
 import RecipeListPage from "../../pages/recipe-list/recipe-list";
 import BrewSettingsPage from "../../pages/brew-settings/brew-settings";
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { loadUserData, userIsAuthenticated } from "../../redux/user";
 import Footer from "../footer/footer";
 import Header from "../header/header";

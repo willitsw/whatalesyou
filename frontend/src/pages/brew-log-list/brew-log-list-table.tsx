@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tooltip } from "antd";
-import { useAppSelector, useAppDispatch } from "../../redux/hooks";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
 import { processDeleteBrewLog, refreshBrewLogList } from "../../redux/brew-log";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { Recipe, RecipeListResponse } from "../types/recipe";
+import { Recipe, RecipeDetailed, RecipeListResponse } from "../types/recipe";
 import {
   createUpdateRecipe,
   deleteRecipe,
@@ -13,7 +13,7 @@ export interface RecipeState {
   nextPage: string;
   prevPage: string;
   recipeList: Recipe[];
-  currentRecipe: Recipe;
+  currentRecipe: RecipeDetailed;
 }
 
 const initialState: RecipeState = {
@@ -47,7 +47,7 @@ export const processDeleteRecipe = createAsyncThunk(
 
 export const processCreateUpdateRecipe = createAsyncThunk(
   "recipes/createUpdateRecipe",
-  async (recipe: Recipe, { getState, dispatch }) => {
+  async (recipe: RecipeDetailed, { getState, dispatch }) => {
     await createUpdateRecipe(recipe);
     const state = getState() as RootState;
     const newRecipeList: Recipe[] = deepCloneObject(state.recipes.recipeList);
@@ -81,7 +81,7 @@ export const recipeSlice = createSlice({
       state.recipeList = action.payload;
       return state;
     },
-    setCurrentRecipe: (state, action: { payload: Recipe }) => {
+    setCurrentRecipe: (state, action: { payload: RecipeDetailed }) => {
       state.currentRecipe = action.payload;
       return state;
     },
@@ -94,5 +94,42 @@ export const { setRecipeList, setCurrentRecipe, setRecipeListResponse } =
 export const selectRecipeList = (state: RootState) => state.recipes.recipeList;
 export const selectCurrentRecipe = (state: RootState) =>
   state.recipes.currentRecipe;
+
+export const selectSortedIngredients = (state: RootState) => {
+  const sortedIngredients = {
+    strikewater: [],
+    mash: [],
+    boil: [],
+    fermentor: [],
+    bottle: [],
+  };
+
+  state.recipes.currentRecipe.hops.forEach((hop) =>
+    sortedIngredients[hop.step].push({ ...hop, ingredient_type: "hop" })
+  );
+  state.recipes.currentRecipe.fermentables.forEach((fermentable) =>
+    sortedIngredients[fermentable.step].push({
+      ...fermentable,
+      ingredient_type: "fermentable",
+    })
+  );
+  state.recipes.currentRecipe.cultures.forEach((culture) =>
+    sortedIngredients[culture.step].push({
+      ...culture,
+      ingredient_type: "culture",
+    })
+  );
+  state.recipes.currentRecipe.non_fermentables.forEach((non_fermentable) =>
+    sortedIngredients[non_fermentable.step].push({
+      ...non_fermentable,
+      ingredient_type: "non_fermentable",
+    })
+  );
+  state.recipes.currentRecipe.chemistry.forEach((chem) =>
+    sortedIngredients[chem.step].push({ ...chem, ingredient_type: "chemistry" })
+  );
+
+  return sortedIngredients;
+};
 
 export default recipeSlice.reducer;

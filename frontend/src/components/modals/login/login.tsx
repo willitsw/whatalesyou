@@ -8,7 +8,7 @@ import {
   selectShowLoginModal,
   setShowLoginModal,
 } from "../../../redux/global-modals";
-import { useAppSelector, useAppDispatch } from "../../../redux/hooks";
+import { useAppSelector, useAppDispatch } from "../../../redux/store";
 import React from "react";
 import { useAnalytics } from "../../../utils/analytics";
 import { createNewUser, loginUser } from "../../../redux/user";

@@ -11,7 +11,6 @@ import {
   Modal,
 } from "antd";
 import React, { useState } from "react";
-import { BrewingTypes as BT, RecipeUtils } from "brewing-shared";
 import hop from "./hop.png";
 import chemical from "./chemical.png";
 import grain from "./grain.png";
@@ -20,10 +19,13 @@ import yeast from "./yeast.png";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import IngredientModal from "./ingredient-modal";
 import { v4 as uuid } from "uuid";
+import { useAppSelector } from "../../../redux/store";
+import { selectSortedIngredients } from "../../../redux/recipe";
+import { MeasurementType } from "../../../types/shared";
+import { Culture, Fermentable, Hop, Ingredient } from "../../../types/recipe";
 
 interface IngredientsProps {
-  measurementType: BT.MeasurementType;
-  ingredients: BT.ValidIngredient[];
+  measurementType: MeasurementType;
   setIngredients: (values: any) => void;
 }
 
@@ -35,70 +37,65 @@ const ingredientIcons = {
   Chemistry: chemical,
 };
 
-const Ingredients = ({
-  measurementType,
-  ingredients,
-  setIngredients,
-}: IngredientsProps) => {
+const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
   const [selectedIngredientId, setSelectedIngredientId] =
     useState<string>(null);
   const [ingredientToDelete, setIngredientToDelete] = useState<string>(null);
 
-  const sortedIngredients = RecipeUtils.sortIngredientsByStep(ingredients);
+  const sortedIngredients = useAppSelector(selectSortedIngredients);
 
   const steps = [
     {
       title: "Strike Water Additions",
       step: "StrikeWater",
-      items: sortedIngredients.StrikeWater,
+      items: sortedIngredients.strikewater,
     },
     {
       title: "Mash Additions",
       step: "Mash",
-      items: sortedIngredients.Mash,
+      items: sortedIngredients.mash,
     },
     {
       title: "Boil Additions",
       step: "Boil",
-      items: sortedIngredients.Boil,
+      items: sortedIngredients.boil,
     },
     {
       title: "Fermentor Additions",
       step: "Fermentor",
-      items: sortedIngredients.Fermentor,
+      items: sortedIngredients.fermentor,
     },
     {
       title: "Packaging Additions",
       step: "Bottle",
-      items: sortedIngredients.Bottle,
+      items: sortedIngredients.bottle,
     },
   ];
 
-  const handleUpdateRecipe = (ingredient: BT.ValidIngredient) => {
-    const ingredientToUpdate = ingredients.find(
-      ({ id }) => selectedIngredientId === id
-    );
-    ingredient.id = ingredientToUpdate?.id ?? uuid();
-    const newIngredients = [...ingredients];
-    const ingredientIndexToReplace = newIngredients.findIndex(
-      ({ id }) => id === ingredient.id
-    );
-    if (ingredientIndexToReplace !== -1) {
-      newIngredients.splice(ingredientIndexToReplace, 1, ingredient);
-    } else {
-      newIngredients.push(ingredient);
-    }
-    setIngredients(newIngredients);
-    setSelectedIngredientId(null);
+  const handleUpdateRecipe = (ingredient: Ingredient) => {
+    // const ingredientToUpdate = ingredients.find(
+    //   ({ id }) => selectedIngredientId === id
+    // );
+    // ingredient.id = ingredientToUpdate?.id ?? uuid();
+    // const newIngredients = [...ingredients];
+    // const ingredientIndexToReplace = newIngredients.findIndex(
+    //   ({ id }) => id === ingredient.id
+    // );
+    // if (ingredientIndexToReplace !== -1) {
+    //   newIngredients.splice(ingredientIndexToReplace, 1, ingredient);
+    // } else {
+    //   newIngredients.push(ingredient);
+    // }
+    // setIngredients(newIngredients);
+    // setSelectedIngredientId(null);
   };
 
   const handleDeleteClick = () => {
-    const newRawIngredients = [...ingredients].filter(
-      (ingredient) => ingredient.id !== ingredientToDelete
-    );
-    setIngredients(newRawIngredients);
-
-    setIngredientToDelete(null);
+    // const newRawIngredients = [...ingredients].filter(
+    //   (ingredient) => ingredient.id !== ingredientToDelete
+    // );
+    // setIngredients(newRawIngredients);
+    // setIngredientToDelete(null);
   };
 
   const formatListTitle = (text: string, step: string) => (
@@ -119,12 +116,12 @@ const Ingredients = ({
     </div>
   );
 
-  const getTiming = (step: BT.Ingredient) => {
-    if (step.step === "Boil") {
+  const getTiming = (step: Ingredient) => {
+    if (step.step === "boil") {
       return (
         <Descriptions.Item label="Timing">{step.timing} min</Descriptions.Item>
       );
-    } else if (step.step === "Fermentor") {
+    } else if (step.step === "fermentor") {
       return (
         <Descriptions.Item label="Timing">{step.timing} days</Descriptions.Item>
       );
@@ -132,58 +129,61 @@ const Ingredients = ({
     return null;
   };
 
-  const getTypeSpecificDetails = (step: any) => {
-    switch (step.type) {
-      case "Chemistry":
+  const getTypeSpecificDetails = (step: Ingredient) => {
+    switch (step.ingredient_type) {
+      case "chemistry":
         return (
-          <Descriptions.Item label="Amount">{`${step.amount} ${step.amountType}`}</Descriptions.Item>
+          <Descriptions.Item label="Amount">{`${step.amount} ${step.amount_type}`}</Descriptions.Item>
         );
-      case "Fermentable":
+      case "fermentable":
+        const fermentable = { ...step } as Fermentable;
         return (
           <>
-            <Descriptions.Item label="Amount">{`${step.amount} ${step.amountType}`}</Descriptions.Item>
+            <Descriptions.Item label="Amount">{`${fermentable.amount} ${fermentable.amount_type}`}</Descriptions.Item>
             <Descriptions.Item label="Lovibond">
-              {step.lovibond}
+              {fermentable.lovibond}
             </Descriptions.Item>
             <Descriptions.Item label="Fermentable Type">
-              {step.form}
+              {fermentable.type}
             </Descriptions.Item>
             <Descriptions.Item label="Gravity">
-              {step.potential}
+              {fermentable.potential}
             </Descriptions.Item>
           </>
         );
-      case "Hop":
+      case "hop":
+        const hop = { ...step } as Hop;
         return (
           <>
-            <Descriptions.Item label="Amount">{`${step.amount} ${step.amountType}`}</Descriptions.Item>
+            <Descriptions.Item label="Amount">{`${hop.amount} ${hop.amount_type}`}</Descriptions.Item>
             <Descriptions.Item label="Alpha Acid">
-              {step.alphaAcid}
+              {hop.alpha_acid}
             </Descriptions.Item>
           </>
         );
-      case "Culture":
+      case "culture":
+        const culture = { ...step } as Culture;
         return (
           <>
-            <Descriptions.Item label="Amount">{`${step.amount} ${step.amountType}`}</Descriptions.Item>
+            <Descriptions.Item label="Amount">{`${culture.amount} ${culture.amount_type}`}</Descriptions.Item>
             <Descriptions.Item label="Attenuation">
-              {step.attenuation}%
+              {culture.attenuation}%
             </Descriptions.Item>
             <Descriptions.Item label="Yeast Type">
-              {step.form}
+              {culture.form}
             </Descriptions.Item>
           </>
         );
-      case "Misc":
+      case "non_fermentable":
         return (
           <>
-            <Descriptions.Item label="Amount">{`${step.amount} ${step.amountType}`}</Descriptions.Item>
+            <Descriptions.Item label="Amount">{`${step.amount} ${step.amount_type}`}</Descriptions.Item>
           </>
         );
     }
   };
 
-  const getDetails = (item: BT.Ingredient) => {
+  const getDetails = (item: Ingredient) => {
     return (
       <Descriptions
         title={
@@ -194,14 +194,14 @@ const Ingredients = ({
                 <Button
                   shape="circle"
                   icon={<EditOutlined />}
-                  onClick={() => setSelectedIngredientId(item.id)}
+                  // onClick={() => setSelectedIngredientId(item.id)}
                 />
               </Tooltip>
               <Tooltip title="Delete">
                 <Button
                   shape="circle"
                   icon={<DeleteOutlined />}
-                  onClick={() => setIngredientToDelete(item.id)}
+                  // onClick={() => setIngredientToDelete(item.id)}
                 />
               </Tooltip>
             </Space>
@@ -226,10 +226,10 @@ const Ingredients = ({
               header={formatListTitle(title, step)}
               itemLayout="horizontal"
               dataSource={items}
-              renderItem={(item: BT.Ingredient) => (
+              renderItem={(item: Ingredient) => (
                 <List.Item>
                   <List.Item.Meta
-                    avatar={<Avatar src={ingredientIcons[item.type]} />}
+                    // avatar={<Avatar src={ingredientIcons[item.type]} />}
                     description={getDetails(item)}
                   />
                 </List.Item>
@@ -240,13 +240,13 @@ const Ingredients = ({
         );
       })}
       {/* {selectedIngredientId && ( */}
-      <IngredientModal
+      {/* <IngredientModal
         handleCancel={() => setSelectedIngredientId(null)}
         ingredientId={selectedIngredientId}
         ingredientList={ingredients}
         updateRecipe={handleUpdateRecipe}
         measurementType={measurementType}
-      />
+      /> */}
 
       <Modal
         title="Delete Ingredient?"

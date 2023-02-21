@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tooltip } from "antd";
-import { useAppSelector, useAppDispatch } from "../../redux/hooks";
-import {
-  processDeleteRecipe,
-  refreshRecipeList,
-} from "../../redux/recipe-list";
+import { useAppSelector, useAppDispatch } from "../../redux/store";
+import { processDeleteRecipe, refreshRecipeList } from "../../redux/recipe";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 
 import { Breakpoint } from "antd/lib/_util/responsiveObserver";

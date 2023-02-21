@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import RecipesReducer from "./recipe-list";
+import RecipesReducer from "./recipe";
 import UserReducer from "./user";
 import BrewSettingsReducer from "./brew-settings";
 import GlobalModalsReducer from "./global-modals";
