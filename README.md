@@ -20,3 +20,11 @@ export PORT=8000
 - exec into docker container: `docker-compose exec backend python backend/manage.py blah blah`
 - enter postgres container: `docker-compose exec db psql -U postgres -W postgres` (password also postgres)
 - see docker containers: `docker ps`
+
+# Delete and recreate DB
+
+- `docker-compose exec db psql -U postgres -W postgres`
+- `DROP SCHEMA public CASCADE;`
+- `CREATE SCHEMA public;`
+- `\q` (to quit)
+- `docker-compose exec backend python backend/manage.py migrate`

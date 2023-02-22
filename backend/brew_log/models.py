@@ -1,6 +1,7 @@
 from django.db import models
 
 from recipes.models import Recipe
+from shared.models import WhatAlesYouBaseModel
 from user.models import User
 
 
@@ -9,7 +10,7 @@ class BrewLogStatuses(models.TextChoices):
     Complete = "complete"
 
 
-class BrewLog(models.Model):
+class BrewLog(WhatAlesYouBaseModel):
     name = models.CharField(max_length=200)
     batch_number = models.IntegerField(blank=True, null=True)
     status = models.CharField(
@@ -43,7 +44,7 @@ class BrewLog(models.Model):
         )
 
 
-class GravityReading(models.Model):
+class GravityReading(WhatAlesYouBaseModel):
     notes = models.CharField(max_length=200)
     gravity = models.FloatField()
     date = models.DateTimeField(auto_now=True)

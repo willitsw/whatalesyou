@@ -8,7 +8,7 @@ import {
 } from "./shared";
 
 export interface Recipe {
-  id: number;
+  id: string;
   name: string;
   type: RecipeTypes;
   description: string;
@@ -34,19 +34,14 @@ export interface RecipeDetailed extends Recipe {
 }
 
 export interface Ingredient {
-  id: number;
+  id: string;
   name: string;
   step: Step;
   timing: number;
   notes: string;
   amount: number;
   amount_type: IngredientAmountType;
-  ingredient_type?:
-    | "fermentable"
-    | "non_fermentable"
-    | "culture"
-    | "hop"
-    | "chemistry";
+  ingredient_type?: IngredientType;
 }
 
 export interface Hop extends Ingredient {
@@ -61,9 +56,37 @@ export interface Fermentable extends Ingredient {
 
 export interface Chemistry extends Ingredient {}
 
+export type CultureForm = "liquid" | "dry";
 export interface Culture extends Ingredient {
   attenuation: number;
-  form: "liquid" | "dry";
+  form: CultureForm;
 }
 
+export const CultureFormLookup: Record<CultureForm, string> = {
+  liquid: "Liquid",
+  dry: "Dry",
+};
+
 export interface NonFermentable extends Ingredient {}
+
+// export type ValidIngredient =
+//   | Hop
+//   | Fermentable
+//   | Chemistry
+//   | NonFermentable
+//   | Culture;
+
+export type IngredientType =
+  | "hops"
+  | "cultures"
+  | "fermentables"
+  | "non_fermentables"
+  | "chemistry";
+
+export const IngredientTypeLookup: Record<IngredientType, string> = {
+  hops: "Hops",
+  cultures: "Cultures",
+  fermentables: "Fermentables",
+  non_fermentables: "Non Fermentables",
+  chemistry: "Chemistry",
+};

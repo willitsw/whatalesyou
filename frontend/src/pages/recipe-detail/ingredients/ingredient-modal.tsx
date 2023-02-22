@@ -8,19 +8,31 @@ import {
   Row,
   Select,
 } from "antd";
-import { BrewingTypes as BT } from "brewing-shared";
 import React, { useEffect, useState } from "react";
 import { setPageIsClean } from "../../../redux/global-modals";
-import { useAppDispatch } from "../../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import DefaultGrains from "../../../data/default-grains";
 import DefaultHops from "../../../data/default-hops";
+import {
+  Fermentable,
+  Hop,
+  Ingredient,
+  IngredientType,
+  IngredientTypeLookup,
+  // ValidIngredient,
+} from "../../../types/recipe";
+import { selectIngredientList } from "../../../redux/recipe";
+import {
+  FermentableTypeLookup,
+  MeasurementType,
+  Step,
+  StepLookup,
+} from "../../../types/shared";
 
 interface IngredientModalProps {
-  ingredientId: string;
-  ingredientList: BT.ValidIngredient[];
-  updateRecipe: (ingredient: BT.ValidIngredient) => void;
+  ingredientId: any;
   handleCancel: () => void;
-  measurementType: BT.MeasurementType;
+  measurementType: MeasurementType;
 }
 
 const grainOptions = DefaultGrains.map((grain) => {
@@ -37,15 +49,14 @@ const hopOptions = DefaultHops.map((hop) => {
 
 const IngredientModal = ({
   ingredientId,
-  ingredientList,
-  updateRecipe,
   handleCancel,
   measurementType,
 }: IngredientModalProps) => {
-  const [form] = Form.useForm<BT.ValidIngredient>();
+  const [form] = Form.useForm<Ingredient>();
   const dispatch = useAppDispatch();
-  const [type, setType] = useState<BT.IngredientType>(null);
-  const [step, setStep] = useState<BT.Step>(null);
+  const [type, setType] = useState<IngredientType>(null);
+  const [step, setStep] = useState<Step>(null);
+  const ingredientList = useAppSelector(selectIngredientList);
 
   useEffect(() => {
     form.resetFields();
@@ -54,25 +65,20 @@ const IngredientModal = ({
       ({ id }) => ingredientId === id
     );
     if (ingredientToUpdate) {
+      console.log("ingredient to update", ingredientToUpdate);
       form.setFieldsValue(ingredientToUpdate);
-      setType(ingredientToUpdate.type);
+      setType(ingredientToUpdate.ingredient_type);
       setStep(ingredientToUpdate.step);
-    } else if (ingredientId) {
-      form.setFieldsValue({ step: ingredientId as BT.Step });
+    } else {
+      form.setFieldsValue({ step: ingredientId as Step });
       setType(null);
-      setStep(ingredientId as BT.Step);
+      setStep(ingredientId as Step);
     }
   }, [ingredientId]);
 
-  // useEffect(() => {
-  //   //form.resetFields();
-  //   //form.setFieldsValue({ step, type });
-  //   //setType(null);
-  // }, [step]);
-
   useEffect(() => {
     form.resetFields();
-    form.setFieldsValue({ step, type });
+    form.setFieldsValue({ step, ingredient_type: type });
   }, [type]);
 
   const handleOnFieldsChange = (changedFields: any) => {
@@ -93,8 +99,8 @@ const IngredientModal = ({
     const defaultHop = DefaultHops.find((hop) => hop.name === selection);
 
     if (defaultHop) {
-      const ingredientToUpdate = form.getFieldsValue() as BT.Hop;
-      ingredientToUpdate.alphaAcid = defaultHop.alpha;
+      const ingredientToUpdate = form.getFieldsValue() as Hop;
+      ingredientToUpdate.alpha_acid = defaultHop.alpha;
       form.setFieldsValue(ingredientToUpdate);
     }
   };
@@ -105,10 +111,10 @@ const IngredientModal = ({
     );
 
     if (defaultGrain) {
-      const ingredientToUpdate = form.getFieldsValue() as BT.Fermentable;
+      const ingredientToUpdate = form.getFieldsValue() as Fermentable;
       ingredientToUpdate.lovibond = defaultGrain.lovibond;
       ingredientToUpdate.potential = defaultGrain.gravity;
-      ingredientToUpdate.form = defaultGrain.type;
+      ingredientToUpdate.type = defaultGrain.type;
       form.setFieldsValue(ingredientToUpdate);
     }
   };
@@ -116,7 +122,7 @@ const IngredientModal = ({
   const handleSaveForm = async () => {
     try {
       const values = await form.validateFields();
-      updateRecipe(values);
+      // updateRecipe(values);
     } catch (e) {
       console.log("Invalid form.", e);
     }
@@ -130,7 +136,7 @@ const IngredientModal = ({
 
   const renderTypeSpecificElements = () => {
     switch (type) {
-      case "Fermentable":
+      case "fermentables":
         return (
           <>
             <Row>
@@ -163,7 +169,7 @@ const IngredientModal = ({
               </Col>
               <Col span={10}>
                 <Form.Item
-                  name="form"
+                  name="type"
                   label="Type"
                   labelCol={{ span: 30, offset: 0 }}
                   rules={[
@@ -175,13 +181,13 @@ const IngredientModal = ({
                   initialValue="grain"
                 >
                   <Select style={{ width: 120 }}>
-                    <Select.Option value="grain">Grain</Select.Option>
-                    <Select.Option value="extract">
-                      Liquid Extract
-                    </Select.Option>
-                    <Select.Option value="dry extract">
-                      Dry Extract
-                    </Select.Option>
+                    {Object.entries(FermentableTypeLookup).map(
+                      ([key, label]) => (
+                        <Select.Option key={key} value={key}>
+                          {label}
+                        </Select.Option>
+                      )
+                    )}
                   </Select>
                 </Form.Item>
               </Col>
@@ -272,7 +278,7 @@ const IngredientModal = ({
             </Row>
           </>
         );
-      case "Hop":
+      case "hops":
         return (
           <>
             <Row>
@@ -371,7 +377,7 @@ const IngredientModal = ({
             </Row>
           </>
         );
-      case "Culture":
+      case "cultures":
         return (
           <>
             <Row>
@@ -467,7 +473,7 @@ const IngredientModal = ({
             </Row>
           </>
         );
-      case "Misc":
+      case "non_fermentables":
         return (
           <Row>
             <Col span={24}>
@@ -519,7 +525,7 @@ const IngredientModal = ({
             </Col>
           </Row>
         );
-      case "Chemistry":
+      case "chemistry":
         return (
           <Row>
             <Col span={24}>
@@ -605,32 +611,32 @@ const IngredientModal = ({
               labelCol={{ span: 30, offset: 0 }}
             >
               <Select style={{ width: 120 }}>
-                <Select.Option value="StrikeWater">Strike Water</Select.Option>
-                <Select.Option value="Mash">Mash</Select.Option>
-                <Select.Option value="Boil">Boil</Select.Option>
-                <Select.Option value="Fermentor">Fermentor</Select.Option>
-                <Select.Option value="Bottle">Package</Select.Option>
+                {Object.entries(StepLookup).map(([key, label]) => (
+                  <Select.Option key={key} value={key}>
+                    {label}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} sm={12} md={8} lg={8} xl={8}>
             <Form.Item
               label="Ingredient Type"
-              name="type"
+              name="ingredient_type"
               rules={[{ required: true, message: "A type is required." }]}
               labelCol={{ span: 30, offset: 0 }}
             >
               <Select style={{ width: 120 }}>
-                <Select.Option value="Fermentable">Fermentable</Select.Option>
-                <Select.Option value="Hop">Hop</Select.Option>
-                <Select.Option value="Culture">Culture</Select.Option>
-                <Select.Option value="Chemistry">Chemistry</Select.Option>
-                <Select.Option value="Misc">Misc.</Select.Option>
+                {Object.entries(IngredientTypeLookup).map(([key, label]) => (
+                  <Select.Option key={key} value={key}>
+                    {label}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
           <Col xs={12} sm={12} md={8} lg={8} xl={8}>
-            {step !== "Bottle" && step !== "StrikeWater" && step !== "Mash" && (
+            {step !== "bottle" && step !== "strikewater" && step !== "mash" && (
               <Form.Item
                 name="timing"
                 label="Time"
@@ -640,7 +646,7 @@ const IngredientModal = ({
                 <InputNumber
                   min={0}
                   style={{ width: 95 }}
-                  addonAfter={step === "Fermentor" ? "days" : "min"}
+                  addonAfter={step === "fermentor" ? "days" : "min"}
                 />
               </Form.Item>
             )}

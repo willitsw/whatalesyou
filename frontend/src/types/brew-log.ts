@@ -1,7 +1,7 @@
 import { PagedResponse } from "./shared";
 
 export interface BrewLog {
-  id: number;
+  id: string;
   gravity_readings: any[];
   name: string;
   batch_number: number;
@@ -16,7 +16,7 @@ export interface BrewLog {
   packaging_notes: string;
   tasting_notes: string;
   other_notes: string;
-  recipe?: number;
+  recipe?: string;
   owner: number;
 }
 

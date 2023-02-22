@@ -37,7 +37,7 @@ const defaultRecipe: RecipeDetailed = {
   description: "",
   author: "",
   batch_size: 5,
-  id: 0,
+  id: "",
   owner: 0,
   type: "all_grain",
   measurement_type: "imperial",
@@ -84,7 +84,7 @@ const RecipeDetailPage = () => {
       if (location.pathname.includes("/recipes/duplicate") && id) {
         workingRecipe = await getRecipeById(id);
         workingRecipe.name = `Copy of ${workingRecipe.name}`;
-        workingRecipe.id = 0;
+        workingRecipe.id = "";
       } else if (location.pathname.includes("/recipes/edit") && id) {
         workingRecipe = await getRecipeById(id);
       } else {
@@ -115,7 +115,7 @@ const RecipeDetailPage = () => {
   const handleSave = (recipeForm: RecipeDetailed) => {
     const newRecipe: RecipeDetailed = {
       ...recipeForm,
-      id: recipe?.id ?? 0,
+      id: recipe?.id ?? "",
       // userId: brewSettings.id ?? "",
       updated_at: dayjs().toISOString(),
       created_at: recipe.created_at,
@@ -161,12 +161,6 @@ const RecipeDetailPage = () => {
     }
   };
 
-  const handleSetIngredients = (newIngredients: any[]) => {
-    dispatch(setPageIsClean(false));
-    updateStats(newIngredients);
-    setIngredients(newIngredients);
-  };
-
   const updateStats = (newIngredients: any[] = null) => {
     const workingRecipe: RecipeDetailed = form.getFieldsValue();
     if (newIngredients !== null) {
@@ -176,20 +170,29 @@ const RecipeDetailPage = () => {
   };
 
   const formSections = (
-    <Tabs defaultActiveKey="1">
-      <Tabs.TabPane tab="General Info" key="1">
-        <GeneralInfo measurementType={form.getFieldValue("measurement_type")} />
-      </Tabs.TabPane>
-      <Tabs.TabPane tab="Ingredients" key="2">
-        <Ingredients
-          measurementType={form.getFieldValue("measurement_type")}
-          setIngredients={handleSetIngredients}
-        />
-      </Tabs.TabPane>
-      {/* <Tabs.TabPane tab="Water Chemistry" key="3">
-        Under construction
-      </Tabs.TabPane> */}
-    </Tabs>
+    <Tabs
+      defaultActiveKey="1"
+      items={[
+        {
+          key: "1",
+          label: "General Info",
+          children: (
+            <GeneralInfo
+              measurementType={form.getFieldValue("measurement_type")}
+            />
+          ),
+        },
+        {
+          key: "2",
+          label: "Ingredients",
+          children: (
+            <Ingredients
+              measurementType={form.getFieldValue("measurement_type")}
+            />
+          ),
+        },
+      ]}
+    />
   );
 
   const getLayout = () => {

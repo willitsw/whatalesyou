@@ -39,7 +39,7 @@ export const refreshBrewLogList = createAsyncThunk(
 
 export const processDeleteBrewLog = createAsyncThunk(
   "brew-log/deleteBrewLog",
-  async (brewLogId: number, { getState, dispatch }) => {
+  async (brewLogId: string, { getState, dispatch }) => {
     await deleteBrewLog(brewLogId);
     const state = getState() as RootState;
     const newBrewLogs = state.brewLogs.brewLogList.filter(

@@ -19,86 +19,114 @@ import yeast from "./yeast.png";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import IngredientModal from "./ingredient-modal";
 import { v4 as uuid } from "uuid";
-import { useAppSelector } from "../../../redux/store";
-import { selectSortedIngredients } from "../../../redux/recipe";
-import { MeasurementType } from "../../../types/shared";
-import { Culture, Fermentable, Hop, Ingredient } from "../../../types/recipe";
+import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import {
+  selectCurrentRecipe,
+  selectIngredientList,
+  selectSortedIngredients,
+  setCurrentRecipe,
+} from "../../../redux/recipe";
+import {
+  FermentableTypeLookup,
+  MeasurementType,
+  Step,
+} from "../../../types/shared";
+import {
+  Culture,
+  CultureFormLookup,
+  Fermentable,
+  Hop,
+  Ingredient,
+  IngredientType,
+  RecipeDetailed,
+} from "../../../types/recipe";
+
+interface StepConfig {
+  title: string;
+  step: Step;
+  items: Ingredient[];
+}
 
 interface IngredientsProps {
   measurementType: MeasurementType;
-  setIngredients: (values: any) => void;
 }
 
-const ingredientIcons = {
-  Culture: yeast,
-  Fermentable: grain,
-  Hop: hop,
-  Misc: ingredient,
-  Chemistry: chemical,
+const ingredientIcons: Record<IngredientType, any> = {
+  cultures: yeast,
+  fermentables: grain,
+  hops: hop,
+  non_fermentables: ingredient,
+  chemistry: chemical,
 };
 
-const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
-  const [selectedIngredientId, setSelectedIngredientId] =
-    useState<string>(null);
-  const [ingredientToDelete, setIngredientToDelete] = useState<string>(null);
+const Ingredients = ({ measurementType }: IngredientsProps) => {
+  const [selectedIngredientId, setSelectedIngredientId] = useState<any>(null);
+  const [ingredientToDelete, setIngredientToDelete] =
+    useState<Ingredient>(null);
 
   const sortedIngredients = useAppSelector(selectSortedIngredients);
+  const ingredientList = useAppSelector(selectIngredientList);
+  const recipe = useAppSelector(selectCurrentRecipe);
 
-  const steps = [
+  const dispatch = useAppDispatch();
+
+  const steps: StepConfig[] = [
     {
       title: "Strike Water Additions",
-      step: "StrikeWater",
+      step: "strikewater",
       items: sortedIngredients.strikewater,
     },
     {
       title: "Mash Additions",
-      step: "Mash",
+      step: "mash",
       items: sortedIngredients.mash,
     },
     {
       title: "Boil Additions",
-      step: "Boil",
+      step: "boil",
       items: sortedIngredients.boil,
     },
     {
       title: "Fermentor Additions",
-      step: "Fermentor",
+      step: "fermentor",
       items: sortedIngredients.fermentor,
     },
     {
       title: "Packaging Additions",
-      step: "Bottle",
+      step: "bottle",
       items: sortedIngredients.bottle,
     },
   ];
 
-  const handleUpdateRecipe = (ingredient: Ingredient) => {
-    // const ingredientToUpdate = ingredients.find(
-    //   ({ id }) => selectedIngredientId === id
-    // );
-    // ingredient.id = ingredientToUpdate?.id ?? uuid();
-    // const newIngredients = [...ingredients];
-    // const ingredientIndexToReplace = newIngredients.findIndex(
-    //   ({ id }) => id === ingredient.id
-    // );
-    // if (ingredientIndexToReplace !== -1) {
-    //   newIngredients.splice(ingredientIndexToReplace, 1, ingredient);
-    // } else {
-    //   newIngredients.push(ingredient);
-    // }
-    // setIngredients(newIngredients);
-    // setSelectedIngredientId(null);
+  const handleUpdateIngredient = (newIngredient: Ingredient) => {
+    const updatedRecipe: RecipeDetailed = { ...recipe };
+    const ingredientIdToUpdate = ingredientList.find(
+      ({ id }) => newIngredient.id === id
+    )?.id;
+
+    if (ingredientIdToUpdate) {
+      const indexToUpdate = updatedRecipe[
+        newIngredient.ingredient_type
+      ].findIndex((oldIngredient) => oldIngredient.id === ingredientIdToUpdate);
+      updatedRecipe[newIngredient.ingredient_type][indexToUpdate] =
+        newIngredient;
+    } else {
+      updatedRecipe[newIngredient.ingredient_type].push(newIngredient as any);
+    }
+
+    dispatch(setCurrentRecipe(updatedRecipe));
   };
 
   const handleDeleteClick = () => {
-    // const newRawIngredients = [...ingredients].filter(
-    //   (ingredient) => ingredient.id !== ingredientToDelete
-    // );
-    // setIngredients(newRawIngredients);
-    // setIngredientToDelete(null);
+    const updatedRecipe: RecipeDetailed = { ...recipe };
+    updatedRecipe[ingredientToDelete.ingredient_type] = updatedRecipe[
+      ingredientToDelete.ingredient_type
+    ].filter((i) => i.id !== ingredientToDelete.id) as any;
+
+    dispatch(setCurrentRecipe(updatedRecipe));
   };
 
-  const formatListTitle = (text: string, step: string) => (
+  const formatListTitle = (text: string, step: Step) => (
     <div
       style={{
         display: "flex",
@@ -135,7 +163,7 @@ const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
         return (
           <Descriptions.Item label="Amount">{`${step.amount} ${step.amount_type}`}</Descriptions.Item>
         );
-      case "fermentable":
+      case "fermentables":
         const fermentable = { ...step } as Fermentable;
         return (
           <>
@@ -144,14 +172,14 @@ const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
               {fermentable.lovibond}
             </Descriptions.Item>
             <Descriptions.Item label="Fermentable Type">
-              {fermentable.type}
+              {FermentableTypeLookup[fermentable.type]}
             </Descriptions.Item>
             <Descriptions.Item label="Gravity">
               {fermentable.potential}
             </Descriptions.Item>
           </>
         );
-      case "hop":
+      case "hops":
         const hop = { ...step } as Hop;
         return (
           <>
@@ -161,7 +189,7 @@ const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
             </Descriptions.Item>
           </>
         );
-      case "culture":
+      case "cultures":
         const culture = { ...step } as Culture;
         return (
           <>
@@ -170,11 +198,11 @@ const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
               {culture.attenuation}%
             </Descriptions.Item>
             <Descriptions.Item label="Yeast Type">
-              {culture.form}
+              {CultureFormLookup[culture.form]}
             </Descriptions.Item>
           </>
         );
-      case "non_fermentable":
+      case "non_fermentables":
         return (
           <>
             <Descriptions.Item label="Amount">{`${step.amount} ${step.amount_type}`}</Descriptions.Item>
@@ -194,14 +222,14 @@ const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
                 <Button
                   shape="circle"
                   icon={<EditOutlined />}
-                  // onClick={() => setSelectedIngredientId(item.id)}
+                  onClick={() => setSelectedIngredientId(item.id)}
                 />
               </Tooltip>
               <Tooltip title="Delete">
                 <Button
                   shape="circle"
                   icon={<DeleteOutlined />}
-                  // onClick={() => setIngredientToDelete(item.id)}
+                  onClick={() => setIngredientToDelete(item)}
                 />
               </Tooltip>
             </Space>
@@ -229,7 +257,9 @@ const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
               renderItem={(item: Ingredient) => (
                 <List.Item>
                   <List.Item.Meta
-                    // avatar={<Avatar src={ingredientIcons[item.type]} />}
+                    avatar={
+                      <Avatar src={ingredientIcons[item.ingredient_type]} />
+                    }
                     description={getDetails(item)}
                   />
                 </List.Item>
@@ -239,14 +269,11 @@ const Ingredients = ({ measurementType, setIngredients }: IngredientsProps) => {
           </div>
         );
       })}
-      {/* {selectedIngredientId && ( */}
-      {/* <IngredientModal
+      <IngredientModal
         handleCancel={() => setSelectedIngredientId(null)}
         ingredientId={selectedIngredientId}
-        ingredientList={ingredients}
-        updateRecipe={handleUpdateRecipe}
         measurementType={measurementType}
-      /> */}
+      />
 
       <Modal
         title="Delete Ingredient?"

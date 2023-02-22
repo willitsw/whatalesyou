@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { Recipe, RecipeDetailed, RecipeListResponse } from "../types/recipe";
+import {
+  Ingredient,
+  Recipe,
+  RecipeDetailed,
+  RecipeListResponse,
+} from "../types/recipe";
 import {
   createUpdateRecipe,
   deleteRecipe,
@@ -29,12 +34,13 @@ export const refreshRecipeList = createAsyncThunk(
   async (_, { dispatch }) => {
     const recipeListResponse = await getRecipesByUser();
     dispatch(setRecipeListResponse(recipeListResponse));
+    dispatch(setRecipeList(recipeListResponse.results));
   }
 );
 
 export const processDeleteRecipe = createAsyncThunk(
   "recipes/deleteRecipe",
-  async (recipeId: number, { getState, dispatch }) => {
+  async (recipeId: string, { getState, dispatch }) => {
     await deleteRecipe(recipeId);
     const state = getState() as RootState;
     const newRecipes = state.recipes.recipeList.filter(
@@ -71,7 +77,6 @@ export const recipeSlice = createSlice({
   initialState,
   reducers: {
     setRecipeListResponse: (state, action: { payload: RecipeListResponse }) => {
-      state.recipeList = action.payload.results;
       state.recipeCount = action.payload.count;
       state.nextPage = action.payload.next;
       state.prevPage = action.payload.previous;
@@ -82,7 +87,21 @@ export const recipeSlice = createSlice({
       return state;
     },
     setCurrentRecipe: (state, action: { payload: RecipeDetailed }) => {
-      state.currentRecipe = action.payload;
+      const currentRecipe: RecipeDetailed = { ...action.payload };
+      currentRecipe.hops.forEach((hop) => (hop.ingredient_type = "hops"));
+      currentRecipe.cultures.forEach(
+        (culture) => (culture.ingredient_type = "cultures")
+      );
+      currentRecipe.fermentables.forEach(
+        (ferm) => (ferm.ingredient_type = "fermentables")
+      );
+      currentRecipe.non_fermentables.forEach(
+        (non_ferm) => (non_ferm.ingredient_type = "non_fermentables")
+      );
+      currentRecipe.chemistry.forEach(
+        (chemistry) => (chemistry.ingredient_type = "chemistry")
+      );
+      state.currentRecipe = currentRecipe;
       return state;
     },
   },
@@ -96,7 +115,13 @@ export const selectCurrentRecipe = (state: RootState) =>
   state.recipes.currentRecipe;
 
 export const selectSortedIngredients = (state: RootState) => {
-  const sortedIngredients = {
+  const sortedIngredients: {
+    strikewater: Ingredient[];
+    mash: Ingredient[];
+    boil: Ingredient[];
+    fermentor: Ingredient[];
+    bottle: Ingredient[];
+  } = {
     strikewater: [],
     mash: [],
     boil: [],
@@ -105,31 +130,30 @@ export const selectSortedIngredients = (state: RootState) => {
   };
 
   state.recipes.currentRecipe.hops.forEach((hop) =>
-    sortedIngredients[hop.step].push({ ...hop, ingredient_type: "hop" })
+    sortedIngredients[hop.step].push(hop)
   );
   state.recipes.currentRecipe.fermentables.forEach((fermentable) =>
-    sortedIngredients[fermentable.step].push({
-      ...fermentable,
-      ingredient_type: "fermentable",
-    })
+    sortedIngredients[fermentable.step].push(fermentable)
   );
   state.recipes.currentRecipe.cultures.forEach((culture) =>
-    sortedIngredients[culture.step].push({
-      ...culture,
-      ingredient_type: "culture",
-    })
+    sortedIngredients[culture.step].push(culture)
   );
   state.recipes.currentRecipe.non_fermentables.forEach((non_fermentable) =>
-    sortedIngredients[non_fermentable.step].push({
-      ...non_fermentable,
-      ingredient_type: "non_fermentable",
-    })
+    sortedIngredients[non_fermentable.step].push(non_fermentable)
   );
   state.recipes.currentRecipe.chemistry.forEach((chem) =>
-    sortedIngredients[chem.step].push({ ...chem, ingredient_type: "chemistry" })
+    sortedIngredients[chem.step].push(chem)
   );
 
   return sortedIngredients;
 };
+
+export const selectIngredientList = (state: RootState): Ingredient[] => [
+  ...state.recipes.currentRecipe.fermentables,
+  ...state.recipes.currentRecipe.hops,
+  ...state.recipes.currentRecipe.cultures,
+  ...state.recipes.currentRecipe.chemistry,
+  ...state.recipes.currentRecipe.non_fermentables,
+];
 
 export default recipeSlice.reducer;

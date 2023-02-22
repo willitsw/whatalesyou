@@ -1,6 +1,18 @@
 export type MeasurementType = "imperial" | "metric";
 
+export const MeasurementTypeLookup: Record<MeasurementType, string> = {
+  imperial: "Imperial",
+  metric: "Metric",
+};
+
 export type RecipeTypes = "other" | "extract" | "partial_mash" | "all_grain";
+
+export const RecipeTypesLookup: Record<RecipeTypes, string> = {
+  other: "Other",
+  extract: "Extract",
+  partial_mash: "Partial Mash",
+  all_grain: "All Grain",
+};
 
 export interface PagedResponse {
   count: number;
@@ -18,12 +30,34 @@ export type FermentableType =
   | "juice"
   | "honey";
 
+export const FermentableTypeLookup: Record<FermentableType, string> = {
+  other: "Other",
+  liquid_extract: "Liquid Extract",
+  dry_extract: "Dry Extract",
+  grain: "Grain",
+  sugar: "Sugar",
+  fruit: "Fruit",
+  juice: "Juice",
+  honey: "Honey",
+};
+
 export type Step = "strikewater" | "mash" | "boil" | "fermentor" | "bottle";
+
+export const StepLookup: Record<Step, string> = {
+  strikewater: "Strike Water",
+  mash: "Mash",
+  boil: "Boil",
+  fermentor: "Fermentor",
+  bottle: "Bottle",
+};
 
 export type IngredientAmountType = "g" | "oz" | "kg" | "lb" | "each";
 
-// class RecipeTypes(models.TextChoices):
-//     Other = "other"
-//     Extract = "extract"
-//     Partial_Mash = "partial_mash"
-//     All_Grain = "all_grain"
+export const IngredientAmountTypeLookup: Record<IngredientAmountType, string> =
+  {
+    g: "g",
+    oz: "oz",
+    kg: "kg",
+    lb: "lb",
+    each: "each",
+  };

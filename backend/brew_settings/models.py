@@ -1,12 +1,12 @@
 from django.db import models
 from django.db.models.signals import post_save
 
-from shared.models import MeasurementTypes
+from shared.models import MeasurementTypes, WhatAlesYouBaseModel
 from user.models import User
 
 
 # Create your models here.
-class BrewSetting(models.Model):
+class BrewSetting(WhatAlesYouBaseModel):
     owner = models.OneToOneField(
         User, related_name="settings", on_delete=models.CASCADE
     )

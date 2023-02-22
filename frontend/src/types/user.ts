@@ -13,11 +13,11 @@ export interface TokenRequest {
 export interface TokenPayload {
   token_type: "access" | "refresh";
   exp: number;
-  user_id: number;
+  user_id: string;
 }
 
 export interface User {
-  id: number;
+  id: string;
   email: string;
   first_name: string;
   last_name: string;

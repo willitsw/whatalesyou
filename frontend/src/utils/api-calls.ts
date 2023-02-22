@@ -22,7 +22,7 @@ export const getRecipeById = async (
   return await makeRequest(`/recipes/${recipeId}`, "GET");
 };
 
-export const deleteRecipe = async (recipeId: number): Promise<void> => {
+export const deleteRecipe = async (recipeId: string): Promise<void> => {
   return await makeRequest(`/recipes/${recipeId}`, "DELETE");
 };
 
@@ -56,7 +56,7 @@ export const getBrewLogById = async (brewLogId: string): Promise<BrewLog> => {
   return await makeRequest(`/brew-logs/${brewLogId}`, "GET");
 };
 
-export const deleteBrewLog = async (brewLogId: number): Promise<void> => {
+export const deleteBrewLog = async (brewLogId: string): Promise<void> => {
   return await makeRequest(`/brew-logs/${brewLogId}`, "DELETE");
 };
 
@@ -97,7 +97,7 @@ export const refreshToken = async (): Promise<void> => {
 
 // USER ENDPOINTS
 
-export const getCurrentUser = async (id: number): Promise<UserResponse> => {
+export const getCurrentUser = async (id: string): Promise<UserResponse> => {
   return await makeRequest(`/users/${id}/`, "GET");
 };
 

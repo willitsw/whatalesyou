@@ -1,6 +1,6 @@
 from django.db import models
 
-from shared.models import MeasurementTypes
+from shared.models import MeasurementTypes, WhatAlesYouBaseModel
 from user.models import User
 
 
@@ -27,7 +27,7 @@ class IngredientAmountTypes(models.TextChoices):
     Each = "each"
 
 
-class Recipe(models.Model):
+class Recipe(WhatAlesYouBaseModel):
     name = models.CharField(max_length=200)
     type = models.CharField(
         max_length=20, choices=RecipeTypes.choices, default=RecipeTypes.All_Grain
@@ -47,12 +47,10 @@ class Recipe(models.Model):
     owner = models.ForeignKey(User, related_name="recipes", on_delete=models.CASCADE)
 
     def __str__(self):
-        return (
-            f"{self.name} - {self.owner.email} - {self.created_at.strftime('%d/%m/%Y')}"
-        )
+        return f"{self.id} {self.name} - {self.owner.email} - {self.created_at.strftime('%d/%m/%Y')}"
 
 
-class IngredientMixin(models.Model):
+class IngredientMixin(WhatAlesYouBaseModel):
     name = models.CharField(max_length=200)
     step = models.CharField(max_length=20, choices=IngredientSteps.choices)
     timing = models.FloatField(blank=True, null=True)
@@ -64,7 +62,7 @@ class IngredientMixin(models.Model):
         abstract = True
 
     def __str__(self):
-        return f"{__name__} {self.name} - {self.amount} {self.amount_type}"
+        return f"{self.id} {self.name} - {self.amount} {self.amount_type}"
 
 
 class FermentableTypes(models.TextChoices):

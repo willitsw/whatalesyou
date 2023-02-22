@@ -11,7 +11,7 @@ interface AnalyticsProviderProps {
 }
 
 interface AnalyticsData {
-  userId: number;
+  userId: string;
   email: string;
   environment: string;
   userAgent: string;
@@ -19,7 +19,7 @@ interface AnalyticsData {
 
 function getDefaultAnalyticsData(): AnalyticsData {
   return {
-    userId: -1,
+    userId: "",
     email: "",
     environment: constants.environment,
     userAgent: window.navigator.userAgent,

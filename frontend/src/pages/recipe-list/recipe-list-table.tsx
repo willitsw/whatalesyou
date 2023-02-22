@@ -18,7 +18,7 @@ import { Recipe } from "../../types/recipe";
 const RecipeListTable = () => {
   const dispatch = useAppDispatch();
   const recipeList = useAppSelector((state) => state.recipes.recipeList);
-  const [idToDelete, setIdToDelete] = useState<number>(null);
+  const [idToDelete, setIdToDelete] = useState<string>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { fireAnalyticsEvent } = useAnalytics();

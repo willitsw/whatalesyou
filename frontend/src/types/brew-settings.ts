@@ -1,7 +1,7 @@
 import { MeasurementType } from "./shared";
 
 export interface BrewSettings {
-  id: number;
+  id: string;
   measurement_type: MeasurementType;
   batch_size: number;
   boil_time: number;

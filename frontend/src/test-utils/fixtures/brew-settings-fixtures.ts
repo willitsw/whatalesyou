@@ -2,7 +2,7 @@ import { BrewSettings } from "../../types/brew-settings";
 
 const getImperialSettings = (): BrewSettings => {
   return {
-    id: 1,
+    id: "1",
     batch_size: 5,
     boil_time: 60,
     brewhouse_efficiency: 70,
@@ -18,7 +18,7 @@ const getImperialSettings = (): BrewSettings => {
 
 const getMetricSettings = (): BrewSettings => {
   return {
-    id: 2,
+    id: "2",
     batch_size: 18.93,
     boil_time: 60,
     brewhouse_efficiency: 70,

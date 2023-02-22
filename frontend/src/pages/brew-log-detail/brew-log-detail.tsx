@@ -43,7 +43,7 @@ import { useAppSelector, useAppDispatch } from "../../redux/store";
 const defaultBrewLog: BrewLog = {
   name: "New Brew Log Entry",
   brew_date: dayjs().toISOString(),
-  id: 1,
+  id: "",
   status: "In Progress",
   owner: 1,
   batch_number: 0,
@@ -119,7 +119,7 @@ const BrewLogDetailPage = () => {
   const handleSave = (brewLogForm: BrewLogForm) => {
     const newBrewLog: BrewLogForm = {
       ...brewLogForm,
-      id: brewLog?.id ?? 0,
+      id: brewLog?.id ?? "",
       // userId: brewSettings.id ?? "",
       brew_date: brewLogForm.workingBrewDate.toISOString(),
       recipe: selectedRecipe.id ?? null,

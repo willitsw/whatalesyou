@@ -16,7 +16,7 @@ import { BrewLog } from "../../types/brew-log";
 const BrewLogListTable = () => {
   const dispatch = useAppDispatch();
   const brewLogList = useAppSelector((state) => state.brewLogs.brewLogList);
-  const [idToDelete, setIdToDelete] = useState<number>(null);
+  const [idToDelete, setIdToDelete] = useState<string>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { fireAnalyticsEvent } = useAnalytics();
