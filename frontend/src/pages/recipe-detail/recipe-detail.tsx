@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Content from "../../components/content/content";
-import {
-  createRecipe,
-  getRecipeById,
-  updateRecipe,
-} from "../../utils/api-calls";
+import { getRecipeById, createUpdateRecipe } from "../../utils/api-calls";
 import {
   Form,
   Button,
@@ -21,18 +17,12 @@ import { getStats } from "../../utils/beer-math";
 import GeneralInfo from "./general/general-info";
 import StatsSection from "./statistics/stats";
 import { setPageIsClean } from "../../redux/global-modals";
-import { gallonsToLiters, litersToGallons } from "../../utils/converters";
 import { selectBrewSettings } from "../../redux/brew-settings";
 import React from "react";
 import Ingredients from "./ingredients/ingredients";
 import { useAnalytics } from "../../utils/analytics";
 import dayjs from "dayjs";
-import {
-  Ingredient,
-  IngredientType,
-  Recipe,
-  RecipeDetailed,
-} from "../../types/recipe";
+import { Ingredient, IngredientType, RecipeDetailed } from "../../types/recipe";
 import { Stats } from "../../types/stats";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { v4 as uuid } from "uuid";
@@ -122,14 +112,7 @@ const RecipeDetailPage = () => {
 
   const handleSave = async () => {
     setLoading(true);
-    if (
-      location.pathname.includes("new") ||
-      location.pathname.includes("duplicate")
-    ) {
-      await createRecipe(recipe);
-    } else {
-      await updateRecipe(recipe);
-    }
+    await createUpdateRecipe(recipe);
     dispatch(setPageIsClean(true));
     setLoading(false);
     message.success(`${recipe.name} has been saved.`);

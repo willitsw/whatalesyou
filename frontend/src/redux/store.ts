@@ -1,5 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import RecipesReducer from "./recipe";
 import UserReducer from "./user";
 import BrewSettingsReducer from "./brew-settings";
 import GlobalModalsReducer from "./global-modals";
@@ -9,7 +8,6 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 export const store = configureStore({
   reducer: {
-    recipes: RecipesReducer,
     user: UserReducer,
     brewSettings: BrewSettingsReducer,
     globalModals: GlobalModalsReducer,

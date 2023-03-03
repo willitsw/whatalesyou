@@ -31,7 +31,6 @@ import {
 import { getBrewLogById, getRecipeById } from "../../utils/api-calls";
 import { setPageIsClean } from "../../redux/global-modals";
 import { DATE_FORMAT } from "../../constants";
-import { refreshRecipeList, selectRecipeList } from "../../redux/recipe";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 import { DeleteOutlined } from "@ant-design/icons";
@@ -71,7 +70,6 @@ const BrewLogDetailPage = () => {
   const dispatch = useAppDispatch();
   const brewLog = useAppSelector(selectCurrentBrewLog);
   const brewLogList = useAppSelector(selectBrewLogList);
-  const recipeList = useAppSelector(selectRecipeList);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [potentialNewId, setPotentialNewId] = useState<string>(null);
@@ -80,9 +78,6 @@ const BrewLogDetailPage = () => {
 
   useEffect(() => {
     const onComponentLoad = async () => {
-      if (recipeList?.length === 0) {
-        dispatch(refreshRecipeList());
-      }
       if (brewLogList?.length === 0) {
         dispatch(refreshBrewLogList());
       }
@@ -364,7 +359,7 @@ const BrewLogDetailPage = () => {
             </Row>
           </Tabs.TabPane>
           <Tabs.TabPane tab="Recipe" key="2">
-            <>
+            {/* <>
               Select an existing recipe:
               <Select
                 showSearch
@@ -404,7 +399,7 @@ const BrewLogDetailPage = () => {
                   "No recipe is selected. Please choose one from the dropdown above."
                 )}
               </div>
-            </>
+            </> */}
           </Tabs.TabPane>
         </Tabs>
         <Affix offsetBottom={10} style={{ float: "right" }}>

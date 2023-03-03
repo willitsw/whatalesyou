@@ -26,12 +26,8 @@ export const deleteRecipe = async (recipeId: string): Promise<void> => {
   return await makeRequest(`/recipes/${recipeId}/`, "DELETE");
 };
 
-export const updateRecipe = async (recipe: Recipe): Promise<Recipe> => {
+export const createUpdateRecipe = async (recipe: Recipe): Promise<Recipe> => {
   return await makeRequest(`/recipes/${recipe.id}/`, "PUT", recipe);
-};
-
-export const createRecipe = async (recipe: Recipe): Promise<Recipe> => {
-  return await makeRequest(`/recipes/`, "POST", recipe);
 };
 
 // BREW SETTINGS ENDPOINTS

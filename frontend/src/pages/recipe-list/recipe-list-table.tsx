@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tooltip } from "antd";
-import { useAppSelector, useAppDispatch } from "../../redux/store";
-import { processDeleteRecipe, refreshRecipeList } from "../../redux/recipe";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 
 import { Breakpoint } from "antd/lib/_util/responsiveObserver";
@@ -14,33 +12,33 @@ import {
 import React from "react";
 import { useAnalytics } from "../../utils/analytics";
 import { Recipe } from "../../types/recipe";
+import { deleteRecipe, getRecipesByUser } from "../../utils/api-calls";
+import { RecipeTypesLookup } from "../../types/shared";
 
 const RecipeListTable = () => {
-  const dispatch = useAppDispatch();
-  const recipeList = useAppSelector((state) => state.recipes.recipeList);
-  const [idToDelete, setIdToDelete] = useState<string>(null);
+  const [recipeList, setRecipeList] = useState<Recipe[]>([]);
+  const [recipeToDelete, setRecipeToDelete] = useState<Recipe>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { fireAnalyticsEvent } = useAnalytics();
 
-  const nameToDelete = idToDelete
-    ? recipeList.find((recipe) => recipe.id === idToDelete)?.name
-    : "";
-
   useEffect(() => {
     const getRecipeList = async () => {
-      dispatch(refreshRecipeList());
+      const recipeResponse = await getRecipesByUser();
+      setRecipeList(recipeResponse.results);
       setLoading(false);
     };
     getRecipeList();
   }, []);
 
   const handleDeleteRecipe = async () => {
-    if (idToDelete) {
-      dispatch(processDeleteRecipe(idToDelete));
-      fireAnalyticsEvent("Recipe Deleted", { recipeId: idToDelete });
-    }
-    setIdToDelete(null);
+    setLoading(true);
+    deleteRecipe(recipeToDelete.id);
+    setRecipeList(
+      recipeList.filter((recipe) => recipe.id !== recipeToDelete.id)
+    );
+    setRecipeToDelete(null);
+    setLoading(false);
   };
 
   const showOnlyDesktop: Breakpoint[] = ["md"];
@@ -65,6 +63,7 @@ const RecipeListTable = () => {
       dataIndex: "type",
       key: "type",
       responsive: showOnlyDesktop,
+      render: (text: string) => RecipeTypesLookup[text],
     },
     {
       title: "Action",
@@ -103,7 +102,11 @@ const RecipeListTable = () => {
               type="primary"
               shape="circle"
               icon={<DeleteOutlined />}
-              onClick={() => setIdToDelete(record.id)}
+              onClick={() =>
+                setRecipeToDelete(
+                  recipeList.find((recipe) => record.id === recipe.id)
+                )
+              }
             />
           </Tooltip>
         </Space>
@@ -136,10 +139,10 @@ const RecipeListTable = () => {
         loading={loading}
       />
       <OkCancelModal
-        onCancel={() => setIdToDelete(null)}
+        onCancel={() => setRecipeToDelete(null)}
         onSubmit={() => handleDeleteRecipe()}
-        showModal={idToDelete !== null}
-        title={`Delete recipe ${nameToDelete}?`}
+        showModal={recipeToDelete !== null}
+        title={`Delete recipe ${recipeToDelete?.name}?`}
       >
         This cannot be undone.
       </OkCancelModal>
