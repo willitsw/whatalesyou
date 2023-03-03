@@ -1,5 +1,5 @@
-import { BrewingTypes as BT } from "brewing-shared";
 import { BrewSettings } from "../types/brew-settings";
+import { Recipe, RecipeDetailed } from "../types/recipe";
 
 export const gallonsToLiters = (gallons: number): number => {
   const rawLiters = gallons * 3.78541;
@@ -41,45 +41,47 @@ export const literKilosToQuartPounds = (literKilos: number) => {
   return parseFloat(rawQuartPounds.toFixed(1));
 };
 
-export const recipeToMetric = (recipe: BT.Recipe): BT.Recipe => {
-  recipe.ingredients.forEach((ingredient) => {
-    if (ingredient.type === "Hop" && ingredient.amountType === "oz") {
-      ingredient.amount = ouncesToGrams(ingredient.amount);
-    } else if (
-      ingredient.type === "Fermentable" &&
-      ingredient.amountType === "lb"
-    ) {
-      ingredient.amount = poundsToKilograms(ingredient.amount);
+export const recipeToMetric = (recipe: RecipeDetailed): RecipeDetailed => {
+  recipe.hops.forEach((hop) => {
+    if (hop.amount_type === "oz") {
+      hop.amount = ouncesToGrams(hop.amount);
+    }
+  });
+
+  recipe.fermentables.forEach((fermentable) => {
+    if (fermentable.amount_type === "lb") {
+      fermentable.amount = poundsToKilograms(fermentable.amount);
     }
   });
 
   return {
     ...recipe,
-    batchSize:
-      recipe.measurementType === "metric"
-        ? recipe.batchSize
-        : gallonsToLiters(recipe.batchSize),
+    batch_size:
+      recipe.measurement_type === "metric"
+        ? recipe.batch_size
+        : gallonsToLiters(recipe.batch_size),
   };
 };
 
-export const recipeToImperial = (recipe: BT.Recipe): BT.Recipe => {
-  recipe.ingredients.forEach((ingredient) => {
-    if (ingredient.type === "Hop" && ingredient.amountType === "g") {
-      ingredient.amount = gramsToOunces(ingredient.amount);
-    } else if (
-      ingredient.type === "Fermentable" &&
-      ingredient.amountType === "kg"
-    ) {
-      ingredient.amount = kilogramsToPounds(ingredient.amount);
+export const recipeToImperial = (recipe: RecipeDetailed): RecipeDetailed => {
+  recipe.hops.forEach((hop) => {
+    if (hop.amount_type === "g") {
+      hop.amount = gramsToOunces(hop.amount);
+    }
+  });
+
+  recipe.fermentables.forEach((fermentable) => {
+    if (fermentable.amount_type === "kg") {
+      fermentable.amount = kilogramsToPounds(fermentable.amount);
     }
   });
 
   return {
     ...recipe,
-    batchSize:
-      recipe.measurementType === "imperial"
-        ? recipe.batchSize
-        : litersToGallons(recipe.batchSize),
+    batch_size:
+      recipe.measurement_type === "imperial"
+        ? recipe.batch_size
+        : litersToGallons(recipe.batch_size),
   };
 };
 

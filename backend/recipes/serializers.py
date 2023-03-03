@@ -1,3 +1,4 @@
+from drf_writable_nested.serializers import WritableNestedModelSerializer
 from rest_framework import serializers
 
 from recipes.models import Chemistry, Culture, Fermentable, Hop, NonFermentable, Recipe
@@ -39,7 +40,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class RecipeDetailSerializer(serializers.ModelSerializer):
+class RecipeDetailSerializer(
+    WritableNestedModelSerializer, serializers.ModelSerializer
+):
     fermentables = FermentableSerializer(many=True)
     chemistry = ChemistrySerializer(many=True)
     hops = HopSerializer(many=True)

@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Content from "../../components/content/content";
-import { getRecipeById } from "../../utils/api-calls";
+import {
+  createRecipe,
+  getRecipeById,
+  updateRecipe,
+} from "../../utils/api-calls";
 import {
   Form,
   Button,
@@ -13,11 +17,6 @@ import {
   Row,
   Tabs,
 } from "antd";
-import {
-  processCreateUpdateRecipe,
-  selectCurrentRecipe,
-  setCurrentRecipe,
-} from "../../redux/recipe";
 import { getStats } from "../../utils/beer-math";
 import GeneralInfo from "./general/general-info";
 import StatsSection from "./statistics/stats";
@@ -28,17 +27,24 @@ import React from "react";
 import Ingredients from "./ingredients/ingredients";
 import { useAnalytics } from "../../utils/analytics";
 import dayjs from "dayjs";
-import { Recipe, RecipeDetailed } from "../../types/recipe";
+import {
+  Ingredient,
+  IngredientType,
+  Recipe,
+  RecipeDetailed,
+} from "../../types/recipe";
 import { Stats } from "../../types/stats";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { v4 as uuid } from "uuid";
+import { selectCurrentUser } from "../../redux/user";
 
-const defaultRecipe: RecipeDetailed = {
+const defaultRecipe = {
+  id: uuid(),
   name: "New Recipe",
   description: "",
   author: "",
   batch_size: 5,
-  id: "",
-  owner: 0,
+  owner: "",
   type: "all_grain",
   measurement_type: "imperial",
   efficiency: 70,
@@ -49,7 +55,7 @@ const defaultRecipe: RecipeDetailed = {
   fermentables: [],
   hops: [],
   non_fermentables: [],
-};
+} as RecipeDetailed;
 
 const defaultStats: Stats = {
   abv: 0,
@@ -64,14 +70,13 @@ const defaultStats: Stats = {
 
 const RecipeDetailPage = () => {
   const brewSettings = useAppSelector(selectBrewSettings);
-  const [form] = Form.useForm<RecipeDetailed>();
+  const user = useAppSelector(selectCurrentUser);
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const recipe = useAppSelector(selectCurrentRecipe);
+  const [recipe, setRecipe] = useState<RecipeDetailed>();
   const [stats, setStats] = useState<Stats>(defaultStats);
-  const [ingredients, setIngredients] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDesktop] = useState<boolean>(
     window.matchMedia("(min-width: 1200px)").matches
@@ -83,28 +88,31 @@ const RecipeDetailPage = () => {
       let workingRecipe: RecipeDetailed;
       if (location.pathname.includes("/recipes/duplicate") && id) {
         workingRecipe = await getRecipeById(id);
+        workingRecipe.id = uuid();
         workingRecipe.name = `Copy of ${workingRecipe.name}`;
-        workingRecipe.id = "";
       } else if (location.pathname.includes("/recipes/edit") && id) {
         workingRecipe = await getRecipeById(id);
       } else {
         workingRecipe = { ...defaultRecipe };
 
-        // workingRecipe.author = brewSettings.displayName;
+        workingRecipe.owner = user.id;
         workingRecipe.batch_size = brewSettings.batch_size;
         workingRecipe.efficiency = brewSettings.brewhouse_efficiency;
         workingRecipe.measurement_type = brewSettings.measurement_type;
       }
-
-      // setStats(getStats(workingRecipe, brewSettings));
-      // setIngredients(workingRecipe.ingredients);
-
-      form.setFieldsValue(workingRecipe);
-      dispatch(setCurrentRecipe(workingRecipe));
+      setRecipe(workingRecipe);
       setLoading(false);
     };
-    onComponentLoad();
-  }, []);
+    if (brewSettings && user) {
+      onComponentLoad();
+    }
+  }, [location.pathname, brewSettings, user]);
+
+  useEffect(() => {
+    if (recipe && brewSettings) {
+      setStats(getStats(recipe, brewSettings));
+    }
+  }, [recipe, brewSettings]);
 
   const handleSaveFailed = () => {
     message.error(
@@ -112,17 +120,19 @@ const RecipeDetailPage = () => {
     );
   };
 
-  const handleSave = (recipeForm: RecipeDetailed) => {
-    const newRecipe: RecipeDetailed = {
-      ...recipeForm,
-      id: recipe?.id ?? "",
-      // userId: brewSettings.id ?? "",
-      updated_at: dayjs().toISOString(),
-      created_at: recipe.created_at,
-    };
-    dispatch(processCreateUpdateRecipe(newRecipe));
+  const handleSave = async () => {
+    setLoading(true);
+    if (
+      location.pathname.includes("new") ||
+      location.pathname.includes("duplicate")
+    ) {
+      await createRecipe(recipe);
+    } else {
+      await updateRecipe(recipe);
+    }
     dispatch(setPageIsClean(true));
-    message.success(`${newRecipe.name} has been saved.`);
+    setLoading(false);
+    message.success(`${recipe.name} has been saved.`);
     fireAnalyticsEvent("Recipe Saved", { recipeId: recipe.id });
   };
 
@@ -130,72 +140,65 @@ const RecipeDetailPage = () => {
     navigate("/recipes/list/");
   };
 
-  const handleOnFieldsChange = (changedFields: any) => {
-    if (changedFields.length === 0) {
-      return null;
-    }
-
-    if (changedFields[0].name[0] === "measurementType") {
-      // recipe type was changed, lets convert the recipe
-      if (changedFields[0].value === "metric") {
-        const metricBatchSize: number = gallonsToLiters(
-          form.getFieldValue("batchSize")
-        );
-        form.setFieldsValue({ batch_size: metricBatchSize });
-      } else {
-        const imperialBatchSize: number = litersToGallons(
-          form.getFieldValue("batchSize")
-        );
-        form.setFieldsValue({ batch_size: imperialBatchSize });
-      }
-      updateStats(ingredients);
-    }
-  };
-
-  const handleOnValuesChange = (changedValues: any) => {
+  const handleFieldChange = (value: any, key: any) => {
     dispatch(setPageIsClean(false));
-
-    const changedValue = Object.keys(changedValues)[0];
-    if (["batchSize", "efficiency"].includes(changedValue)) {
-      updateStats(ingredients);
-    }
+    const newRecipe = { ...recipe };
+    newRecipe[key] = value;
+    setRecipe(newRecipe);
   };
 
-  const updateStats = (newIngredients: any[] = null) => {
-    const workingRecipe: RecipeDetailed = form.getFieldsValue();
-    if (newIngredients !== null) {
-      // workingRecipe.ingredients = newIngredients;
+  const handleUpdateIngredient = (newIngredient: Ingredient) => {
+    const updatedRecipe: RecipeDetailed = { ...recipe };
+
+    const ingredientIdToUpdate = updatedRecipe[
+      newIngredient.ingredient_type
+    ].findIndex(({ id }) => newIngredient.id === id);
+
+    if (ingredientIdToUpdate >= 0 && newIngredient.id) {
+      updatedRecipe[newIngredient.ingredient_type][ingredientIdToUpdate] =
+        newIngredient;
+    } else {
+      updatedRecipe[newIngredient.ingredient_type].push(newIngredient as any);
     }
-    // setStats(getStats(workingRecipe, brewSettings));
+
+    setRecipe(updatedRecipe);
   };
 
-  const formSections = (
-    <Tabs
-      defaultActiveKey="1"
-      items={[
-        {
-          key: "1",
-          label: "General Info",
-          children: (
-            <GeneralInfo
-              measurementType={form.getFieldValue("measurement_type")}
-            />
-          ),
-        },
-        {
-          key: "2",
-          label: "Ingredients",
-          children: (
-            <Ingredients
-              measurementType={form.getFieldValue("measurement_type")}
-            />
-          ),
-        },
-      ]}
-    />
-  );
+  const handleDeleteIngredient = (idToDelete: string, type: IngredientType) => {
+    const updatedRecipe: RecipeDetailed = { ...recipe };
+    updatedRecipe[type] = updatedRecipe[type].filter(
+      (ingredient) => ingredient.id !== idToDelete
+    ) as any;
+    setRecipe(updatedRecipe);
+  };
 
   const getLayout = () => {
+    const formSections = (
+      <Tabs
+        defaultActiveKey="1"
+        items={[
+          {
+            key: "1",
+            label: "General Info",
+            children: (
+              <GeneralInfo onValuesChange={handleFieldChange} recipe={recipe} />
+            ),
+          },
+          {
+            key: "2",
+            label: "Ingredients",
+            children: (
+              <Ingredients
+                recipe={recipe}
+                onIngredientChange={handleUpdateIngredient}
+                onIngredientDelete={handleDeleteIngredient}
+              />
+            ),
+          },
+        ]}
+      />
+    );
+
     if (isDesktop) {
       return (
         <Row justify="start" gutter={[24, 0]}>
@@ -204,10 +207,7 @@ const RecipeDetailPage = () => {
           </Col>
           <Col xs={0} sm={0} md={0} lg={8} xl={8}>
             <Affix offsetTop={10}>
-              <StatsSection
-                stats={stats}
-                measurementType={form.getFieldValue("measurementType")}
-              />
+              <StatsSection stats={stats} recipe={recipe} />
             </Affix>
           </Col>
         </Row>
@@ -217,49 +217,28 @@ const RecipeDetailPage = () => {
     return (
       <>
         {formSections}
-        <StatsSection
-          stats={stats}
-          measurementType={form.getFieldValue("measurementType")}
-        />
+        <StatsSection stats={stats} recipe={recipe} />
         <Divider />
       </>
     );
   };
 
   return (
-    <Form
-      name="recipe-edit-form"
-      labelCol={{ span: 8 }}
-      wrapperCol={{ span: 16 }}
-      form={form}
-      onFinish={handleSave}
-      onFinishFailed={handleSaveFailed}
-      scrollToFirstError={true}
-      autoComplete="off"
-      layout="vertical"
-      onValuesChange={handleOnValuesChange}
-      onFieldsChange={handleOnFieldsChange}
-      preserve
-    >
-      <Content
-        isLoading={loading}
-        pageTitle={!loading ? recipe?.name ?? "" : ""}
-      >
-        {getLayout()}
-        <Affix offsetBottom={10} style={{ float: "right" }}>
-          <Space>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Save
-              </Button>
-            </Form.Item>
-            <Form.Item>
-              <Button onClick={goBackToRecipeList}>Back to Recipe List</Button>
-            </Form.Item>
-          </Space>
-        </Affix>
-      </Content>
-    </Form>
+    <Content isLoading={loading} pageTitle={!loading ? recipe?.name ?? "" : ""}>
+      {getLayout()}
+      <Affix offsetBottom={10} style={{ float: "right" }}>
+        <Space>
+          <Form.Item>
+            <Button type="primary" onClick={handleSave}>
+              Save
+            </Button>
+          </Form.Item>
+          <Form.Item>
+            <Button onClick={goBackToRecipeList}>Back to Recipe List</Button>
+          </Form.Item>
+        </Space>
+      </Affix>
+    </Content>
   );
 };
 

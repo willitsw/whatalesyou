@@ -1,4 +1,3 @@
-import { Layout } from "antd";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "../../pages/home/home";
 import RecipeDetailPage from "../../pages/recipe-detail/recipe-detail";
@@ -28,7 +27,7 @@ const PageLayout = () => {
   }, []);
 
   return (
-    <Layout className="layout beer-layout">
+    <>
       <Loading isLoading={isLoading}>
         <Header />
         <Routes>
@@ -63,7 +62,7 @@ const PageLayout = () => {
         <Footer />
       </Loading>
       <LoginModal />
-    </Layout>
+    </>
   );
 };
 

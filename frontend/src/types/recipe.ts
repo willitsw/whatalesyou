@@ -18,7 +18,7 @@ export interface Recipe {
   batch_size: number;
   efficiency: number;
   measurement_type: MeasurementType;
-  owner: number;
+  owner: string;
 }
 
 export interface RecipeListResponse extends PagedResponse {
@@ -69,12 +69,12 @@ export const CultureFormLookup: Record<CultureForm, string> = {
 
 export interface NonFermentable extends Ingredient {}
 
-// export type ValidIngredient =
-//   | Hop
-//   | Fermentable
-//   | Chemistry
-//   | NonFermentable
-//   | Culture;
+export type ValidIngredient =
+  | Hop
+  | Fermentable
+  | Chemistry
+  | NonFermentable
+  | Culture;
 
 export type IngredientType =
   | "hops"
@@ -84,9 +84,9 @@ export type IngredientType =
   | "chemistry";
 
 export const IngredientTypeLookup: Record<IngredientType, string> = {
-  hops: "Hops",
-  cultures: "Cultures",
-  fermentables: "Fermentables",
-  non_fermentables: "Non Fermentables",
+  hops: "Hop",
+  cultures: "Culture",
+  fermentables: "Fermentable",
+  non_fermentables: "Non Fermentable",
   chemistry: "Chemistry",
 };

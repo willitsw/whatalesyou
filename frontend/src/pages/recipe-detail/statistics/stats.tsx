@@ -6,18 +6,19 @@ import sixer from "./sixer.png";
 import water from "./water.png";
 import { BrewingTypes as BT } from "brewing-shared";
 import React from "react";
+import { RecipeDetailed } from "../../../types/recipe";
 
 interface StatsProps {
   stats: BT.Stats;
-  measurementType: BT.MeasurementType;
+  recipe: RecipeDetailed;
 }
 
-const Stats = ({ stats, measurementType }: StatsProps) => {
+const Stats = ({ stats, recipe }: StatsProps) => {
   const { og, fg, abv, srm, ibu, strikeWater, hotLiquor, waterLoss } = stats;
   const ogDisplay = og?.toFixed(3) ?? null;
   const fgDisplay = fg?.toFixed(3) ?? null;
   const abvDisplay = abv?.toFixed(1) ?? null;
-  const waterUnit = measurementType === "imperial" ? "gal" : "lit";
+  const waterUnit = recipe.measurement_type === "imperial" ? "gal" : "lit";
   const strikeWaterDisplay = `${strikeWater?.toFixed(1)} ${waterUnit}` ?? null;
   const hotLiquorDisplay =
     hotLiquor !== 0 ? `${hotLiquor?.toFixed(1)} ${waterUnit}` ?? null : "N/A";

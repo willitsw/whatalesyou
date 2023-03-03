@@ -10,7 +10,7 @@ import {
   Typography,
   Modal,
 } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import hop from "./hop.png";
 import chemical from "./chemical.png";
 import grain from "./grain.png";
@@ -20,12 +20,6 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import IngredientModal from "./ingredient-modal";
 import { v4 as uuid } from "uuid";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
-import {
-  selectCurrentRecipe,
-  selectIngredientList,
-  selectSortedIngredients,
-  setCurrentRecipe,
-} from "../../../redux/recipe";
 import {
   FermentableTypeLookup,
   MeasurementType,
@@ -48,7 +42,17 @@ interface StepConfig {
 }
 
 interface IngredientsProps {
-  measurementType: MeasurementType;
+  recipe: RecipeDetailed;
+  onIngredientChange: (newIngredient: Ingredient) => void;
+  onIngredientDelete: (ingredientId: string, type: IngredientType) => void;
+}
+
+interface SortedIngredients {
+  strikewater: Ingredient[];
+  mash: Ingredient[];
+  boil: Ingredient[];
+  fermentor: Ingredient[];
+  bottle: Ingredient[];
 }
 
 const ingredientIcons: Record<IngredientType, any> = {
@@ -59,16 +63,64 @@ const ingredientIcons: Record<IngredientType, any> = {
   chemistry: chemical,
 };
 
-const Ingredients = ({ measurementType }: IngredientsProps) => {
+const Ingredients = ({
+  recipe,
+  onIngredientChange,
+  onIngredientDelete,
+}: IngredientsProps) => {
   const [selectedIngredientId, setSelectedIngredientId] = useState<any>(null);
   const [ingredientToDelete, setIngredientToDelete] =
     useState<Ingredient>(null);
+  const [sortedIngredients, setSortedIngredients] = useState<SortedIngredients>(
+    {
+      strikewater: [],
+      mash: [],
+      boil: [],
+      fermentor: [],
+      bottle: [],
+    }
+  );
+  const [ingredientList, setIngredientList] = useState<Ingredient[]>([]);
 
-  const sortedIngredients = useAppSelector(selectSortedIngredients);
-  const ingredientList = useAppSelector(selectIngredientList);
-  const recipe = useAppSelector(selectCurrentRecipe);
+  useEffect(() => {
+    const newSortedIngredients: SortedIngredients = {
+      strikewater: [],
+      mash: [],
+      boil: [],
+      fermentor: [],
+      bottle: [],
+    };
+    const newIngredientList: Ingredient[] = [];
 
-  const dispatch = useAppDispatch();
+    recipe.hops.forEach((hop) => {
+      hop.ingredient_type = "hops";
+      newSortedIngredients[hop.step].push(hop);
+      newIngredientList.push(hop);
+    });
+    recipe.fermentables.forEach((fermentable) => {
+      fermentable.ingredient_type = "fermentables";
+      newSortedIngredients[fermentable.step].push(fermentable);
+      newIngredientList.push(fermentable);
+    });
+    recipe.cultures.forEach((culture) => {
+      culture.ingredient_type = "cultures";
+      newSortedIngredients[culture.step].push(culture);
+      newIngredientList.push(culture);
+    });
+    recipe.non_fermentables.forEach((non_fermentable) => {
+      non_fermentable.ingredient_type = "non_fermentables";
+      newSortedIngredients[non_fermentable.step].push(non_fermentable);
+      newIngredientList.push(non_fermentable);
+    });
+    recipe.chemistry.forEach((chem) => {
+      chem.ingredient_type = "chemistry";
+      newSortedIngredients[chem.step].push(chem);
+      newIngredientList.push(chem);
+    });
+
+    setSortedIngredients(newSortedIngredients);
+    setIngredientList(newIngredientList);
+  }, [recipe]);
 
   const steps: StepConfig[] = [
     {
@@ -97,34 +149,6 @@ const Ingredients = ({ measurementType }: IngredientsProps) => {
       items: sortedIngredients.bottle,
     },
   ];
-
-  const handleUpdateIngredient = (newIngredient: Ingredient) => {
-    const updatedRecipe: RecipeDetailed = { ...recipe };
-    const ingredientIdToUpdate = ingredientList.find(
-      ({ id }) => newIngredient.id === id
-    )?.id;
-
-    if (ingredientIdToUpdate) {
-      const indexToUpdate = updatedRecipe[
-        newIngredient.ingredient_type
-      ].findIndex((oldIngredient) => oldIngredient.id === ingredientIdToUpdate);
-      updatedRecipe[newIngredient.ingredient_type][indexToUpdate] =
-        newIngredient;
-    } else {
-      updatedRecipe[newIngredient.ingredient_type].push(newIngredient as any);
-    }
-
-    dispatch(setCurrentRecipe(updatedRecipe));
-  };
-
-  const handleDeleteClick = () => {
-    const updatedRecipe: RecipeDetailed = { ...recipe };
-    updatedRecipe[ingredientToDelete.ingredient_type] = updatedRecipe[
-      ingredientToDelete.ingredient_type
-    ].filter((i) => i.id !== ingredientToDelete.id) as any;
-
-    dispatch(setCurrentRecipe(updatedRecipe));
-  };
 
   const formatListTitle = (text: string, step: Step) => (
     <div
@@ -272,13 +296,23 @@ const Ingredients = ({ measurementType }: IngredientsProps) => {
       <IngredientModal
         handleCancel={() => setSelectedIngredientId(null)}
         ingredientId={selectedIngredientId}
-        measurementType={measurementType}
+        ingredientList={ingredientList}
+        commitIngredientChange={(newIngredient: Ingredient) => {
+          onIngredientChange(newIngredient);
+          setSelectedIngredientId(null);
+        }}
+        recipeId={recipe.id}
       />
-
       <Modal
         title="Delete Ingredient?"
         onCancel={() => setIngredientToDelete(null)}
-        onOk={handleDeleteClick}
+        onOk={() => {
+          onIngredientDelete(
+            ingredientToDelete.id,
+            ingredientToDelete.ingredient_type
+          );
+          setIngredientToDelete(null);
+        }}
         open={!!ingredientToDelete}
       >
         <>Are you sure you want to delete this ingredient?</>

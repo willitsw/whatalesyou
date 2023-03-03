@@ -19,51 +19,55 @@ export const getRecipesByUser = async (): Promise<RecipeListResponse> => {
 export const getRecipeById = async (
   recipeId: string
 ): Promise<RecipeDetailed> => {
-  return await makeRequest(`/recipes/${recipeId}`, "GET");
+  return await makeRequest(`/recipes/${recipeId}/`, "GET");
 };
 
 export const deleteRecipe = async (recipeId: string): Promise<void> => {
-  return await makeRequest(`/recipes/${recipeId}`, "DELETE");
+  return await makeRequest(`/recipes/${recipeId}/`, "DELETE");
 };
 
-export const createUpdateRecipe = async (recipe: Recipe): Promise<Recipe> => {
-  return await makeRequest("/recipes", "POST", recipe);
+export const updateRecipe = async (recipe: Recipe): Promise<Recipe> => {
+  return await makeRequest(`/recipes/${recipe.id}/`, "PUT", recipe);
+};
+
+export const createRecipe = async (recipe: Recipe): Promise<Recipe> => {
+  return await makeRequest(`/recipes/`, "POST", recipe);
 };
 
 // BREW SETTINGS ENDPOINTS
 
 export const getBrewSettings = async (): Promise<BrewSettings> => {
-  return await makeRequest("/users", "GET");
+  return await makeRequest("/users/", "GET");
 };
 
 export const deleteBrewSettings = async (id: string): Promise<void> => {
-  return await makeRequest(`/users/${id}`, "DELETE");
+  return await makeRequest(`/users/${id}/`, "DELETE");
 };
 
 export const createUpdateBrewSettings = async (
   brewSettings: BrewSettings
 ): Promise<BrewSettings> => {
-  return await makeRequest("/users", "POST", brewSettings);
+  return await makeRequest("/users/", "POST", brewSettings);
 };
 
 // BREW LOG ENDPOINTS
 
 export const getBrewLogsByUser = async (): Promise<BrewLogListResponse> => {
-  return await makeRequest("/brew-logs", "GET");
+  return await makeRequest("/brew-logs/", "GET");
 };
 
 export const getBrewLogById = async (brewLogId: string): Promise<BrewLog> => {
-  return await makeRequest(`/brew-logs/${brewLogId}`, "GET");
+  return await makeRequest(`/brew-logs/${brewLogId}/`, "GET");
 };
 
 export const deleteBrewLog = async (brewLogId: string): Promise<void> => {
-  return await makeRequest(`/brew-logs/${brewLogId}`, "DELETE");
+  return await makeRequest(`/brew-logs/${brewLogId}/`, "DELETE");
 };
 
 export const createUpdateBrewLog = async (
   brewLog: BrewLog
 ): Promise<BrewLog> => {
-  return await makeRequest("/brew-logs", "POST", brewLog);
+  return await makeRequest("/brew-logs/", "POST", brewLog);
 };
 
 // TOKEN ENDPOINTS

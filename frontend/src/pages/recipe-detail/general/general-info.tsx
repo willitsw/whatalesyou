@@ -1,109 +1,119 @@
-import { Typography, Form, Input, InputNumber, Radio, Col, Row } from "antd";
+import { Typography, Input, InputNumber, Radio } from "antd";
 import React from "react";
-import { MeasurementType } from "../../../types/shared";
+import ElementWithLabel from "../../../components/form-layouts/element-with-label";
+import { RecipeDetailed } from "../../../types/recipe";
 
 interface GeneralInfoProps {
-  measurementType: MeasurementType;
+  recipe: RecipeDetailed;
+  onValuesChange: (key: string, value: any) => void;
 }
 
-const GeneralInfo = ({ measurementType }: GeneralInfoProps) => {
-  console.log(`measurement type: ${measurementType}`);
+const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
   return (
     <>
       <Typography.Title level={4}>General Info</Typography.Title>
-      <Row justify="start" gutter={[12, 0]}>
-        <Col xs={24} sm={24} md={12} lg={12} xl={12}>
-          <Form.Item
-            label="Recipe Name"
-            name="name"
-            rules={[{ required: true, message: "A recipe name is required." }]}
-          >
-            <Input style={{ maxWidth: "100%" }} />
-          </Form.Item>
-        </Col>
-        <Col xs={24} sm={24} md={12} lg={12} xl={12}>
-          <Form.Item
-            label="Author"
-            name="author"
-            rules={[
-              { warningOnly: true, message: "It is nice to enter an author." },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row justify="start" gutter={[12, 0]}>
-        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-          <Form.Item label="Recipe Description" name="description">
-            <Input.TextArea />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row justify="start" gutter={[12, 0]}>
-        <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-          <Form.Item
-            label="Batch Size"
-            name="batch_size"
-            rules={[{ required: true, message: "A batch size is required." }]}
-            style={{ width: 105 }}
-            labelCol={{ span: 30, offset: 0 }}
-          >
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
+      >
+        <ElementWithLabel
+          formElement={
+            <Input
+              value={recipe.name}
+              onChange={(value) => onValuesChange(value.target.value, "name")}
+              style={{ maxWidth: "100%" }}
+            />
+          }
+          label="Recipe Name"
+          orientation="column"
+        />
+        <ElementWithLabel
+          formElement={
+            <Input
+              value={recipe.author}
+              onChange={(value) => onValuesChange(value.target.value, "author")}
+            />
+          }
+          label="Author"
+          orientation="column"
+        />
+        <ElementWithLabel
+          formElement={
+            <Input.TextArea
+              style={{ width: 300 }}
+              value={recipe.description}
+              onChange={(value) =>
+                onValuesChange(value.target.value, "description")
+              }
+            />
+          }
+          label="Recipe Description"
+          orientation="column"
+        />
+        <ElementWithLabel
+          formElement={
             <InputNumber
               min="0"
               max="100"
               step="0.5"
-              addonAfter={measurementType === "metric" ? "l" : "gal"}
+              style={{ width: 105 }}
+              addonAfter={recipe.measurement_type === "metric" ? "l" : "gal"}
+              value={recipe.batch_size.toString()}
+              onChange={(value: string) => onValuesChange(value, "batch_size")}
             />
-          </Form.Item>
-        </Col>
-        <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-          <Form.Item
-            label="Efficiency"
-            name="efficiency"
-            rules={[
-              {
-                required: true,
-                message: "An efficiency percentage is required.",
-              },
-            ]}
-            labelCol={{ span: 30, offset: 0 }}
-            style={{ width: 105 }}
-          >
-            <InputNumber min="0" max="100" step="1" addonAfter="%" />
-          </Form.Item>
-        </Col>
-        <Col xs={12} sm={12} md={6} lg={6} xl={6}>
-          <Form.Item
-            label="Brew Type"
-            name="type"
-            labelCol={{ span: 30, offset: 0 }}
-            style={{ width: "250px" }}
-            initialValue="all_grain"
-          >
-            <Radio.Group>
+          }
+          label="Batch Size"
+          orientation="column"
+        />
+        <ElementWithLabel
+          formElement={
+            <InputNumber
+              style={{ width: 105 }}
+              value={recipe.efficiency.toString()}
+              onChange={(value: string) => onValuesChange(value, "efficiency")}
+              min="0"
+              max="100"
+              step="1"
+              addonAfter="%"
+            />
+          }
+          label="Efficiency"
+          orientation="column"
+        />
+        <ElementWithLabel
+          formElement={
+            <Radio.Group
+              value={recipe.type}
+              onChange={(value) => onValuesChange(value.target.value, "type")}
+            >
               <Radio.Button value="all_grain">All Grain</Radio.Button>
               <Radio.Button value="extract">Extract</Radio.Button>
             </Radio.Group>
-          </Form.Item>
-        </Col>
-        <Col xs={12} sm={12} md={6} lg={6} xl={6}>
-          <Form.Item
-            label="Measurement Type"
-            name="measurementType"
-            labelCol={{ span: 30, offset: 0 }}
-            style={{ width: "250px" }}
-            initialValue={measurementType}
-          >
-            <Radio.Group>
+          }
+          label="Brew Type"
+          orientation="column"
+        />
+        <ElementWithLabel
+          formElement={
+            <Radio.Group
+              value={recipe.measurement_type}
+              onChange={(value) =>
+                onValuesChange(value.target.value, "measurement_type")
+              }
+            >
               <Radio.Button value="imperial">Imperial</Radio.Button>
               <Radio.Button value="metric">Metric</Radio.Button>
             </Radio.Group>
-          </Form.Item>
-        </Col>
-      </Row>
+          }
+          label="Measurement Type"
+          orientation="column"
+        />
+      </div>
     </>
   );
 };

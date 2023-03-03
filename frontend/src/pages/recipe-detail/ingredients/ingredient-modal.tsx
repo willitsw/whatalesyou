@@ -1,38 +1,33 @@
-import {
-  AutoComplete,
-  Col,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Row,
-  Select,
-} from "antd";
+import { AutoComplete, Input, InputNumber, Modal, Select } from "antd";
 import React, { useEffect, useState } from "react";
 import { setPageIsClean } from "../../../redux/global-modals";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import DefaultGrains from "../../../data/default-grains";
 import DefaultHops from "../../../data/default-hops";
 import {
+  Chemistry,
+  Culture,
   Fermentable,
   Hop,
   Ingredient,
   IngredientType,
   IngredientTypeLookup,
-  // ValidIngredient,
+  NonFermentable,
 } from "../../../types/recipe";
-import { selectIngredientList } from "../../../redux/recipe";
 import {
   FermentableTypeLookup,
-  MeasurementType,
+  IngredientAmountTypeLookup,
   Step,
   StepLookup,
 } from "../../../types/shared";
-
+import ElementWithLabel from "../../../components/form-layouts/element-with-label";
+import { selectBrewSettings } from "../../../redux/brew-settings";
 interface IngredientModalProps {
   ingredientId: any;
   handleCancel: () => void;
-  measurementType: MeasurementType;
+  ingredientList: Ingredient[];
+  commitIngredientChange: (newIngredient: Ingredient) => void;
+  recipeId: string;
 }
 
 const grainOptions = DefaultGrains.map((grain) => {
@@ -47,51 +42,91 @@ const hopOptions = DefaultHops.map((hop) => {
   };
 });
 
+const defaultTypeForStep: Record<Step, IngredientType> = {
+  boil: "hops",
+  bottle: "non_fermentables",
+  fermentor: "cultures",
+  mash: "fermentables",
+  strikewater: "chemistry",
+};
+
 const IngredientModal = ({
   ingredientId,
   handleCancel,
-  measurementType,
+  ingredientList,
+  commitIngredientChange,
+  recipeId,
 }: IngredientModalProps) => {
-  const [form] = Form.useForm<Ingredient>();
   const dispatch = useAppDispatch();
-  const [type, setType] = useState<IngredientType>(null);
-  const [step, setStep] = useState<Step>(null);
-  const ingredientList = useAppSelector(selectIngredientList);
+  const brewSettings = useAppSelector(selectBrewSettings);
+  const [ingredient, setIngredient] = useState<any>(null);
 
   useEffect(() => {
-    form.resetFields();
-
     const ingredientToUpdate = ingredientList.find(
       ({ id }) => ingredientId === id
     );
     if (ingredientToUpdate) {
       console.log("ingredient to update", ingredientToUpdate);
-      form.setFieldsValue(ingredientToUpdate);
-      setType(ingredientToUpdate.ingredient_type);
-      setStep(ingredientToUpdate.step);
+      setIngredient(ingredientToUpdate);
     } else {
-      form.setFieldsValue({ step: ingredientId as Step });
-      setType(null);
-      setStep(ingredientId as Step);
+      setIngredient({
+        step: ingredientId,
+        recipe: recipeId,
+        ...addDefaultsForType(defaultTypeForStep[ingredientId]),
+      });
     }
   }, [ingredientId]);
 
-  useEffect(() => {
-    form.resetFields();
-    form.setFieldsValue({ step, ingredient_type: type });
-  }, [type]);
-
-  const handleOnFieldsChange = (changedFields: any) => {
-    if (changedFields.length === 0) {
-      return null;
+  const addDefaultsForType = (type: IngredientType) => {
+    switch (type) {
+      case "chemistry":
+        return {
+          ingredient_type: "chemistry",
+          amount_type: "g",
+        } as Chemistry;
+      case "cultures":
+        return {
+          ingredient_type: "cultures",
+          amount_type: "each",
+          form: "dry",
+          attenuation: 75,
+          timing: 1,
+        } as Culture;
+      case "fermentables":
+        return {
+          ingredient_type: "fermentables",
+          amount_type:
+            brewSettings.measurement_type === "imperial" ? "lb" : "kg",
+        } as Fermentable;
+      case "hops":
+        return {
+          ingredient_type: "hops",
+          amount_type:
+            brewSettings.measurement_type === "imperial" ? "oz" : "g",
+          timing: 60,
+        } as Hop;
+      case "non_fermentables":
+        return {
+          ingredient_type: "non_fermentables",
+          amount_type: "each",
+        } as NonFermentable;
+      default:
+        return {};
     }
+  };
 
+  const handleChangeIngredient = (value: any, key: any) => {
     dispatch(setPageIsClean(false));
+    const newIngredient = { ...ingredient };
+    newIngredient[key] = value;
 
-    if (changedFields[0].name[0] === "type") {
-      setType(form.getFieldValue("type"));
-    } else if (changedFields[0].name[0] === "step") {
-      setStep(form.getFieldValue("step"));
+    if (["step", "ingredient_type"].includes(key)) {
+      setIngredient({
+        step: newIngredient.step,
+        ...addDefaultsForType(newIngredient.ingredient_type),
+      });
+    } else {
+      setIngredient(newIngredient);
     }
   };
 
@@ -99,9 +134,10 @@ const IngredientModal = ({
     const defaultHop = DefaultHops.find((hop) => hop.name === selection);
 
     if (defaultHop) {
-      const ingredientToUpdate = form.getFieldsValue() as Hop;
+      const ingredientToUpdate = { ...ingredient } as Hop;
       ingredientToUpdate.alpha_acid = defaultHop.alpha;
-      form.setFieldsValue(ingredientToUpdate);
+      ingredientToUpdate.name = defaultHop.name;
+      setIngredient(ingredientToUpdate);
     }
   };
 
@@ -111,471 +147,393 @@ const IngredientModal = ({
     );
 
     if (defaultGrain) {
-      const ingredientToUpdate = form.getFieldsValue() as Fermentable;
+      const ingredientToUpdate = { ...ingredient } as Fermentable;
+      ingredientToUpdate.name = defaultGrain.name;
       ingredientToUpdate.lovibond = defaultGrain.lovibond;
       ingredientToUpdate.potential = defaultGrain.gravity;
       ingredientToUpdate.type = defaultGrain.type;
-      form.setFieldsValue(ingredientToUpdate);
-    }
-  };
-
-  const handleSaveForm = async () => {
-    try {
-      const values = await form.validateFields();
-      // updateRecipe(values);
-    } catch (e) {
-      console.log("Invalid form.", e);
+      setIngredient(ingredientToUpdate);
     }
   };
 
   const handleCancelClick = () => {
-    setType(null);
-    setStep(null);
+    setIngredient(null);
     handleCancel();
   };
 
   const renderTypeSpecificElements = () => {
-    switch (type) {
+    switch (ingredient?.ingredient_type) {
       case "fermentables":
         return (
           <>
-            <Row>
-              <Col xs={24} sm={24} md={14} lg={14} xl={14}>
-                <Form.Item
-                  name="name"
-                  label="Name"
-                  labelCol={{ span: 30, offset: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please name your grain.",
-                    },
-                  ]}
+            <ElementWithLabel
+              label="Name"
+              formElement={
+                <AutoComplete
+                  value={ingredient?.name}
+                  options={grainOptions}
+                  style={{ width: 220 }}
+                  filterOption={(inputValue, option) =>
+                    option?.value
+                      .toUpperCase()
+                      .indexOf(inputValue.toUpperCase()) !== -1
+                  }
+                  onSelect={(selection: string) =>
+                    handleGrainNameSelect(selection)
+                  }
+                  placeholder="Grain Name"
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Type"
+              formElement={
+                <Select
+                  onChange={(value) => handleChangeIngredient(value, "type")}
+                  value={ingredient?.type}
+                  style={{ width: 150 }}
                 >
-                  <AutoComplete
-                    options={grainOptions}
-                    style={{ width: 220 }}
-                    filterOption={(inputValue, option) =>
-                      option?.value
-                        .toUpperCase()
-                        .indexOf(inputValue.toUpperCase()) !== -1
-                    }
-                    onSelect={(selection: string) =>
-                      handleGrainNameSelect(selection)
-                    }
-                    placeholder="Grain Name"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={10}>
-                <Form.Item
-                  name="type"
-                  label="Type"
-                  labelCol={{ span: 30, offset: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Required",
-                    },
-                  ]}
-                  initialValue="grain"
-                >
-                  <Select style={{ width: 120 }}>
-                    {Object.entries(FermentableTypeLookup).map(
-                      ([key, label]) => (
-                        <Select.Option key={key} value={key}>
-                          {label}
-                        </Select.Option>
-                      )
-                    )}
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item
-                  name="amount"
-                  label="Amount"
-                  labelCol={{ span: 30, offset: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "How much?",
-                    },
-                  ]}
-                  initialValue="0"
-                >
+                  {Object.entries(FermentableTypeLookup).map(([key, label]) => (
+                    <Select.Option key={key} value={key}>
+                      {label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              }
+              orientation="column"
+            />
+            <div style={{ display: "flex", flexDirection: "row", gap: 10 }}>
+              <ElementWithLabel
+                label="Amount"
+                formElement={
                   <InputNumber
+                    value={ingredient?.amount}
+                    onChange={(value) =>
+                      handleChangeIngredient(value, "amount")
+                    }
                     min="0"
                     max="100"
                     step="0.1"
                     style={{ width: 105 }}
                   />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item
-                  name="amountType"
-                  label="Amount Type"
-                  labelCol={{ span: 30, offset: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Enter a type",
-                    },
-                  ]}
-                  initialValue={measurementType === "imperial" ? "lb" : "kg"}
-                >
-                  <Select style={{ width: 100 }}>
+                }
+                orientation="column"
+              />
+              <ElementWithLabel
+                label="Amount Type"
+                formElement={
+                  <Select
+                    value={ingredient?.amount_type}
+                    onChange={(value) =>
+                      handleChangeIngredient(value, "amount_type")
+                    }
+                    style={{ width: 100 }}
+                  >
                     <Select.Option value="lb">lb</Select.Option>
                     <Select.Option value="kg">kg</Select.Option>
                   </Select>
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item
-                  name="lovibond"
-                  label="Color"
-                  labelCol={{ span: 30, offset: 0 }}
-                  initialValue={0}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Required",
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    min="0"
-                    max="100"
-                    step="1"
-                    style={{ width: 105 }}
-                    addonAfter="lov"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item
-                  name="potential"
-                  label="Gravity"
-                  labelCol={{ span: 30, offset: 0 }}
-                  initialValue={"1.000"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Required",
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    stringMode
-                    min="1"
-                    max="2"
-                    step="0.001"
-                    style={{ width: 84 }}
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
+                }
+                orientation="column"
+              />
+            </div>
+            <ElementWithLabel
+              label="Color"
+              formElement={
+                <InputNumber
+                  value={ingredient?.lovibond}
+                  onChange={(value) =>
+                    handleChangeIngredient(value, "lovibond")
+                  }
+                  min="0"
+                  max="100"
+                  step="1"
+                  style={{ width: 105 }}
+                  addonAfter="lov"
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Gravity"
+              formElement={
+                <InputNumber
+                  value={ingredient?.potential}
+                  onChange={(value) =>
+                    handleChangeIngredient(value, "potential")
+                  }
+                  stringMode
+                  min="1"
+                  max="2"
+                  step="0.001"
+                  style={{ width: 84 }}
+                />
+              }
+              orientation="column"
+            />
           </>
         );
       case "hops":
         return (
           <>
-            <Row>
-              <Col span={14}>
-                <Form.Item
-                  name="name"
-                  label="Name"
-                  labelCol={{ span: 30, offset: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please name your grain.",
-                    },
-                  ]}
+            <ElementWithLabel
+              label="Name"
+              formElement={
+                <AutoComplete
+                  value={ingredient?.name}
+                  options={hopOptions}
+                  style={{ width: 220 }}
+                  filterOption={(inputValue, option) =>
+                    option?.value
+                      .toUpperCase()
+                      .indexOf(inputValue.toUpperCase()) !== -1
+                  }
+                  onSelect={(selection: string) =>
+                    handleHopNameSelect(selection)
+                  }
+                  placeholder="Hop Name"
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Amount"
+              formElement={
+                <InputNumber
+                  value={ingredient?.amount}
+                  onChange={(value) => handleChangeIngredient(value, "amount")}
+                  min="0"
+                  max="100"
+                  step="0.5"
+                  style={{ width: 105 }}
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Amount Type"
+              formElement={
+                <Select
+                  value={ingredient?.amount_type}
+                  onChange={(value) =>
+                    handleChangeIngredient(value, "amount_type")
+                  }
+                  style={{ width: 120 }}
                 >
-                  <AutoComplete
-                    options={hopOptions}
-                    style={{ width: 220 }}
-                    filterOption={(inputValue, option) =>
-                      option?.value
-                        .toUpperCase()
-                        .indexOf(inputValue.toUpperCase()) !== -1
-                    }
-                    onSelect={(selection: string) =>
-                      handleHopNameSelect(selection)
-                    }
-                    placeholder="Hop Name"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={10}></Col>
-            </Row>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="amount"
-                  label="Amount"
-                  labelCol={{ span: 30, offset: 0 }}
-                  initialValue={0}
-                  rules={[
-                    {
-                      required: true,
-                      message: "How much?",
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    min="0"
-                    max="100"
-                    step="0.5"
-                    style={{ width: 105 }}
-                  />
-                </Form.Item>
-              </Col>
-              <Col>
-                <Form.Item
-                  name="amountType"
-                  label="Amount Type"
-                  labelCol={{ span: 30, offset: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Enter a type",
-                    },
-                  ]}
-                  initialValue={measurementType === "imperial" ? "oz" : "g"}
-                >
-                  <Select style={{ width: 120 }}>
-                    <Select.Option value="oz">oz</Select.Option>
-                    <Select.Option value="g">g</Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="alphaAcid"
-                  label="Bitterness"
-                  labelCol={{ span: 30, offset: 0 }}
-                  initialValue={0}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Required",
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    min="0"
-                    max="25"
-                    step="0.1"
-                    style={{ width: 105 }}
-                    addonAfter="AA"
-                  />
-                </Form.Item>
-              </Col>
-            </Row>
+                  <Select.Option value="oz">oz</Select.Option>
+                  <Select.Option value="g">g</Select.Option>
+                </Select>
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Bitterness"
+              formElement={
+                <InputNumber
+                  value={ingredient?.alpha_acid}
+                  onChange={(value) =>
+                    handleChangeIngredient(value, "alpha_acid")
+                  }
+                  min="0"
+                  max="25"
+                  step="0.1"
+                  style={{ width: 105 }}
+                  addonAfter="AA"
+                />
+              }
+              orientation="column"
+            />
           </>
         );
       case "cultures":
         return (
           <>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="name"
-                  label="Name"
-                  labelCol={{ span: 30, offset: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please name your yeast.",
-                    },
-                  ]}
+            <ElementWithLabel
+              label="Name"
+              formElement={
+                <Input
+                  value={ingredient?.name}
+                  onChange={(value) =>
+                    handleChangeIngredient(value.target.value, "name")
+                  }
+                  style={{ width: 220 }}
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Amount"
+              formElement={
+                <InputNumber
+                  value={ingredient?.amount}
+                  onChange={(value) => handleChangeIngredient(value, "amount")}
+                  min="0"
+                  max="100"
+                  step="1"
+                  style={{ width: 105 }}
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Amount Type"
+              formElement={
+                <Select
+                  value={ingredient?.amount_type}
+                  onChange={(value) =>
+                    handleChangeIngredient(value, "amount_type")
+                  }
+                  style={{ width: 120 }}
                 >
-                  <Input style={{ width: 220 }} />
-                </Form.Item>
-              </Col>
-            </Row>
-            <Row>
-              <Col span={12}>
-                <Form.Item
-                  name="amount"
-                  label="Amount"
-                  labelCol={{ span: 30, offset: 0 }}
-                  initialValue={1}
-                  rules={[
-                    {
-                      required: true,
-                      message: "How much?",
-                    },
-                  ]}
+                  {Object.entries(IngredientAmountTypeLookup).map(
+                    ([key, label]) => (
+                      <Select.Option key={key} value={key}>
+                        {label}
+                      </Select.Option>
+                    )
+                  )}
+                </Select>
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Attenuation"
+              formElement={
+                <InputNumber
+                  value={ingredient?.attenuation}
+                  onChange={(value) =>
+                    handleChangeIngredient(value, "attenuation")
+                  }
+                  style={{ width: 120 }}
+                  min="0"
+                  max="100"
+                  step="1"
+                  addonAfter="%"
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Yeast Form"
+              formElement={
+                <Select
+                  value={ingredient?.form}
+                  onChange={(value) => handleChangeIngredient(value, "form")}
+                  style={{ width: 120 }}
                 >
-                  <InputNumber
-                    min="0"
-                    max="100"
-                    step="1"
-                    style={{ width: 105 }}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="amountType"
-                  label="Amount Type"
-                  labelCol={{ span: 30, offset: 0 }}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Enter a type",
-                    },
-                  ]}
-                  initialValue="packages"
-                >
-                  <Input style={{ width: 115 }} />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="attenuation"
-                  label="Attenuation"
-                  labelCol={{ span: 30, offset: 0 }}
-                  initialValue="77"
-                >
-                  <InputNumber
-                    style={{ width: 120 }}
-                    min="0"
-                    max="100"
-                    step="1"
-                    addonAfter="%"
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="form"
-                  label="Yeast Form"
-                  labelCol={{ span: 30, offset: 0 }}
-                  initialValue={"Dry"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Required",
-                    },
-                  ]}
-                >
-                  <Select style={{ width: 120 }}>
-                    <Select.Option value="Dry">Dry</Select.Option>
-                    <Select.Option value="Liquid">Liquid</Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
+                  <Select.Option value="dry">Dry</Select.Option>
+                  <Select.Option value="liquid">Liquid</Select.Option>
+                </Select>
+              }
+              orientation="column"
+            />
           </>
         );
       case "non_fermentables":
         return (
-          <Row>
-            <Col span={24}>
-              <Form.Item
-                name="name"
-                label="Name"
-                labelCol={{ span: 30, offset: 0 }}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please name your yeast.",
-                  },
-                ]}
-              >
-                <Input style={{ width: 220 }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="amount"
-                label="Amount"
-                labelCol={{ span: 30, offset: 0 }}
-                rules={[
-                  {
-                    required: true,
-                    message: "How much?",
-                  },
-                ]}
-                initialValue="0"
-              >
-                <Input style={{ width: 115 }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="amountType"
-                label="Amount Type"
-                labelCol={{ span: 30, offset: 0 }}
-                rules={[
-                  {
-                    required: true,
-                    message: "Enter a type",
-                  },
-                ]}
-                initialValue="each"
-              >
-                <Input style={{ width: 115 }} />
-              </Form.Item>
-            </Col>
-          </Row>
+          <>
+            <ElementWithLabel
+              label="Name"
+              formElement={
+                <Input
+                  value={ingredient?.name}
+                  onChange={(value) =>
+                    handleChangeIngredient(value.target.value, "name")
+                  }
+                  style={{ width: 220 }}
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Amount"
+              formElement={
+                <InputNumber
+                  value={ingredient?.amount}
+                  onChange={(value) => handleChangeIngredient(value, "amount")}
+                  min="0"
+                  max="100"
+                  step="1"
+                  style={{ width: 105 }}
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Amount Type"
+              formElement={
+                <Select
+                  value={ingredient?.amount_type}
+                  onChange={(value) =>
+                    handleChangeIngredient(value, "amount_type")
+                  }
+                  style={{ width: 120 }}
+                >
+                  {Object.entries(IngredientAmountTypeLookup).map(
+                    ([key, label]) => (
+                      <Select.Option key={key} value={key}>
+                        {label}
+                      </Select.Option>
+                    )
+                  )}
+                </Select>
+              }
+              orientation="column"
+            />
+          </>
         );
       case "chemistry":
         return (
-          <Row>
-            <Col span={24}>
-              <Form.Item
-                name="name"
-                label="Name"
-                labelCol={{ span: 30, offset: 0 }}
-                rules={[
-                  {
-                    required: true,
-                    message: "Please name your yeast.",
-                  },
-                ]}
-              >
-                <Input style={{ width: 220 }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="amount"
-                label="Amount"
-                labelCol={{ span: 30, offset: 0 }}
-                rules={[
-                  {
-                    required: true,
-                    message: "How much?",
-                  },
-                ]}
-                initialValue="0"
-              >
-                <Input style={{ width: 115 }} />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="amountType"
-                label="Amount Type"
-                labelCol={{ span: 30, offset: 0 }}
-                rules={[
-                  {
-                    required: true,
-                    message: "Enter a type",
-                  },
-                ]}
-                initialValue="grams"
-              >
-                <Input style={{ width: 115 }} />
-              </Form.Item>
-            </Col>
-          </Row>
+          <>
+            <ElementWithLabel
+              label="Name"
+              formElement={
+                <Input
+                  value={ingredient?.name}
+                  onChange={(value) =>
+                    handleChangeIngredient(value.target.value, "name")
+                  }
+                  style={{ width: 220 }}
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Amount"
+              formElement={
+                <InputNumber
+                  value={ingredient?.amount}
+                  onChange={(value) => handleChangeIngredient(value, "amount")}
+                  min="0"
+                  max="100"
+                  step="1"
+                  style={{ width: 105 }}
+                />
+              }
+              orientation="column"
+            />
+            <ElementWithLabel
+              label="Amount Type"
+              formElement={
+                <Select
+                  value={ingredient?.amount_type}
+                  onChange={(value) =>
+                    handleChangeIngredient(value, "amount_type")
+                  }
+                  style={{ width: 120 }}
+                >
+                  {Object.entries(IngredientAmountTypeLookup).map(
+                    ([key, label]) => (
+                      <Select.Option key={key} value={key}>
+                        {label}
+                      </Select.Option>
+                    )
+                  )}
+                </Select>
+              }
+              orientation="column"
+            />
+          </>
         );
       default:
         return null;
@@ -586,85 +544,89 @@ const IngredientModal = ({
     <Modal
       title="Add/Edit Ingredient"
       open={!!ingredientId}
-      onOk={handleSaveForm}
+      onOk={() => {
+        commitIngredientChange(ingredient);
+        setIngredient(null);
+      }}
       onCancel={handleCancelClick}
-      destroyOnClose
-      forceRender
     >
-      <Form
-        name="ingredient-edit-form"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        form={form}
-        scrollToFirstError={true}
-        autoComplete="off"
-        layout="vertical"
-        onFieldsChange={handleOnFieldsChange}
-        preserve={false}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
       >
-        <Row justify="start" gutter={[12, 0]}>
-          <Col xs={12} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item
-              label="Brewing Step"
-              name="step"
-              rules={[{ required: true, message: "A step is required." }]}
-              labelCol={{ span: 30, offset: 0 }}
+        <ElementWithLabel
+          label="Brewing Step"
+          formElement={
+            <Select
+              value={ingredient?.step}
+              onChange={(value) => handleChangeIngredient(value, "step")}
+              style={{ width: 130 }}
             >
-              <Select style={{ width: 120 }}>
-                {Object.entries(StepLookup).map(([key, label]) => (
-                  <Select.Option key={key} value={key}>
-                    {label}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item
-              label="Ingredient Type"
-              name="ingredient_type"
-              rules={[{ required: true, message: "A type is required." }]}
-              labelCol={{ span: 30, offset: 0 }}
+              {Object.entries(StepLookup).map(([key, label]) => (
+                <Select.Option key={key} value={key}>
+                  {label}
+                </Select.Option>
+              ))}
+            </Select>
+          }
+          orientation="column"
+        />
+        <ElementWithLabel
+          label="Ingredient Type"
+          formElement={
+            <Select
+              value={ingredient?.ingredient_type}
+              onChange={(value) =>
+                handleChangeIngredient(value, "ingredient_type")
+              }
+              style={{ width: 150 }}
             >
-              <Select style={{ width: 120 }}>
-                {Object.entries(IngredientTypeLookup).map(([key, label]) => (
-                  <Select.Option key={key} value={key}>
-                    {label}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={8} lg={8} xl={8}>
-            {step !== "bottle" && step !== "strikewater" && step !== "mash" && (
-              <Form.Item
-                name="timing"
-                label="Time"
-                labelCol={{ span: 30, offset: 0 }}
-                initialValue={ingredientId === "Boil" ? 60 : 0}
-              >
+              {Object.entries(IngredientTypeLookup).map(([key, label]) => (
+                <Select.Option key={key} value={key}>
+                  {label}
+                </Select.Option>
+              ))}
+            </Select>
+          }
+          orientation="column"
+        />
+        {ingredient?.step !== "bottle" &&
+          ingredient?.step !== "strikewater" &&
+          ingredient?.step !== "mash" && (
+            <ElementWithLabel
+              label="Timing"
+              formElement={
                 <InputNumber
+                  value={ingredient?.timing}
                   min={0}
                   style={{ width: 95 }}
-                  addonAfter={step === "fermentor" ? "days" : "min"}
+                  addonAfter={ingredient?.step === "fermentor" ? "days" : "min"}
+                  onChange={(value) => handleChangeIngredient(value, "timing")}
                 />
-              </Form.Item>
-            )}
-          </Col>
-        </Row>
+              }
+              orientation="column"
+            />
+          )}
         {renderTypeSpecificElements()}
-        <Row>
-          <Col span={22}>
-            <Form.Item
-              label="Notes"
-              name="notes"
-              labelCol={{ span: 30, offset: 0 }}
-            >
-              <Input.TextArea />
-            </Form.Item>
-          </Col>
-        </Row>
-      </Form>
+        <ElementWithLabel
+          label="Notes"
+          formElement={
+            <Input.TextArea
+              value={ingredient?.notes}
+              onChange={(value) =>
+                handleChangeIngredient(value.target.value, "notes")
+              }
+              style={{ width: 300 }}
+            />
+          }
+          orientation="column"
+        />
+      </div>
     </Modal>
   );
 };

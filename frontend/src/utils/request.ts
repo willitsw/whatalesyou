@@ -4,7 +4,7 @@ import jwt from "jwt-decode";
 import { TokenPayload } from "../types/user";
 import { refreshToken } from "./api-calls";
 
-type RequestMethod = "GET" | "POST" | "PUT" | "DELETE";
+type RequestMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 interface RequestOptions {
   useAuth?: boolean;
