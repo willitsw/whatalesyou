@@ -2,14 +2,12 @@ import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import {
   Affix,
   Button,
-  Col,
   Divider,
   Form,
   Input,
   InputNumber,
   message,
   Radio,
-  Row,
   Switch,
   Typography,
 } from "antd";
@@ -26,243 +24,258 @@ import {
   brewSettingsToImperial,
 } from "../../utils/converters";
 import React from "react";
-import { MeasurementType } from "../../types/shared";
 import { BrewSettings } from "../../types/brew-settings";
+import ElementWithLabel from "../../components/form-layouts/element-with-label";
+
+const defaultBrewSettings: BrewSettings = {
+  batch_size: 0,
+  boil_time: 0,
+  brewhouse_efficiency: 0,
+  do_sparge: true,
+  id: "",
+  mash_thickness_target: 0,
+  measurement_type: "imperial",
+  water_loss_fermentor_trub: 0,
+  water_loss_kettle_trub: 0,
+  water_loss_per_boil_unit: 0,
+  water_loss_per_grain_unit: 0,
+};
 
 const BrewSettings = () => {
   const brewSettings = useAppSelector(selectBrewSettings);
-  const [measurementType, setMeasurementType] = useState<MeasurementType>(
-    brewSettings.measurement_type
-  );
-  const [sparge, setSparge] = useState<boolean>(brewSettings.do_sparge);
+  const [localBrewSettings, setLocalBrewSettings] =
+    useState<BrewSettings>(defaultBrewSettings);
 
-  const [form] = Form.useForm<BrewSettings>();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const onComponentLoad = async () => {
-      form.setFieldsValue(brewSettings);
-    };
-    onComponentLoad();
-  }, []);
+    if (brewSettings) {
+      setLocalBrewSettings(brewSettings);
+    }
+  }, [brewSettings]);
 
-  const handleSave = (form: BrewSettings) => {
+  const handleSave = () => {
     const updatedBrewSettings: BrewSettings = {
-      ...form,
-      // id: brewSettings.id,
+      ...localBrewSettings,
     };
     dispatch(processCreateUpdateBrewSettings(updatedBrewSettings));
     message.success("Brew Settings have been updated.");
     dispatch(setPageIsClean(true));
   };
 
-  const handleSaveFailed = () => {
-    message.error(
-      "Brew Settings could not be saved. Please address any validation errors."
-    );
-  };
-
-  const handleOnFieldsChange = (changedFields: any) => {
-    if (changedFields.length === 0) {
-      return null;
-    }
-
+  const handleFieldChange = (value: any, key: any) => {
     dispatch(setPageIsClean(false));
-
-    if (changedFields[0].name[0] === "measurementType") {
-      // measurement type was changed, lets convert the recipe
-      if (changedFields[0].value === "metric") {
-        const oldSettings: BrewSettings = form.getFieldsValue();
-        form.setFieldsValue(brewSettingsToMetric(oldSettings));
-        setMeasurementType("metric");
-      } else {
-        const oldSettings: BrewSettings = form.getFieldsValue();
-        form.setFieldsValue(brewSettingsToImperial(oldSettings));
-        setMeasurementType("imperial");
-      }
-    }
-
-    if (changedFields[0].name[0] === "sparge") {
-      setSparge(changedFields[0].value);
-    }
+    const newBrewSettings = { ...localBrewSettings };
+    newBrewSettings[key] = value;
+    setLocalBrewSettings(newBrewSettings);
   };
 
   return (
     <Content pageTitle="Brew Settings">
-      <Form
-        name="brew-settings-form"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        form={form}
-        onFinish={handleSave}
-        onFinishFailed={handleSaveFailed}
-        scrollToFirstError={true}
-        autoComplete="off"
-        layout="vertical"
-        onFieldsChange={handleOnFieldsChange}
+      <Typography.Title level={4}>General Defaults</Typography.Title>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
       >
-        <Typography.Title level={4}>General Defaults</Typography.Title>
-        <Row justify="start" gutter={[12, 0]}>
-          <Col xs={12} sm={12} md={8} lg={8} xl={8}>
-            <Form.Item
-              label="Author"
-              name="author"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: "100%" }}
+        <ElementWithLabel
+          label="Batch Size"
+          formElement={
+            <InputNumber
+              value={localBrewSettings.batch_size.toString()}
+              onChange={(value: string) =>
+                handleFieldChange(value, "batch_size")
+              }
+              min="0"
+              max="100"
+              step="0.5"
+              addonAfter={
+                localBrewSettings.measurement_type === "metric" ? "l" : "gal"
+              }
+            />
+          }
+          orientation="column"
+        />
+        <ElementWithLabel
+          label="Boil Time"
+          formElement={
+            <InputNumber
+              value={localBrewSettings.boil_time.toString()}
+              onChange={(value: string) =>
+                handleFieldChange(value, "boil_time")
+              }
+              addonAfter="min"
+            />
+          }
+          orientation="column"
+        />
+        <ElementWithLabel
+          label="Efficiency"
+          formElement={
+            <InputNumber
+              value={localBrewSettings.brewhouse_efficiency.toString()}
+              onChange={(value: string) =>
+                handleFieldChange(value, "brewhouse_efficiency")
+              }
+              addonAfter="%"
+            />
+          }
+          orientation="column"
+        />
+        <ElementWithLabel
+          label="Measurement Type"
+          formElement={
+            <Radio.Group
+              value={localBrewSettings.measurement_type}
+              onChange={(value) =>
+                handleFieldChange(value.target.value, "measurement_type")
+              }
             >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={3} lg={3} xl={3}>
-            <Form.Item
-              label="Batch Size"
-              name="batchSize"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: 105 }}
-            >
+              <Radio.Button value="imperial">Imperial</Radio.Button>
+              <Radio.Button value="metric">Metric</Radio.Button>
+            </Radio.Group>
+          }
+          orientation="column"
+        />
+      </div>
+      <Divider />
+      <Typography.Title level={4}>Water Loss Constants</Typography.Title>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
+      >
+        <ElementWithLabel
+          label="Grain Water Loss"
+          formElement={
+            <InputNumber
+              value={localBrewSettings.water_loss_per_grain_unit.toString()}
+              onChange={(value: string) =>
+                handleFieldChange(value, "water_loss_per_grain_unit")
+              }
+              min="0"
+              max="100"
+              step="0.1"
+              addonAfter={
+                localBrewSettings.measurement_type === "metric"
+                  ? "l/kg"
+                  : "qt/lb"
+              }
+            />
+          }
+          orientation="column"
+        />
+        <ElementWithLabel
+          label="Fermenter Dead Space"
+          formElement={
+            <InputNumber
+              value={localBrewSettings.water_loss_fermentor_trub.toString()}
+              onChange={(value: string) =>
+                handleFieldChange(value, "water_loss_fermentor_trub")
+              }
+              addonAfter={
+                localBrewSettings.measurement_type === "metric" ? "lit" : "gal"
+              }
+            />
+          }
+          orientation="column"
+        />
+        <ElementWithLabel
+          label="Kettle Dead Space"
+          formElement={
+            <InputNumber
+              value={localBrewSettings.water_loss_kettle_trub.toString()}
+              onChange={(value: string) =>
+                handleFieldChange(value, "water_loss_kettle_trub")
+              }
+              addonAfter={
+                localBrewSettings.measurement_type === "metric" ? "lit" : "gal"
+              }
+            />
+          }
+          orientation="column"
+        />
+        <ElementWithLabel
+          label="Evaporation Water Loss"
+          formElement={
+            <InputNumber
+              value={localBrewSettings.water_loss_per_boil_unit.toString()}
+              onChange={(value: string) =>
+                handleFieldChange(value, "water_loss_per_boil_unit")
+              }
+              addonAfter={
+                localBrewSettings.measurement_type === "metric"
+                  ? "lit/hr"
+                  : "gal/hr"
+              }
+            />
+          }
+          orientation="column"
+        />
+      </div>
+      <Divider />
+      <Typography.Title level={4}>Mash Settings</Typography.Title>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
+      >
+        <ElementWithLabel
+          label="Sparging"
+          formElement={
+            <Switch
+              checkedChildren={<CheckOutlined />}
+              unCheckedChildren={<CloseOutlined />}
+              checked={localBrewSettings.do_sparge}
+              onChange={(value) => handleFieldChange(value, "do_sparge")}
+            />
+          }
+          orientation="column"
+        />
+        {localBrewSettings.do_sparge && (
+          <ElementWithLabel
+            label="Mash Thickness"
+            formElement={
               <InputNumber
-                min="0"
-                max="100"
-                step="0.5"
-                addonAfter={measurementType === "metric" ? "l" : "gal"}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={3} lg={3} xl={3}>
-            <Form.Item
-              label="Boil Time"
-              name="boilTime"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: 105 }}
-            >
-              <InputNumber addonAfter="min" />
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={3} lg={3} xl={3}>
-            <Form.Item
-              label="Efficiency"
-              name="brewhouseEfficiency"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: 105 }}
-            >
-              <InputNumber addonAfter="%" />
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Measurement Type"
-              name="measurementType"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: "250px" }}
-            >
-              <Radio.Group>
-                <Radio.Button value="imperial">Imperial</Radio.Button>
-                <Radio.Button value="metric">Metric</Radio.Button>
-              </Radio.Group>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Divider />
-        <Typography.Title level={4}>Water Loss Constants</Typography.Title>
-        <Row justify="start" gutter={[12, 0]}>
-          <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Grain Water Loss"
-              name="waterLossPerGrain"
-              labelCol={{ span: 20, offset: 0 }}
-              style={{ width: 115 }}
-            >
-              <InputNumber
-                min="0"
-                max="100"
-                step="0.1"
-                addonAfter={measurementType === "metric" ? "l/kg" : "qt/lb"}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Fermenter Dead Space"
-              name="fermentorTrubWaterLoss"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: 105 }}
-            >
-              <InputNumber
-                addonAfter={measurementType === "metric" ? "lit" : "gal"}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Kettle Dead Space"
-              name="kettleTrubWaterLoss"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: 105 }}
-            >
-              <InputNumber
-                addonAfter={measurementType === "metric" ? "lit" : "gal"}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Evaporation Water Loss"
-              name="boilOffWaterLossRate"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: 105 }}
-            >
-              <InputNumber
-                addonAfter={measurementType === "metric" ? "lit/hr" : "gal/hr"}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Divider />
-        <Typography.Title level={4}>Mash Settings</Typography.Title>
-        <Row justify="start" gutter={[12, 0]}>
-          <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Sparging"
-              name="sparge"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: 105 }}
-              initialValue={sparge}
-            >
-              <Switch
-                checkedChildren={<CheckOutlined />}
-                unCheckedChildren={<CloseOutlined />}
-                checked={sparge}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={12} sm={12} md={4} lg={4} xl={4}>
-            <Form.Item
-              label="Mash Thickness"
-              name="mashThickness"
-              labelCol={{ span: 30, offset: 0 }}
-              style={{ width: 125 }}
-              initialValue="1.3"
-              hidden={!sparge}
-            >
-              <InputNumber
+                value={localBrewSettings.mash_thickness_target.toString()}
+                onChange={(value: string) =>
+                  handleFieldChange(value, "mash_thickness_target")
+                }
                 min="0"
                 max="100"
                 step="0.1"
                 style={{ width: 115 }}
-                addonAfter={measurementType === "metric" ? "l/kg" : "qt/lb"}
+                addonAfter={
+                  localBrewSettings.measurement_type === "metric"
+                    ? "l/kg"
+                    : "qt/lb"
+                }
               />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Divider />
-        <Affix offsetBottom={10} style={{ float: "right" }}>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Save
-            </Button>
-          </Form.Item>
-        </Affix>
-      </Form>
+            }
+            orientation="column"
+          />
+        )}
+      </div>
+      <Divider />
+      <Affix offsetBottom={10} style={{ float: "right" }}>
+        <Form.Item>
+          <Button type="primary" onClick={handleSave}>
+            Save
+          </Button>
+        </Form.Item>
+      </Affix>
     </Content>
   );
 };

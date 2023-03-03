@@ -19,6 +19,7 @@ from rest_framework import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from brew_log.views import BrewLogViewSet
+from brew_settings.views import BrewSettingViewSet
 from recipes.views import RecipesViewSet
 from user.views import UserViewSet
 
@@ -26,6 +27,7 @@ router = routers.DefaultRouter()
 router.register(r"recipes", RecipesViewSet)
 router.register(r"users", UserViewSet)
 router.register(r"brew-logs", BrewLogViewSet)
+router.register(r"brew-settings", BrewSettingViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),

@@ -104,12 +104,6 @@ const RecipeDetailPage = () => {
     }
   }, [recipe, brewSettings]);
 
-  const handleSaveFailed = () => {
-    message.error(
-      "Form could not be saved. Please address any validation errors."
-    );
-  };
-
   const handleSave = async () => {
     setLoading(true);
     await createUpdateRecipe(recipe);

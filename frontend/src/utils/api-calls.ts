@@ -36,14 +36,14 @@ export const getBrewSettings = async (): Promise<BrewSettings> => {
   return await makeRequest("/users/", "GET");
 };
 
-export const deleteBrewSettings = async (id: string): Promise<void> => {
-  return await makeRequest(`/users/${id}/`, "DELETE");
-};
-
 export const createUpdateBrewSettings = async (
   brewSettings: BrewSettings
 ): Promise<BrewSettings> => {
-  return await makeRequest("/users/", "POST", brewSettings);
+  return await makeRequest(
+    `/brew-settings/${brewSettings.id}/`,
+    "PUT",
+    brewSettings
+  );
 };
 
 // BREW LOG ENDPOINTS
