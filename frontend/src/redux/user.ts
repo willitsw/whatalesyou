@@ -10,6 +10,7 @@ import { createUser, getCurrentUser, getToken } from "../utils/api-calls";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
 import jwt from "jwt-decode";
 import { setBrewSettings } from "./brew-settings";
+import { message } from "antd";
 
 export interface UserState {
   currentUser: User;
@@ -25,13 +26,19 @@ export const loadUserData = createAsyncThunk(
   "users/loadUserData",
   async (_, { dispatch }) => {
     const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-    const { user_id } = jwt(token) as TokenPayload;
-    const userResponse = await getCurrentUser(user_id);
+    if (token) {
+      const { user_id } = jwt(token) as TokenPayload;
+      const userResponse = await getCurrentUser(user_id);
+      message.success(`Successfully logged in as ${userResponse.email}!`);
 
-    const { settings, ...user } = userResponse;
+      const { settings, ...user } = userResponse;
 
-    dispatch(setUser(user));
-    dispatch(setBrewSettings(settings));
+      dispatch(setUser(user));
+      dispatch(setBrewSettings(settings));
+    } else {
+      message.error("We were unable to load the user. Please try again.");
+      console.error("User not loaded!");
+    }
   }
 );
 
@@ -60,6 +67,7 @@ export const logoutUser = createAsyncThunk(
     dispatch(clearUser);
     dispatch(setIsAuthenticated(false));
     dispatch(setBrewSettings(null));
+    message.success("Successfully logged out.");
     console.log("logged out");
   }
 );
