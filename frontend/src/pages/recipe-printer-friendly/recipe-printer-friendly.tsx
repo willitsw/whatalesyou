@@ -5,7 +5,7 @@ import Content from "../../components/content/content";
 import { Button } from "antd";
 import { useReactToPrint } from "react-to-print";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
-import { Recipe } from "../../types/recipe";
+import { Recipe, RecipeDetailed } from "../../types/recipe";
 
 const RecipePrinterFriendly = () => {
   const { id } = useParams();
@@ -14,7 +14,7 @@ const RecipePrinterFriendly = () => {
     content: () => printRef.current,
   });
 
-  const [recipe, setRecipe] = useState<Recipe>(null);
+  const [recipe, setRecipe] = useState<RecipeDetailed>(null);
 
   useEffect(() => {
     const setNewRecipe = async () => {
@@ -27,7 +27,7 @@ const RecipePrinterFriendly = () => {
 
   useEffect(() => {
     if (recipe) {
-      //handlePrint();
+      handlePrint();
     }
   }, [recipe]);
 

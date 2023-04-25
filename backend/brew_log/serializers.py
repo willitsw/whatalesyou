@@ -1,3 +1,4 @@
+from drf_writable_nested.serializers import WritableNestedModelSerializer
 from rest_framework import serializers
 
 from .models import BrewLog, GravityReading
@@ -9,7 +10,7 @@ class GravityReadingSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class BrewLogSerializer(serializers.ModelSerializer):
+class BrewLogSerializer(WritableNestedModelSerializer, serializers.ModelSerializer):
     gravity_readings = GravityReadingSerializer(many=True)
 
     class Meta:

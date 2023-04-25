@@ -32,8 +32,8 @@ export enum BrewLogActionTypes {
 export const refreshBrewLogList = createAsyncThunk(
   "brew-log/refreshBrewLogList",
   async (_, { dispatch }) => {
-    const brewLogs = await getBrewLogsByUser();
-    dispatch(setBrewLogListResponse(brewLogs));
+    const brewLogResponse = await getBrewLogsByUser();
+    dispatch(setBrewLogListResponse(brewLogResponse));
   }
 );
 
@@ -102,5 +102,7 @@ export const selectBrewLogList = (state: RootState) =>
   state.brewLogs.brewLogList;
 export const selectCurrentBrewLog = (state: RootState) =>
   state.brewLogs.currentBrewLog;
+export const selectBrewLogCount = (state: RootState) =>
+  state.brewLogs.brewLogCount;
 
 export default brewLogSlice.reducer;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Children, useEffect, useState } from "react";
 import Content from "../../components/content/content";
 import { selectBrewSettings } from "../../redux/brew-settings";
 import {
@@ -7,6 +7,7 @@ import {
   Col,
   ConfigProvider,
   DatePicker,
+  Descriptions,
   Form,
   Input,
   InputNumber,
@@ -18,32 +19,41 @@ import {
   Select,
   Space,
   Tabs,
+  Tooltip,
   Typography,
 } from "antd";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   processCreateUpdateBrewLog,
   refreshBrewLogList,
+  selectBrewLogCount,
   selectBrewLogList,
   selectCurrentBrewLog,
   setCurrentBrewLog,
 } from "../../redux/brew-log";
-import { getBrewLogById, getRecipeById } from "../../utils/api-calls";
+import {
+  getBrewLogById,
+  getRecipeById,
+  getRecipesByUser,
+} from "../../utils/api-calls";
 import { setPageIsClean } from "../../redux/global-modals";
 import { DATE_FORMAT } from "../../constants";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
-import { Recipe } from "../../types/recipe";
-import { BrewLog } from "../../types/brew-log";
+import { Recipe, RecipeDetailed } from "../../types/recipe";
+import { BrewLog, BrewLogStatuses, GravityReading } from "../../types/brew-log";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
+import ElementWithLabel from "../../components/form-layouts/element-with-label";
+import { selectCurrentUser } from "../../redux/user";
+import { v4 as uuid } from "uuid";
 
 const defaultBrewLog: BrewLog = {
   name: "New Brew Log Entry",
   brew_date: dayjs().toISOString(),
-  id: "",
-  status: "In Progress",
+  id: uuid(),
+  status: "in_progress",
   owner: 1,
   batch_number: 0,
   gravity_readings: [],
@@ -57,25 +67,33 @@ const defaultBrewLog: BrewLog = {
   packaging_notes: "",
 };
 
+const defaultGravityReading: GravityReading = {
+  id: uuid(),
+  date: dayjs().toISOString(),
+  gravity: 1,
+  notes: "",
+};
+
 interface BrewLogForm extends BrewLog {
   workingBrewDate: Dayjs;
 }
 
 const BrewLogDetailPage = () => {
   const brewSettings = useAppSelector(selectBrewSettings);
-  const [form] = Form.useForm<BrewLogForm>();
+  const user = useAppSelector(selectCurrentUser);
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const brewLog = useAppSelector(selectCurrentBrewLog);
+  const [brewLog, setBrewLog] = useState<BrewLog>();
   const brewLogList = useAppSelector(selectBrewLogList);
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe>(null);
+  const brewLogCount = useAppSelector(selectBrewLogCount);
   const [loading, setLoading] = useState<boolean>(true);
-  const [potentialNewId, setPotentialNewId] = useState<string>(null);
+  const [recipe, setRecipe] = useState<RecipeDetailed>(null);
   const [gravityReadingToDelete, setGravityReadingToDelete] =
-    useState<number>(null);
-
+    useState<string>(null);
+  const [gravityReading, setGravityReading] = useState<GravityReading>(null);
+  const [recipeList, setRecipeList] = useState<Recipe[]>([]);
   useEffect(() => {
     const onComponentLoad = async () => {
       if (brewLogList?.length === 0) {
@@ -87,54 +105,74 @@ const BrewLogDetailPage = () => {
       } else {
         workingBrewLog = {
           ...defaultBrewLog,
-          batch_number: brewLogList.length + 1,
+          batch_number: brewLogCount + 1,
         };
       }
-
-      form.setFieldsValue({
-        ...workingBrewLog,
-        workingBrewDate: dayjs(workingBrewLog.brew_date),
-      });
-      dispatch(setCurrentBrewLog(workingBrewLog));
+      setBrewLog(workingBrewLog);
 
       if (workingBrewLog.recipe) {
-        // setSelectedRecipe(workingBrewLog.recipe);
+        const recipe = await getRecipeById(workingBrewLog.recipe);
+        setRecipe(recipe);
       }
+      const recipeResponse = await getRecipesByUser();
+      setRecipeList(recipeResponse.results);
       setLoading(false);
     };
     onComponentLoad();
-  }, []);
+  }, [location.pathname, brewSettings, user]);
 
-  const handleSaveFailed = () => {
-    message.error(
-      "Form could not be saved. Please address any validation errors."
-    );
+  const handleAddGravityReading = () => {
+    setGravityReading(defaultGravityReading);
   };
 
   const handleSave = (brewLogForm: BrewLogForm) => {
     const newBrewLog: BrewLogForm = {
       ...brewLogForm,
       id: brewLog?.id ?? "",
-      // userId: brewSettings.id ?? "",
       brew_date: brewLogForm.workingBrewDate.toISOString(),
-      recipe: selectedRecipe.id ?? null,
     };
+    if (recipe) {
+      newBrewLog.recipe = recipe.id;
+    }
     delete newBrewLog.workingBrewDate;
     dispatch(processCreateUpdateBrewLog(newBrewLog));
     dispatch(setPageIsClean(true));
     message.success("Brew Log has been saved.");
   };
 
-  const handleChangeRecipe = async (newRecipeId: string) => {
+  const handleFieldChange = (value: any, key: any) => {
     dispatch(setPageIsClean(false));
-    const newRecipe = await getRecipeById(newRecipeId);
-    // setSelectedRecipe(newRecipe);
+    const newBrewLog = { ...brewLog };
+    newBrewLog[key] = value;
+    setBrewLog(newBrewLog);
   };
 
-  const handleDeleteClick = () => {
-    const gravityReadings = [...form.getFieldValue("gravityReadings")];
-    gravityReadings.splice(gravityReadingToDelete, 1);
-    form.setFieldsValue({ gravity_readings: gravityReadings });
+  const handleGravityReadingChange = (value: any, key: any) => {
+    const newGravityReading = { ...gravityReading };
+    newGravityReading[key] = value;
+    setGravityReading(newGravityReading);
+  };
+
+  const handleGravityReadingOk = () => {
+    const newBrewLog = { ...brewLog };
+    const idxToReplace = newBrewLog.gravity_readings.findIndex(
+      (reading) => reading.id === gravityReading.id
+    );
+    if (idxToReplace >= 0) {
+      newBrewLog.gravity_readings[idxToReplace] = gravityReading;
+    } else {
+      newBrewLog.gravity_readings.push(gravityReading);
+    }
+    setBrewLog(newBrewLog);
+    setGravityReading(null);
+  };
+
+  const handleGravityReadingDelete = () => {
+    const newBrewLog = { ...brewLog };
+    newBrewLog.gravity_readings = newBrewLog.gravity_readings.filter(
+      (g) => g.id !== gravityReadingToDelete
+    );
+    setBrewLog(newBrewLog);
     setGravityReadingToDelete(null);
   };
 
@@ -143,265 +181,297 @@ const BrewLogDetailPage = () => {
   };
 
   return (
-    <Form
-      name="brew-log-edit-form"
-      labelCol={{ span: 8 }}
-      wrapperCol={{ span: 16 }}
-      form={form}
-      onFinish={handleSave}
-      onFinishFailed={handleSaveFailed}
-      onValuesChange={() => dispatch(setPageIsClean(false))}
-      scrollToFirstError={true}
-      autoComplete="off"
-      layout="vertical"
-      preserve
-    >
+    <>
       <Content
         pageTitle={!loading ? brewLog?.name ?? "" : ""}
         isLoading={loading}
       >
-        <Tabs defaultActiveKey="1">
-          <Tabs.TabPane tab="Log Data" key="1">
-            <Row justify="start" gutter={[12, 0]}>
-              <Col span={24}>
-                <Typography.Title level={4}>General Info</Typography.Title>
-              </Col>
-              <Col xs={12} sm={12} md={6} lg={6} xl={6}>
-                <Form.Item
-                  label="Brew Session Name"
-                  name="name"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please name your brew session",
-                    },
-                  ]}
-                  labelCol={{ span: 30, offset: 0 }}
-                >
-                  <Input style={{ width: "100%" }} />
-                </Form.Item>
-              </Col>
-              <Col xs={12} sm={12} md={6} lg={6} xl={6}>
-                <Form.Item
-                  label="Brew Date"
-                  name="workingBrewDate"
-                  rules={[
-                    {
-                      required: true,
-                      message: "A Brew Date is required",
-                    },
-                  ]}
-                  initialValue={dayjs()}
-                >
-                  <DatePicker
-                    format={(date) =>
-                      dayjs(date.toISOString()).format(DATE_FORMAT)
-                    }
-                  />
-                </Form.Item>
-              </Col>
-              <Col xs={12} sm={12} md={6} lg={6} xl={6}>
-                <Form.Item
-                  label="Status"
-                  name="status"
-                  initialValue="In Progress"
-                >
-                  <Radio.Group>
-                    <Radio.Button value="In Progress">In Progress</Radio.Button>
-                    <Radio.Button value="Complete">Complete</Radio.Button>
-                  </Radio.Group>
-                </Form.Item>
-              </Col>
-              <Col xs={12} sm={12} md={6} lg={6} xl={6}>
-                <Form.Item
-                  label="Batch Number"
-                  name="batchNumber"
-                  initialValue={brewLogList.length + 1}
-                >
-                  <InputNumber min="0" max="100" step="1" />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <ConfigProvider renderEmpty={() => null}>
-                  <Form.List name="gravityReadings">
-                    {(fields, { add }) => (
-                      <List
-                        header={
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                            }}
+        <Tabs
+          defaultActiveKey="1"
+          items={[
+            {
+              key: "1",
+              label: "Log Data",
+              children: (
+                <>
+                  <Typography.Title level={4}>General Info</Typography.Title>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      gap: 10,
+                      marginBottom: 50,
+                    }}
+                  >
+                    <ElementWithLabel
+                      formElement={
+                        <Input
+                          value={brewLog?.name}
+                          onChange={(value) =>
+                            handleFieldChange(value.target.value, "name")
+                          }
+                          style={{ maxWidth: "100%" }}
+                        />
+                      }
+                      label="Brew Session Name"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <DatePicker
+                          format={(date) =>
+                            dayjs(date.toISOString()).format(DATE_FORMAT)
+                          }
+                          value={dayjs(brewLog?.brew_date)}
+                          onChange={(date) =>
+                            handleFieldChange(date.toISOString(), "brew_date")
+                          }
+                        />
+                      }
+                      label="Brew Date"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <Radio.Group
+                          value={brewLog?.status}
+                          onChange={(value) =>
+                            handleFieldChange(value.target.value, "status")
+                          }
+                        >
+                          <Radio.Button value="in_progress">
+                            In Progress
+                          </Radio.Button>
+                          <Radio.Button value="complete">Complete</Radio.Button>
+                        </Radio.Group>
+                      }
+                      label="Status"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <InputNumber
+                          value={brewLog?.batch_number.toString()}
+                          onChange={(value) =>
+                            handleFieldChange(value, "batch_number")
+                          }
+                          min="0"
+                          max="100"
+                          step="1"
+                        />
+                      }
+                      label="Batch Number"
+                      orientation="column"
+                    />
+                  </div>
+                  <ConfigProvider renderEmpty={() => null}>
+                    <List
+                      header={
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Typography.Title level={4}>
+                            Gravity Readings
+                          </Typography.Title>
+                          <Button
+                            style={{ marginLeft: "15px" }}
+                            type="primary"
+                            onClick={handleAddGravityReading}
                           >
-                            <Typography.Title level={4}>
-                              Gravity Readings
-                            </Typography.Title>
-                            <Button
-                              style={{ marginLeft: "15px" }}
-                              type="primary"
-                              onClick={add}
-                            >
-                              Add Gravity Reading
-                            </Button>
-                          </div>
-                        }
-                        bordered={false}
-                        dataSource={fields}
-                        renderItem={(field, index) => (
-                          <Form.Item
-                            noStyle
-                            shouldUpdate={(prevValues, curValues) =>
-                              prevValues.date !== curValues.date ||
-                              prevValues.gravity !== curValues.gravity ||
-                              prevValues.notes !== curValues.notes
-                            }
-                          >
-                            {() => (
-                              <Row>
-                                <Col xs={12} sm={12} md={12} lg={4} xl={4}>
-                                  <Form.Item
-                                    {...field}
-                                    name={[field.name, "date"]}
-                                    label="Date"
-                                    initialValue={dayjs()}
-                                  >
-                                    <DatePicker
-                                      format={(date) =>
-                                        dayjs(date.toISOString()).format(
-                                          DATE_FORMAT
-                                        )
-                                      }
-                                    />
-                                  </Form.Item>
-                                </Col>
-                                <Col xs={12} sm={12} md={12} lg={4} xl={4}>
-                                  <Form.Item
-                                    {...field}
-                                    name={[field.name, "gravity"]}
-                                    label="Gravity"
-                                    initialValue={"1.000"}
-                                  >
-                                    <InputNumber
-                                      stringMode
-                                      min="1"
-                                      max="2"
-                                      step="0.001"
-                                    />
-                                  </Form.Item>
-                                </Col>
-                                <Col xs={20} sm={20} md={20} lg={14} xl={14}>
-                                  <Form.Item
-                                    {...field}
-                                    name={[field.name, "notes"]}
-                                    label="Notes"
-                                  >
-                                    <Input />
-                                  </Form.Item>
-                                </Col>
-                                <Col xs={2} sm={2} md={2} lg={2} xl={2}>
-                                  <Button
-                                    type="primary"
-                                    shape="circle"
-                                    icon={<DeleteOutlined />}
-                                    onClick={() => {
-                                      setGravityReadingToDelete(index);
+                            Add Gravity Reading
+                          </Button>
+                        </div>
+                      }
+                      renderItem={(item: GravityReading) => (
+                        <List.Item>
+                          <List.Item.Meta
+                            description={
+                              <Descriptions
+                                title={
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
                                     }}
-                                    style={{ marginTop: 30, marginLeft: 15 }}
-                                  />
-                                </Col>
-                              </Row>
-                            )}
-                          </Form.Item>
-                        )}
-                      />
+                                  >
+                                    {item.notes}
+                                    <Space>
+                                      <Tooltip title="Edit">
+                                        <Button
+                                          shape="circle"
+                                          icon={<EditOutlined />}
+                                          onClick={() =>
+                                            setGravityReading(item)
+                                          }
+                                        />
+                                      </Tooltip>
+                                      <Tooltip title="Delete">
+                                        <Button
+                                          shape="circle"
+                                          icon={<DeleteOutlined />}
+                                          onClick={() =>
+                                            setGravityReadingToDelete(item.id)
+                                          }
+                                        />
+                                      </Tooltip>
+                                    </Space>
+                                  </div>
+                                }
+                              >
+                                <Descriptions.Item label="Date">
+                                  {dayjs(item.date).format(DATE_FORMAT)}
+                                </Descriptions.Item>
+                                <Descriptions.Item label="Gravity">
+                                  {item.gravity}
+                                </Descriptions.Item>
+                              </Descriptions>
+                            }
+                          />
+                        </List.Item>
+                      )}
+                      dataSource={brewLog?.gravity_readings}
+                    />
+                  </ConfigProvider>
+                  <Typography.Title level={4}>Process Notes</Typography.Title>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      gap: 10,
+                      marginBottom: 50,
+                    }}
+                  >
+                    <ElementWithLabel
+                      formElement={
+                        <Input.TextArea
+                          value={brewLog?.brewing_notes}
+                          onChange={(value) =>
+                            handleFieldChange(value, "brewing_notes")
+                          }
+                        />
+                      }
+                      label="Brewing Notes"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <Input.TextArea
+                          value={brewLog?.fermentation_notes}
+                          onChange={(value) =>
+                            handleFieldChange(value, "fermentation_notes")
+                          }
+                        />
+                      }
+                      label="Fermentation Notes"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <Input.TextArea
+                          value={brewLog?.hop_notes}
+                          onChange={(value) =>
+                            handleFieldChange(value, "hop_notes")
+                          }
+                        />
+                      }
+                      label="Hop Notes"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <Input.TextArea
+                          value={brewLog?.yeast_notes}
+                          onChange={(value) =>
+                            handleFieldChange(value, "yeast_notes")
+                          }
+                        />
+                      }
+                      label="Yeast Notes"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <Input.TextArea
+                          value={brewLog?.other_notes}
+                          onChange={(value) =>
+                            handleFieldChange(value, "other_notes")
+                          }
+                        />
+                      }
+                      label="Other Notes"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <Input.TextArea
+                          value={brewLog?.packaging_notes}
+                          onChange={(value) =>
+                            handleFieldChange(value, "packaging_notes")
+                          }
+                        />
+                      }
+                      label="Packaging Notes"
+                      orientation="column"
+                    />
+                    <ElementWithLabel
+                      formElement={
+                        <Input.TextArea
+                          value={brewLog?.tasting_notes}
+                          onChange={(value) =>
+                            handleFieldChange(value, "tasting_notes")
+                          }
+                        />
+                      }
+                      label="Tasting Notes"
+                      orientation="column"
+                    />
+                  </div>
+                </>
+              ),
+            },
+            {
+              key: "2",
+              label: "Recipe",
+              children: (
+                <>
+                  Select an existing recipe:
+                  <Select
+                    value={recipe ? recipe.name : "Select a recipe"}
+                    optionFilterProp="children"
+                    onChange={async (newRecipeId) => {
+                      const newRecipe = await getRecipeById(newRecipeId);
+                      setRecipe(newRecipe);
+                    }}
+                    style={{ width: 240, marginLeft: 10, marginRight: 10 }}
+                  >
+                    {recipeList.map((recipe) => {
+                      return (
+                        <Select.Option key={recipe.id} value={recipe.id}>
+                          {recipe.name}
+                        </Select.Option>
+                      );
+                    })}
+                  </Select>{" "}
+                  or <Link to={"/recipes/new/"}>create a new recipe</Link>.
+                  <div style={{ marginTop: 20 }}>
+                    {recipe ? (
+                      <ReadOnlyRecipe recipe={recipe} />
+                    ) : (
+                      "No recipe is selected. Please choose one from the dropdown above."
                     )}
-                  </Form.List>
-                </ConfigProvider>
-              </Col>
-              <Col span={24}>
-                <Typography.Title level={4}>Process Notes</Typography.Title>
-              </Col>
-              <Col span={24}>
-                <Form.Item label="Brewing Notes" name="brewingNotes">
-                  <Input.TextArea />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item label="Fermentation Notes" name="fermentationNotes">
-                  <Input.TextArea />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item label="Hop Notes" name="hopNotes">
-                  <Input.TextArea />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item label="Yeast Notes" name="yeastNotes">
-                  <Input.TextArea />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item label="Other Notes" name="otherNotes">
-                  <Input.TextArea />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item label="Packaging Notes" name="packagingNotes">
-                  <Input.TextArea />
-                </Form.Item>
-              </Col>
-              <Col span={24}>
-                <Form.Item label="Tasting Notes" name="tastingNotes">
-                  <Input.TextArea />
-                </Form.Item>
-              </Col>
-            </Row>
-          </Tabs.TabPane>
-          <Tabs.TabPane tab="Recipe" key="2">
-            {/* <>
-              Select an existing recipe:
-              <Select
-                showSearch
-                value={selectedRecipe ? selectedRecipe.name : "Select a recipe"}
-                optionFilterProp="children"
-                onChange={(newRecipeId) => {
-                  if (
-                    selectedRecipe &&
-                    !recipeList.some((r) => r.id === selectedRecipe.id)
-                  ) {
-                    setPotentialNewId(newRecipeId);
-                  } else {
-                    handleChangeRecipe(newRecipeId);
-                  }
-                }}
-                filterOption={(input, option) =>
-                  // eslint-disable-next-line
-                  // @ts-ignore
-                  option.children.toLowerCase().indexOf(input.toLowerCase()) >=
-                  0
-                }
-                style={{ width: 240, marginLeft: 10, marginRight: 10 }}
-              >
-                {recipeList.map((recipe) => {
-                  return (
-                    <Select.Option key={recipe.id} value={recipe.id}>
-                      {recipe.name}
-                    </Select.Option>
-                  );
-                })}
-              </Select>{" "}
-              or <Link to={"/recipes/new/"}>create a new recipe</Link>.
-              <div style={{ marginTop: 20 }}>
-                {selectedRecipe ? (
-                  <ReadOnlyRecipe recipe={selectedRecipe} />
-                ) : (
-                  "No recipe is selected. Please choose one from the dropdown above."
-                )}
-              </div>
-            </> */}
-          </Tabs.TabPane>
-        </Tabs>
+                  </div>
+                </>
+              ),
+            },
+          ]}
+        />
         <Affix offsetBottom={10} style={{ float: "right" }}>
           <Space>
             <Form.Item>
@@ -417,24 +487,74 @@ const BrewLogDetailPage = () => {
           </Space>
         </Affix>
       </Content>
-      <OkCancelModal
-        onCancel={() => setPotentialNewId(null)}
-        onSubmit={() => handleChangeRecipe(potentialNewId)}
-        showModal={potentialNewId !== null}
+      {/* <OkCancelModal
+        onCancel={() => setRecipeId(null)}
+        onSubmit={() => handleChangeRecipe(recipeId)}
+        showModal={recipeId !== null}
         title="Change recipe in brew log?"
       >
         This selected recipe does not exist in your Recipe List anymore. If you
         change this, it will be lost forever. Continue?
-      </OkCancelModal>
+      </OkCancelModal> */}
+      <Modal
+        title="Add/Edit Gravity Reading"
+        onCancel={() => setGravityReading(null)}
+        onOk={handleGravityReadingOk}
+        open={gravityReading !== null}
+      >
+        <>
+          <ElementWithLabel
+            formElement={
+              <Input
+                value={gravityReading?.notes}
+                onChange={(value) =>
+                  handleGravityReadingChange(value.target.value, "notes")
+                }
+                style={{ maxWidth: "100%" }}
+              />
+            }
+            label="Notes"
+            orientation="column"
+          />
+          <ElementWithLabel
+            formElement={
+              <InputNumber
+                value={gravityReading?.gravity.toString()}
+                onChange={(value) =>
+                  handleGravityReadingChange(value, "gravity")
+                }
+                min="0"
+                max="2"
+                step=".001"
+              />
+            }
+            label="Gravity"
+            orientation="column"
+          />
+          <ElementWithLabel
+            formElement={
+              <DatePicker
+                format={(date) => dayjs(date.toISOString()).format(DATE_FORMAT)}
+                value={dayjs(gravityReading?.date)}
+                onChange={(date) =>
+                  handleGravityReadingChange(date.toISOString(), "date")
+                }
+              />
+            }
+            label="Reading Date"
+            orientation="column"
+          />
+        </>
+      </Modal>
       <Modal
         title="Delete Gravity Reading?"
         onCancel={() => setGravityReadingToDelete(null)}
-        onOk={handleDeleteClick}
+        onOk={handleGravityReadingDelete}
         open={gravityReadingToDelete !== null}
       >
         Are you sure you want to delete this gravity reading?
       </Modal>
-    </Form>
+    </>
   );
 };
 

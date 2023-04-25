@@ -1,3 +1,5 @@
+import { BrewLogStatuses } from "./brew-log";
+
 export type MeasurementType = "imperial" | "metric";
 
 export const MeasurementTypeLookup: Record<MeasurementType, string> = {
@@ -61,3 +63,8 @@ export const IngredientAmountTypeLookup: Record<IngredientAmountType, string> =
     lb: "lb",
     each: "each",
   };
+
+export const BrewLogStatusLookup: Record<BrewLogStatuses, string> = {
+  in_progress: "In Progress",
+  complete: "Complete",
+};

@@ -1,11 +1,13 @@
 import { PagedResponse } from "./shared";
 
+export type BrewLogStatuses = "in_progress" | "complete";
+
 export interface BrewLog {
   id: string;
-  gravity_readings: any[];
+  gravity_readings: GravityReading[];
   name: string;
   batch_number: number;
-  status: string;
+  status: BrewLogStatuses;
   brew_date: string;
   secondary_date?: string;
   packaging_date?: string;
@@ -18,6 +20,13 @@ export interface BrewLog {
   other_notes: string;
   recipe?: string;
   owner: number;
+}
+
+export interface GravityReading {
+  id: string;
+  notes: string;
+  gravity: number;
+  date: string;
 }
 
 export interface BrewLogListResponse extends PagedResponse {

@@ -6,6 +6,7 @@ import {
   Ingredient,
   NonFermentable,
 } from "../types/recipe";
+import { Step } from "../types/shared";
 
 const sortAmountDescending = (a: Ingredient, b: Ingredient) => {
   if (a.amount > b.amount) {
@@ -39,26 +40,20 @@ const sortTimeAscending = (a: Ingredient, b: Ingredient) => {
 
 export const sortIngredientsByStep = (
   ingredients: Ingredient[]
-): {
-  StrikeWater: Ingredient[];
-  Mash: Ingredient[];
-  Boil: Ingredient[];
-  Fermentor: Ingredient[];
-  Bottle: Ingredient[];
-} => {
-  const sortedIngredients = ingredients.reduce(
+): Record<Step, Ingredient[]> => {
+  const sortedIngredients: Record<Step, Ingredient[]> = ingredients.reduce(
     (returnValue, currentValue) => {
       returnValue[currentValue.step].push(currentValue);
       return returnValue;
     },
-    { StrikeWater: [], Mash: [], Boil: [], Fermentor: [], Bottle: [] }
+    { strikewater: [], mash: [], boil: [], fermentor: [], bottle: [] }
   );
 
-  sortedIngredients.StrikeWater.sort(sortAmountDescending);
-  sortedIngredients.Mash.sort(sortAmountDescending);
-  sortedIngredients.Boil.sort(sortTimeDescending);
-  sortedIngredients.Fermentor.sort(sortTimeAscending);
-  sortedIngredients.Bottle.sort(sortAmountDescending);
+  sortedIngredients.strikewater.sort(sortAmountDescending);
+  sortedIngredients.mash.sort(sortAmountDescending);
+  sortedIngredients.boil.sort(sortTimeDescending);
+  sortedIngredients.fermentor.sort(sortTimeAscending);
+  sortedIngredients.bottle.sort(sortAmountDescending);
 
   return sortedIngredients;
 };

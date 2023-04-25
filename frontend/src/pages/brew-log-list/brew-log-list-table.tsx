@@ -11,7 +11,8 @@ import dayjs from "dayjs";
 import { DATE_FORMAT } from "../../constants";
 import { useAnalytics } from "../../utils/analytics";
 import { Breakpoint } from "antd/es/_util/responsiveObserver";
-import { BrewLog } from "../../types/brew-log";
+import { BrewLog, BrewLogStatuses } from "../../types/brew-log";
+import { BrewLogStatusLookup } from "../../types/shared";
 
 const BrewLogListTable = () => {
   const dispatch = useAppDispatch();
@@ -82,6 +83,7 @@ const BrewLogListTable = () => {
     return {
       ...brewLog,
       key: brewLog.id,
+      status: BrewLogStatusLookup[brewLog.status] as BrewLogStatuses,
     };
   });
 
