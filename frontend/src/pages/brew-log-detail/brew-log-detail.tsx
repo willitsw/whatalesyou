@@ -49,35 +49,6 @@ import ElementWithLabel from "../../components/form-layouts/element-with-label";
 import { selectCurrentUser } from "../../redux/user";
 import { v4 as uuid } from "uuid";
 
-const defaultBrewLog: BrewLog = {
-  name: "New Brew Log Entry",
-  brew_date: dayjs().toISOString(),
-  id: uuid(),
-  status: "in_progress",
-  owner: 1,
-  batch_number: 0,
-  gravity_readings: [],
-  brewing_notes: "",
-  fermentation_notes: "",
-  hop_notes: "",
-  other_notes: "",
-  packaging_date: "",
-  tasting_notes: "",
-  yeast_notes: "",
-  packaging_notes: "",
-};
-
-const defaultGravityReading: GravityReading = {
-  id: uuid(),
-  date: dayjs().toISOString(),
-  gravity: 1,
-  notes: "",
-};
-
-interface BrewLogForm extends BrewLog {
-  workingBrewDate: Dayjs;
-}
-
 const BrewLogDetailPage = () => {
   const brewSettings = useAppSelector(selectBrewSettings);
   const user = useAppSelector(selectCurrentUser);
@@ -94,6 +65,7 @@ const BrewLogDetailPage = () => {
     useState<string>(null);
   const [gravityReading, setGravityReading] = useState<GravityReading>(null);
   const [recipeList, setRecipeList] = useState<Recipe[]>([]);
+
   useEffect(() => {
     const onComponentLoad = async () => {
       if (brewLogList?.length === 0) {
@@ -104,7 +76,7 @@ const BrewLogDetailPage = () => {
         workingBrewLog = await getBrewLogById(id);
       } else {
         workingBrewLog = {
-          ...defaultBrewLog,
+          ...getBrewLog(),
           batch_number: brewLogCount + 1,
         };
       }
@@ -121,21 +93,45 @@ const BrewLogDetailPage = () => {
     onComponentLoad();
   }, [location.pathname, brewSettings, user]);
 
+  const getBrewLog = (): BrewLog => ({
+    name: "New Brew Log Entry",
+    brew_date: dayjs().toISOString(),
+    id: uuid(),
+    status: "in_progress",
+    owner: user.id,
+    batch_number: 0,
+    gravity_readings: [],
+    brewing_notes: "",
+    fermentation_notes: "",
+    hop_notes: "",
+    other_notes: "",
+    tasting_notes: "",
+    yeast_notes: "",
+    packaging_notes: "",
+  });
+
+  const getDefaultGravityReading = (): GravityReading => ({
+    id: uuid(),
+    date: dayjs().toISOString(),
+    gravity: 1,
+    notes: "",
+    brew_log: brewLog.id,
+  });
+
   const handleAddGravityReading = () => {
-    setGravityReading(defaultGravityReading);
+    setGravityReading(getDefaultGravityReading());
   };
 
-  const handleSave = (brewLogForm: BrewLogForm) => {
-    const newBrewLog: BrewLogForm = {
-      ...brewLogForm,
-      id: brewLog?.id ?? "",
-      brew_date: brewLogForm.workingBrewDate.toISOString(),
-    };
+  const handleSave = () => {
+    const brewLogToSave = { ...brewLog };
+
     if (recipe) {
-      newBrewLog.recipe = recipe.id;
+      brewLogToSave.recipe = recipe.id;
     }
-    delete newBrewLog.workingBrewDate;
-    dispatch(processCreateUpdateBrewLog(newBrewLog));
+
+    brewLogToSave.brew_date = dayjs(brewLog.brew_date).format("YYYY-MM-DD");
+
+    dispatch(processCreateUpdateBrewLog(brewLogToSave));
     dispatch(setPageIsClean(true));
     message.success("Brew Log has been saved.");
   };
@@ -353,7 +349,10 @@ const BrewLogDetailPage = () => {
                         <Input.TextArea
                           value={brewLog?.brewing_notes}
                           onChange={(value) =>
-                            handleFieldChange(value, "brewing_notes")
+                            handleFieldChange(
+                              value.target.value,
+                              "brewing_notes"
+                            )
                           }
                         />
                       }
@@ -365,7 +364,10 @@ const BrewLogDetailPage = () => {
                         <Input.TextArea
                           value={brewLog?.fermentation_notes}
                           onChange={(value) =>
-                            handleFieldChange(value, "fermentation_notes")
+                            handleFieldChange(
+                              value.target.value,
+                              "fermentation_notes"
+                            )
                           }
                         />
                       }
@@ -377,7 +379,7 @@ const BrewLogDetailPage = () => {
                         <Input.TextArea
                           value={brewLog?.hop_notes}
                           onChange={(value) =>
-                            handleFieldChange(value, "hop_notes")
+                            handleFieldChange(value.target.value, "hop_notes")
                           }
                         />
                       }
@@ -389,7 +391,7 @@ const BrewLogDetailPage = () => {
                         <Input.TextArea
                           value={brewLog?.yeast_notes}
                           onChange={(value) =>
-                            handleFieldChange(value, "yeast_notes")
+                            handleFieldChange(value.target.value, "yeast_notes")
                           }
                         />
                       }
@@ -401,7 +403,7 @@ const BrewLogDetailPage = () => {
                         <Input.TextArea
                           value={brewLog?.other_notes}
                           onChange={(value) =>
-                            handleFieldChange(value, "other_notes")
+                            handleFieldChange(value.target.value, "other_notes")
                           }
                         />
                       }
@@ -413,7 +415,10 @@ const BrewLogDetailPage = () => {
                         <Input.TextArea
                           value={brewLog?.packaging_notes}
                           onChange={(value) =>
-                            handleFieldChange(value, "packaging_notes")
+                            handleFieldChange(
+                              value.target.value,
+                              "packaging_notes"
+                            )
                           }
                         />
                       }
@@ -425,7 +430,10 @@ const BrewLogDetailPage = () => {
                         <Input.TextArea
                           value={brewLog?.tasting_notes}
                           onChange={(value) =>
-                            handleFieldChange(value, "tasting_notes")
+                            handleFieldChange(
+                              value.target.value,
+                              "tasting_notes"
+                            )
                           }
                         />
                       }
@@ -475,7 +483,7 @@ const BrewLogDetailPage = () => {
         <Affix offsetBottom={10} style={{ float: "right" }}>
           <Space>
             <Form.Item>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" onClick={handleSave}>
                 Save
               </Button>
             </Form.Item>

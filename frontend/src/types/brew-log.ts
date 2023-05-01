@@ -19,7 +19,7 @@ export interface BrewLog {
   tasting_notes: string;
   other_notes: string;
   recipe?: string;
-  owner: number;
+  owner: string;
 }
 
 export interface GravityReading {
@@ -27,6 +27,7 @@ export interface GravityReading {
   notes: string;
   gravity: number;
   date: string;
+  brew_log: string;
 }
 
 export interface BrewLogListResponse extends PagedResponse {

@@ -61,7 +61,7 @@ export const deleteBrewLog = async (brewLogId: string): Promise<void> => {
 export const createUpdateBrewLog = async (
   brewLog: BrewLog
 ): Promise<BrewLog> => {
-  return (await makeRequest("/brew-logs/", "POST", brewLog)).body;
+  return (await makeRequest(`/brew-logs/${brewLog.id}/`, "PUT", brewLog)).body;
 };
 
 // TOKEN ENDPOINTS

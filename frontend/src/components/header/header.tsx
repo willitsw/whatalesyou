@@ -36,6 +36,7 @@ const Header = () => {
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
   const isAuthenticated = useAppSelector(userIsAuthenticated);
+  const currentUser = useAppSelector(selectCurrentUser);
   const pageIsClean = useAppSelector(selectPageIsClean);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -80,7 +81,10 @@ const Header = () => {
           label: (
             <Button
               type="link"
-              onClick={() => dispatch(setShowLoginModal(true))}
+              onClick={() => {
+                dispatch(setShowLoginModal(true));
+                navigate("/home");
+              }}
             >
               Login
             </Button>
@@ -113,6 +117,20 @@ const Header = () => {
           label: (
             <Button type="link" onClick={handleSignOut}>
               Logout
+            </Button>
+          ),
+        },
+        {
+          key: "user",
+          icon: <UserOutlined />,
+          label: (
+            <Button
+              type="link"
+              onClick={() => {
+                navigate(`/user/${currentUser.id}`);
+              }}
+            >
+              User Settings
             </Button>
           ),
         },

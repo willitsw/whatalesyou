@@ -28,36 +28,6 @@ import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { v4 as uuid } from "uuid";
 import { selectCurrentUser } from "../../redux/user";
 
-const defaultRecipe = {
-  id: uuid(),
-  name: "New Recipe",
-  description: "",
-  author: "",
-  batch_size: 5,
-  owner: "",
-  type: "all_grain",
-  measurement_type: "imperial",
-  efficiency: 70,
-  created_at: dayjs().toISOString(),
-  updated_at: dayjs().toISOString(),
-  chemistry: [],
-  cultures: [],
-  fermentables: [],
-  hops: [],
-  non_fermentables: [],
-} as RecipeDetailed;
-
-const defaultStats: Stats = {
-  abv: 0,
-  ibu: 0,
-  og: 0,
-  fg: 0,
-  srm: 0,
-  strikeWater: 0,
-  hotLiquor: 0,
-  waterLoss: 0,
-};
-
 const RecipeDetailPage = () => {
   const brewSettings = useAppSelector(selectBrewSettings);
   const user = useAppSelector(selectCurrentUser);
@@ -66,7 +36,7 @@ const RecipeDetailPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [recipe, setRecipe] = useState<RecipeDetailed>();
-  const [stats, setStats] = useState<Stats>(defaultStats);
+  const [stats, setStats] = useState<Stats>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDesktop] = useState<boolean>(
     window.matchMedia("(min-width: 1200px)").matches
@@ -83,7 +53,7 @@ const RecipeDetailPage = () => {
       } else if (location.pathname.includes("/recipes/edit") && id) {
         workingRecipe = await getRecipeById(id);
       } else {
-        workingRecipe = { ...defaultRecipe };
+        workingRecipe = { ...getDefaultRecipe() };
 
         workingRecipe.owner = user.id;
         workingRecipe.batch_size = brewSettings.batch_size;
@@ -101,8 +71,40 @@ const RecipeDetailPage = () => {
   useEffect(() => {
     if (recipe && brewSettings) {
       setStats(getStats(recipe, brewSettings));
+    } else {
+      setStats(getDefaultStats());
     }
   }, [recipe, brewSettings]);
+
+  const getDefaultRecipe = (): RecipeDetailed => ({
+    id: uuid(),
+    name: "New Recipe",
+    description: "",
+    author: "",
+    batch_size: 5,
+    owner: "",
+    type: "all_grain",
+    measurement_type: "imperial",
+    efficiency: 70,
+    created_at: dayjs().toISOString(),
+    updated_at: dayjs().toISOString(),
+    chemistry: [],
+    cultures: [],
+    fermentables: [],
+    hops: [],
+    non_fermentables: [],
+  });
+
+  const getDefaultStats = (): Stats => ({
+    abv: 0,
+    ibu: 0,
+    og: 0,
+    fg: 0,
+    srm: 0,
+    strikeWater: 0,
+    hotLiquor: 0,
+    waterLoss: 0,
+  });
 
   const handleSave = async () => {
     setLoading(true);

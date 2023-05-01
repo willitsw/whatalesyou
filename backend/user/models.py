@@ -6,7 +6,14 @@ from django.db import models
 
 class UserManager(BaseUserManager):
     def create_user(
-        self, email=None, password=None, is_admin=False, is_staff=False, is_active=True
+        self,
+        email=None,
+        password=None,
+        is_admin=False,
+        is_staff=False,
+        is_active=True,
+        first_name="",
+        last_name="",
     ):
         if not email:
             raise ValueError("User must have an email")
@@ -18,6 +25,8 @@ class UserManager(BaseUserManager):
         user.admin = is_admin
         user.staff = is_staff
         user.active = is_active
+        user.first_name = first_name
+        user.last_name = last_name
         user.save(using=self._db)
         return user
 
@@ -30,11 +39,14 @@ class UserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, password=None):
+        print("hit it")
         user = self.create_user(
             email=email,
             password=password,
             is_staff=True,
             is_admin=True,
+            first_name="",
+            last_name="",
         )
         return user
 

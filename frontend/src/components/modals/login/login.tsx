@@ -13,6 +13,7 @@ import React from "react";
 import { useAnalytics } from "../../../utils/analytics";
 import { createNewUser, loginUser } from "../../../redux/user";
 import { TokenRequest } from "../../../types/user";
+import { useNavigate } from "react-router-dom";
 
 const LoginModal = () => {
   const [form] = Form.useForm();
@@ -20,6 +21,7 @@ const LoginModal = () => {
   const showLoginModal = useAppSelector(selectShowLoginModal);
   const dispatch = useAppDispatch();
   const { fireAnalyticsEvent } = useAnalytics();
+  const navigate = useNavigate();
 
   const onCancel = () => dispatch(setShowLoginModal(false));
 
@@ -28,7 +30,7 @@ const LoginModal = () => {
     try {
       await form.validateFields();
       const values: TokenRequest = form.getFieldsValue();
-      dispatch(createNewUser(values));
+      // dispatch(createNewUser(values));
       fireAnalyticsEvent("Email/Password Account Created");
     } catch (error) {
       console.log("email / password signup failed:", error);
@@ -83,7 +85,10 @@ const LoginModal = () => {
         </Form.Item>
         <Button
           style={{ float: "right" }}
-          onClick={handleCreateAccount}
+          onClick={() => {
+            navigate("/user/new");
+            onCancel();
+          }}
           type="link"
         >
           Create Account
