@@ -2,11 +2,13 @@ type EnvironmentType = "production" | "development";
 interface Constants {
   apiUrl: string;
   environment: EnvironmentType;
+  enableAnalytics: boolean;
 }
 
 let constants: Constants = {
   apiUrl: "http://localhost:8000",
   environment: process.env.APP_ENV as EnvironmentType,
+  enableAnalytics: false,
 };
 
 if (constants.environment === "production") {

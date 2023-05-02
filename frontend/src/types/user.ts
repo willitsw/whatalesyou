@@ -28,7 +28,9 @@ export interface UserResponse extends User {
   settings: BrewSettings;
 }
 
-export interface CreateUserRequest {
+export interface UserRequest {
   email: string;
   password: string;
+  first_name: string;
+  last_name: string;
 }

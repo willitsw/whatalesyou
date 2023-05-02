@@ -27,7 +27,9 @@ function getDefaultAnalyticsData(): AnalyticsData {
 }
 
 function sendEvent(name: string, payload: any): void {
-  ReactGA.event(name, payload);
+  if (constants.enableAnalytics) {
+    ReactGA.event(name, payload);
+  }
 }
 
 const AnalyticsContext = React.createContext<{
@@ -41,34 +43,35 @@ export const AnalyticsProvider = ({ children }: AnalyticsProviderProps) => {
   const location = useLocation();
   const user = useAppSelector(selectCurrentUser);
   const brewSettings = useAppSelector(selectBrewSettings);
-  const sendEvents = constants.environment === "production";
 
   useEffect(() => {
-    if (!isInitialized && sendEvents) {
+    if (!isInitialized && constants.enableAnalytics) {
       ReactGA.initialize("G-4HGTT0YXYQ");
       setIsInitialized(true);
     }
-  }, [isInitialized, sendEvents]);
+  }, [isInitialized, constants]);
 
   useEffect(() => {
-    let newData: AnalyticsData;
-    if (user) {
-      newData = {
-        userId: user.id,
-        email: user.email,
-        environment: constants.environment,
-        userAgent: window.navigator.userAgent,
-      };
-    } else {
-      newData = getDefaultAnalyticsData();
-    }
+    if (constants.enableAnalytics) {
+      let newData: AnalyticsData;
+      if (user) {
+        newData = {
+          userId: user.id,
+          email: user.email,
+          environment: constants.environment,
+          userAgent: window.navigator.userAgent,
+        };
+      } else {
+        newData = getDefaultAnalyticsData();
+      }
 
-    setAnalyticsData(newData);
-    ReactGA.set(newData);
+      setAnalyticsData(newData);
+      ReactGA.set(newData);
+    }
   }, [user, brewSettings]);
 
   useEffect(() => {
-    if (isInitialized && sendEvents) {
+    if (isInitialized && constants.enableAnalytics) {
       ReactGA.send({
         hitType: "pageview",
         page_title: location.pathname,
@@ -80,7 +83,7 @@ export const AnalyticsProvider = ({ children }: AnalyticsProviderProps) => {
     <AnalyticsContext.Provider
       value={{
         analyticsData,
-        shouldSendEvents: isInitialized && sendEvents,
+        shouldSendEvents: isInitialized && constants.enableAnalytics,
       }}
     >
       {children}

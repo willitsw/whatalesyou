@@ -3,10 +3,11 @@ import { BrewLog, BrewLogListResponse } from "../types/brew-log";
 import { BrewSettings } from "../types/brew-settings";
 import { Recipe, RecipeDetailed, RecipeListResponse } from "../types/recipe";
 import {
-  CreateUserRequest,
+  UserRequest,
   TokenRequest,
   TokenResponse,
   UserResponse,
+  User,
 } from "../types/user";
 import makeRequest from "./request";
 
@@ -100,8 +101,10 @@ export const getCurrentUser = async (id: string): Promise<UserResponse> => {
   return (await makeRequest(`/users/${id}/`, "GET")).body;
 };
 
-export const createUser = async (
-  body: CreateUserRequest
-): Promise<UserResponse> => {
+export const createUser = async (body: UserRequest): Promise<UserResponse> => {
   return (await makeRequest("/users/", "POST", body, { useAuth: false })).body;
+};
+
+export const updateUser = async (body: User): Promise<UserResponse> => {
+  return (await makeRequest(`/users/${body.id}/`, "PUT", body)).body;
 };

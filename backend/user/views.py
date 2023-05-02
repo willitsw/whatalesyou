@@ -6,7 +6,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import CreateUserSerializer, UserSerializer
+from .serializers import CreateUserSerializer, UpdateUserSerializer, UserSerializer
 
 
 class CanAccessUsers(BasePermission):
@@ -35,6 +35,10 @@ class UserViewSet(viewsets.ModelViewSet):
         if not request.user.is_staff:
             self.queryset = User.objects.filter(owner__user=request.user)
         return super().list(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        self.serializer_class = UpdateUserSerializer
+        return super().update(request, *args, **kwargs)
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         create_user_serializer = CreateUserSerializer(data=request.data)

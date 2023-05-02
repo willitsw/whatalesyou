@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Form, useLocation, useNavigate, useParams } from "react-router-dom";
-import { useAppSelector } from "../../redux/store";
-import { selectCurrentUser } from "../../redux/user";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
+import {
+  createNewUser,
+  selectCurrentUser,
+  selectUserName,
+  updateExistingUser,
+} from "../../redux/user";
 import { User } from "../../types/user";
 import { v4 as uuid } from "uuid";
 import Content from "../../components/content/content";
@@ -25,6 +30,8 @@ const UserSettingsPage = () => {
   const [password, setPassword] = useState<string>(null);
   const [passwordConfirm, setPasswordConfirm] = useState<string>(null);
   const [passwordVisible, setPasswordVisible] = React.useState(false);
+  const dispatch = useAppDispatch();
+  const userName = useAppSelector(selectUserName);
 
   const isCreateNewUser = id === "new";
 
@@ -47,11 +54,25 @@ const UserSettingsPage = () => {
     setUser(newUser);
   };
 
+  const handleCreateUpdateUser = () => {
+    if (isCreateNewUser) {
+      dispatch(
+        createNewUser({
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          password: password,
+        })
+      );
+    } else {
+      console.log("hit it");
+      dispatch(updateExistingUser(user));
+    }
+  };
+
   return (
     <Content
-      pageTitle={
-        isCreateNewUser ? "Create New User" : `Edit ${currentUser?.email}`
-      }
+      pageTitle={isCreateNewUser ? "Create New User" : `Edit ${userName}`}
     >
       <ElementWithLabel
         formElement={
@@ -95,7 +116,7 @@ const UserSettingsPage = () => {
           <ElementWithLabel
             formElement={
               <Input.Password
-                value={user?.last_name}
+                value={password}
                 onChange={(value) => setPassword(value.target.value)}
                 style={{ width: 300, marginBottom: 20 }}
                 visibilityToggle={{
@@ -110,7 +131,7 @@ const UserSettingsPage = () => {
           <ElementWithLabel
             formElement={
               <Input.Password
-                value={user?.last_name}
+                value={passwordConfirm}
                 onChange={(value) => setPasswordConfirm(value.target.value)}
                 visibilityToggle={{
                   visible: passwordVisible,
@@ -126,7 +147,7 @@ const UserSettingsPage = () => {
       )}
       <Affix offsetBottom={10} style={{ float: "right" }}>
         <Space>
-          <Button type="primary">
+          <Button type="primary" onClick={handleCreateUpdateUser}>
             {isCreateNewUser ? "Create" : "Save User"}
           </Button>
           <Button onClick={() => navigate("/home")}>Go Home</Button>

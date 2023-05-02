@@ -1,12 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "./store";
+import { UserRequest, TokenPayload, TokenRequest, User } from "../types/user";
 import {
-  CreateUserRequest,
-  TokenPayload,
-  TokenRequest,
-  User,
-} from "../types/user";
-import { createUser, getCurrentUser, getToken } from "../utils/api-calls";
+  createUser,
+  getCurrentUser,
+  getToken,
+  updateUser,
+} from "../utils/api-calls";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
 import jwt from "jwt-decode";
 import { setBrewSettings } from "./brew-settings";
@@ -53,9 +53,18 @@ export const loginUser = createAsyncThunk(
 
 export const createNewUser = createAsyncThunk(
   "users/create",
-  async (payload: CreateUserRequest, { dispatch }) => {
+  async (payload: UserRequest, { dispatch }) => {
     await createUser(payload);
     dispatch(loginUser(payload));
+  }
+);
+
+export const updateExistingUser = createAsyncThunk(
+  "users/create",
+  async (payload: User, { dispatch }) => {
+    const updatedUser = await updateUser(payload);
+    dispatch(setUser(updatedUser));
+    message.success(`User ${updatedUser.email} has been updated.`);
   }
 );
 
@@ -98,5 +107,21 @@ export const { setUser, clearUser, setIsAuthenticated } = userSlice.actions;
 export const selectCurrentUser = (state: RootState) => state.user.currentUser;
 export const userIsAuthenticated = (state: RootState) =>
   state.user.isAuthenticated;
+export const selectUserName = (state: RootState) => {
+  let name = "";
+  if (state.user.currentUser.first_name) {
+    name += state.user.currentUser.first_name;
+  }
+  if (state.user.currentUser.last_name) {
+    if (name) {
+      name += " ";
+    }
+    name += state.user.currentUser.last_name;
+  }
+  if (!name) {
+    name = state.user.currentUser.email;
+  }
+  return name;
+};
 
 export default userSlice.reducer;
