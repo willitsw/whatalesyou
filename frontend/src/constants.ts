@@ -12,8 +12,7 @@ let constants: Constants = {
 };
 
 if (constants.environment === "production") {
-  constants.apiUrl =
-    "https://6l89tf8fp2.execute-api.us-east-2.amazonaws.com/beer-backend";
+  constants.apiUrl = "https://what-ales-you.herokuapp.com";
 }
 
 export const DATE_FORMAT = "MM/DD/YYYY";
