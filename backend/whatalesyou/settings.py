@@ -40,8 +40,8 @@ ALLOWED_HOSTS = [
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8080",
-    "https://enchanting-starlight-bc28a8.netlify.app/",
-    "https://whatalesyou.net/",
+    "https://enchanting-starlight-bc28a8.netlify.app",
+    "https://whatalesyou.net",
 ]
 
 # Application definition
