@@ -37,6 +37,8 @@ ALLOWED_HOSTS = [
     "what-ales-you.herokuapp.com",
     "https://what-ales-you.herokuapp.com",
     "https://enchanting-starlight-bc28a8.netlify.app/",
+    "https://enchanting-starlight-bc28a8.netlify.app",
+    "enchanting-starlight-bc28a8.netlify.app",
 ]
 
 CORS_ALLOWED_ORIGINS = [
