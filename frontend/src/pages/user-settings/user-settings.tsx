@@ -11,7 +11,8 @@ import { User } from "../../types/user";
 import { v4 as uuid } from "uuid";
 import Content from "../../components/content/content";
 import ElementWithLabel from "../../components/form-layouts/element-with-label";
-import { Affix, Button, Input, Space } from "antd";
+import { Affix, Button, Input, Space, message } from "antd";
+import { isEmail } from "../../utils/validators";
 
 const defaultUser: User = {
   email: "",
@@ -32,6 +33,7 @@ const UserSettingsPage = () => {
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   const dispatch = useAppDispatch();
   const userName = useAppSelector(selectUserName);
+  const [validations, setValidations] = useState<any>({});
 
   const isCreateNewUser = id === "new";
 
@@ -48,6 +50,18 @@ const UserSettingsPage = () => {
     }
   }, [location.pathname, currentUser]);
 
+  const validateForm = (key?: any, value?: any): boolean => {
+    let isValid = true;
+    if (!key || key === "email") {
+      if (!isEmail(value)) {
+        setValidations({ ...validations, email: false });
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  };
+
   const handleFieldChange = (value: any, key: any) => {
     const newUser = { ...user };
     newUser[key] = value;
@@ -55,18 +69,23 @@ const UserSettingsPage = () => {
   };
 
   const handleCreateUpdateUser = () => {
-    if (isCreateNewUser) {
-      dispatch(
-        createNewUser({
-          email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          password: password,
-        })
-      );
+    if (!validateForm) {
+      message.error("Please fix the errors in this form and try again.");
+      return;
     } else {
-      console.log("hit it");
-      dispatch(updateExistingUser(user));
+      if (isCreateNewUser) {
+        dispatch(
+          createNewUser({
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            password: password,
+          })
+        );
+      } else {
+        console.log("hit it");
+        dispatch(updateExistingUser(user));
+      }
     }
   };
 
@@ -79,8 +98,12 @@ const UserSettingsPage = () => {
           <Input
             value={user?.email}
             onChange={(value) => handleFieldChange(value.target.value, "email")}
-            style={{ width: 300, marginBottom: 20 }}
+            style={{ width: 300 }}
           />
+        }
+        errorMsg={
+          validations.email === false &&
+          "You must provide a valid email address"
         }
         label="Email"
         orientation="column"

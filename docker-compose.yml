@@ -21,8 +21,11 @@ services:
       - PG_PASSWORD=${PG_PASSWORD}
       - PG_HOST=${PG_HOST}
       - PG_PORT=${PG_PORT}
+      - GOOGLE_EMAIL_USER=${GOOGLE_EMAIL_USER}
+      - GOOGLE_EMAIL_PASSWORD=${GOOGLE_EMAIL_PASSWORD}
     ports:
       - "8000:8000"
+      - "3000:3000"
     volumes:
       - .:/code
     depends_on:

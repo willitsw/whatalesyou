@@ -26,6 +26,8 @@ jobs:
           echo PG_PASSWORD=${{ secrets.PG_PASSWORD }} >> .env
           echo PG_HOST=${{ secrets.PG_HOST }} >> .env
           echo PG_PORT=${{ secrets.PG_PORT }} >> .env
+          echo GOOGLE_EMAIL_USER=${{ secrets.GOOGLE_EMAIL_USER }} >> .env
+          echo GOOGLE_EMAIL_PASSWORD=${{ secrets.GOOGLE_EMAIL_PASSWORD }} >> .env
           cat .env
       - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
         uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).

@@ -109,16 +109,16 @@ export const userIsAuthenticated = (state: RootState) =>
   state.user.isAuthenticated;
 export const selectUserName = (state: RootState) => {
   let name = "";
-  if (state.user.currentUser.first_name) {
+  if (state.user?.currentUser?.first_name) {
     name += state.user.currentUser.first_name;
   }
-  if (state.user.currentUser.last_name) {
+  if (state.user?.currentUser?.last_name) {
     if (name) {
       name += " ";
     }
     name += state.user.currentUser.last_name;
   }
-  if (!name) {
+  if (state.user?.currentUser?.email) {
     name = state.user.currentUser.email;
   }
   return name;
