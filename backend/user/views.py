@@ -51,21 +51,18 @@ class UserViewSet(viewsets.ModelViewSet):
             request_data.get("email"), request_data.get("first_name", "New User")
         )
 
-        # new_user = User.objects.create_user(
-        #     email=request_data.get("email"),
-        #     first_name=request_data.get("first_name", ""),
-        #     last_name=request_data.get("last_name", ""),
-        #     password=request_data.get("password"),
-        # )
+        new_user = User.objects.create_user(
+            email=request_data.get("email"),
+            first_name=request_data.get("first_name", ""),
+            last_name=request_data.get("last_name", ""),
+            password=request_data.get("password"),
+        )
 
-        # new_user_serializer = UserSerializer(new_user)
+        new_user_serializer = UserSerializer(new_user)
 
-        # headers = self.get_success_headers(new_user_serializer.data)
-        # return Response(
-        #     data=new_user_serializer.data,
-        #     status=status.HTTP_201_CREATED,
-        #     headers=headers,
-        # )
+        headers = self.get_success_headers(new_user_serializer.data)
         return Response(
+            data=new_user_serializer.data,
             status=status.HTTP_201_CREATED,
+            headers=headers,
         )
