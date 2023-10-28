@@ -52,7 +52,7 @@ module.exports = {
       favicon: path.join(__dirname, "../static", "favicon.ico"),
     }),
     new CopyWebpackPlugin({
-      patterns: [{ from: "../static/_redirects" }],
+      patterns: [{ from: "./static/_redirects" }],
     }),
   ],
 };
