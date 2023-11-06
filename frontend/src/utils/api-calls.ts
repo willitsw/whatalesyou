@@ -2,12 +2,14 @@ import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
 import { BrewLog, BrewLogListResponse } from "../types/brew-log";
 import { BrewSettings } from "../types/brew-settings";
 import { Recipe, RecipeDetailed, RecipeListResponse } from "../types/recipe";
+import { Response } from "../types/shared";
 import {
   UserRequest,
   TokenRequest,
   TokenResponse,
   UserResponse,
   User,
+  EmailValidationRequest,
 } from "../types/user";
 import makeRequest from "./request";
 
@@ -102,9 +104,18 @@ export const getCurrentUser = async (id: string): Promise<UserResponse> => {
 };
 
 export const createUser = async (body: UserRequest): Promise<UserResponse> => {
-  return (await makeRequest("/users/", "POST", body, { useAuth: false })).body;
+  const result = await makeRequest("/users/", "POST", body, { useAuth: false });
+  return { code: result.code, ...result.body };
 };
 
 export const updateUser = async (body: User): Promise<UserResponse> => {
   return (await makeRequest(`/users/${body.id}/`, "PUT", body)).body;
+};
+
+export const validateEmailToken = async (
+  body: EmailValidationRequest
+): Promise<Response> => {
+  const result = await makeRequest(`/validate-new-user/`, "POST", body);
+
+  return { code: result.code };
 };

@@ -14,6 +14,7 @@ class UserManager(BaseUserManager):
         is_active=True,
         first_name="",
         last_name="",
+        verification_code="",
     ):
         if not email:
             raise ValueError("User must have an email")
@@ -27,7 +28,9 @@ class UserManager(BaseUserManager):
         user.active = is_active
         user.first_name = first_name
         user.last_name = last_name
+        user.verification_code = verification_code
         user.save(using=self._db)
+
         return user
 
     def create_staffuser(self, email, password=None):
@@ -59,6 +62,8 @@ class User(AbstractUser):
         max_length=150,
         blank=True,
     )
+    is_verified = models.BooleanField(default=False)
+    verification_code = models.TextField(max_length=5, blank=True, null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

@@ -59,14 +59,14 @@ const makeRequest = async (
 
   let json: any;
 
-  if (response.ok && response.status !== 204) {
+  if (response.status !== 204) {
     json = await response.json();
   }
 
   return {
     code: response.status,
     ok: response.ok,
-    body: json,
+    body: { ...json },
   };
 };
 

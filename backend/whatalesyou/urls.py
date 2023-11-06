@@ -21,7 +21,12 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from brew_log.views import BrewLogViewSet
 from brew_settings.views import BrewSettingViewSet
 from recipes.views import RecipesViewSet
-from user.views import UserViewSet
+from user.views import (
+    UserViewSet,
+    initiate_reset_password,
+    process_reset_password,
+    verification_code_check,
+)
 
 router = routers.DefaultRouter()
 router.register(r"recipes", RecipesViewSet)
@@ -35,4 +40,7 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("validate-new-user/", verification_code_check),
+    path("initiate-password-reset/", initiate_reset_password),
+    path("process-password-reset/", process_reset_password),
 ]

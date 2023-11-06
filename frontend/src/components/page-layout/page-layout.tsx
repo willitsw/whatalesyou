@@ -15,6 +15,7 @@ import BrewLogListPage from "../../pages/brew-log-list/brew-log-list";
 import BrewLogDetailPage from "../../pages/brew-log-detail/brew-log-detail";
 import LoginModal from "../modals/login/login";
 import UserSettingsPage from "../../pages/user-settings/user-settings";
+import { TokenValidator } from "../../pages/token-validator/token-validator";
 
 const PageLayout = () => {
   const isAuthenticated = useAppSelector(userIsAuthenticated);
@@ -56,6 +57,7 @@ const PageLayout = () => {
                 path={"/brew-log/edit/:id"}
                 element={<BrewLogDetailPage />}
               />
+              <Route path={"/token-validator"} element={<TokenValidator />} />
             </>
           )}
           <Route path={"/user/:id"} element={<UserSettingsPage />} />

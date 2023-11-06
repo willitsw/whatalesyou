@@ -1,3 +1,4 @@
+import { Response } from "./shared";
 import { BrewSettings } from "./brew-settings";
 
 export interface TokenResponse {
@@ -22,9 +23,10 @@ export interface User {
   first_name: string;
   last_name: string;
   is_staff: boolean;
+  is_verified: boolean;
 }
 
-export interface UserResponse extends User {
+export interface UserResponse extends User, Response {
   settings: BrewSettings;
 }
 
@@ -33,4 +35,8 @@ export interface UserRequest {
   password: string;
   first_name: string;
   last_name: string;
+}
+
+export interface EmailValidationRequest {
+  token: string;
 }

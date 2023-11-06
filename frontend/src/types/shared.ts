@@ -68,3 +68,7 @@ export const BrewLogStatusLookup: Record<BrewLogStatuses, string> = {
   in_progress: "In Progress",
   complete: "Complete",
 };
+
+export interface Response {
+  code: number;
+}

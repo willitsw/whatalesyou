@@ -54,8 +54,16 @@ export const loginUser = createAsyncThunk(
 export const createNewUser = createAsyncThunk(
   "users/create",
   async (payload: UserRequest, { dispatch }) => {
-    await createUser(payload);
-    dispatch(loginUser(payload));
+    const response = await createUser(payload);
+    if (response.code >= 300) {
+      if (response.code === 400) {
+        message.error("Error creating user.");
+      }
+    } else {
+      dispatch(loginUser(payload));
+    }
+
+    return response.code < 300;
   }
 );
 
@@ -106,7 +114,7 @@ export const { setUser, clearUser, setIsAuthenticated } = userSlice.actions;
 
 export const selectCurrentUser = (state: RootState) => state.user.currentUser;
 export const userIsAuthenticated = (state: RootState) =>
-  state.user.isAuthenticated;
+  state.user.isAuthenticated && state.user.currentUser?.is_verified;
 export const selectUserName = (state: RootState) => {
   let name = "";
   if (state.user?.currentUser?.first_name) {

@@ -1,13 +1,19 @@
 from typing import Any
 
+from django.http import HttpRequest
 from rest_framework import status, viewsets
+from rest_framework.decorators import api_view
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .models import User
 from .serializers import CreateUserSerializer, UpdateUserSerializer, UserSerializer
-from .services import send_new_hire_email
+from .services import (
+    generate_verification_code,
+    send_forgot_password_email,
+    send_new_hire_email,
+)
 
 
 class CanAccessUsers(BasePermission):
@@ -18,7 +24,7 @@ class CanAccessUsers(BasePermission):
     def has_permission(self, request, view):
         if request.method == "DELETE" and not request.user.is_staff:
             return False
-        elif request.method == "POST" or request.user and request.user.is_authenticated:
+        if request.method == "POST" or request.user and request.user.is_authenticated:
             return True
         return False
 
@@ -46,9 +52,12 @@ class UserViewSet(viewsets.ModelViewSet):
         create_user_serializer.is_valid(raise_exception=True)
 
         request_data = create_user_serializer.data
+        access_code = generate_verification_code()
 
         send_new_hire_email(
-            request_data.get("email"), request_data.get("first_name", "New User")
+            request_data.get("email"),
+            request_data.get("first_name", "New User"),
+            access_code,
         )
 
         new_user = User.objects.create_user(
@@ -56,6 +65,7 @@ class UserViewSet(viewsets.ModelViewSet):
             first_name=request_data.get("first_name", ""),
             last_name=request_data.get("last_name", ""),
             password=request_data.get("password"),
+            verification_code=access_code,
         )
 
         new_user_serializer = UserSerializer(new_user)
@@ -66,3 +76,63 @@ class UserViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
             headers=headers,
         )
+
+
+@api_view(["POST"])
+def verification_code_check(request: HttpRequest) -> Response:
+    validation_code: str = request.data.get("token", None)
+
+    user: User = request.user
+
+    if not validation_code or validation_code != user.verification_code:
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST,
+            data={"error": "The code entered is not correct, please try again"},
+        )
+
+    user.is_verified = True
+    user.verification_code = ""
+
+    user.save()
+
+    return Response(
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["POST"])
+def initiate_reset_password(request: HttpRequest) -> Response:
+    user: User = request.user
+    access_code = generate_verification_code()
+
+    send_forgot_password_email(user.email, user.first_name, access_code)
+
+    user.is_verified = False
+    user.verification_code = access_code
+
+    user.save()
+
+    return Response(
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["POST"])
+def process_reset_password(request: HttpRequest) -> Response:
+    validation_code: str = request.data.get("code", None)
+    new_password: str = request.data.get("password", None)
+
+    user: User = request.user
+
+    if not validation_code or validation_code != user.verification_code:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    user.set_password(new_password)
+    user.is_verified = True
+    user.verification_code = ""
+
+    user.save()
+
+    return Response(
+        status=status.HTTP_200_OK,
+    )

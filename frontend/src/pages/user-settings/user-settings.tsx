@@ -3,6 +3,7 @@ import { Form, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import {
   createNewUser,
+  loginUser,
   selectCurrentUser,
   selectUserName,
   updateExistingUser,
@@ -13,6 +14,7 @@ import Content from "../../components/content/content";
 import ElementWithLabel from "../../components/form-layouts/element-with-label";
 import { Affix, Button, Input, Space, message } from "antd";
 import { isEmail } from "../../utils/validators";
+import { createUser } from "../../utils/api-calls";
 
 const defaultUser: User = {
   email: "",
@@ -20,6 +22,7 @@ const defaultUser: User = {
   last_name: "",
   id: uuid(),
   is_staff: false,
+  is_verified: false,
 };
 
 const UserSettingsPage = () => {
@@ -68,22 +71,26 @@ const UserSettingsPage = () => {
     setUser(newUser);
   };
 
-  const handleCreateUpdateUser = () => {
+  const handleCreateUpdateUser = async () => {
     if (!validateForm) {
       message.error("Please fix the errors in this form and try again.");
       return;
     } else {
       if (isCreateNewUser) {
-        dispatch(
-          createNewUser({
-            email: user.email,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            password: password,
-          })
-        );
+        const payload = {
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          password: password,
+        };
+        const response = await createUser(payload);
+        if (response.code === 400) {
+          message.error(`Error creating user: ${Object.values(response)[1]}`);
+        } else {
+          dispatch(loginUser(payload));
+          navigate("/token-validator");
+        }
       } else {
-        console.log("hit it");
         dispatch(updateExistingUser(user));
       }
     }
