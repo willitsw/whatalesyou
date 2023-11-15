@@ -12,7 +12,7 @@ let constants: Constants = {
 };
 
 if (constants.environment === "production") {
-  constants.apiUrl = "api.whatalesyou.net";
+  constants.apiUrl = "http://api.whatalesyou.net";
 }
 
 export const DATE_FORMAT = "MM/DD/YYYY";
