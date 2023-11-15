@@ -18,7 +18,7 @@ const Stats = ({ stats, recipe }: StatsProps) => {
   const ogDisplay = og?.toFixed(3) ?? null;
   const fgDisplay = fg?.toFixed(3) ?? null;
   const abvDisplay = abv?.toFixed(1) ?? null;
-  const waterUnit = recipe.measurement_type === "imperial" ? "gal" : "lit";
+  const waterUnit = recipe?.measurement_type === "imperial" ? "gal" : "lit";
   const strikeWaterDisplay = `${strikeWater?.toFixed(1)} ${waterUnit}` ?? null;
   const hotLiquorDisplay =
     hotLiquor !== 0 ? `${hotLiquor?.toFixed(1)} ${waterUnit}` ?? null : "N/A";

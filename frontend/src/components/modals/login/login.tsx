@@ -1,7 +1,6 @@
-import { Button, Form, Input, Modal, Space, Typography } from "antd";
+import { Button, Form, Input, Modal, Space } from "antd";
 
-import { useState } from "react";
-import { FacebookOutlined, GoogleOutlined } from "@ant-design/icons";
+import { useContext, useState } from "react";
 
 import styles from "./login.module.css";
 import {
@@ -11,12 +10,13 @@ import {
 import { useAppSelector, useAppDispatch } from "../../../redux/store";
 import React from "react";
 import { useAnalytics } from "../../../utils/analytics";
-import { createNewUser, loginUser } from "../../../redux/user";
 import { TokenRequest } from "../../../types/user";
 import { useNavigate } from "react-router-dom";
+import { UserContext, UserContextValue } from "../../user-context/user-context";
 
 const LoginModal = () => {
   const [form] = Form.useForm();
+  const { loginUser }: UserContextValue = useContext(UserContext);
   const [modalLoading, setModalLoading] = useState<boolean>(false);
   const showLoginModal = useAppSelector(selectShowLoginModal);
   const dispatch = useAppDispatch();
@@ -44,7 +44,7 @@ const LoginModal = () => {
     try {
       await form.validateFields();
       const values: TokenRequest = form.getFieldsValue();
-      dispatch(loginUser(values));
+      loginUser(values);
       fireAnalyticsEvent("Email/Password Sign In");
     } catch (error) {
       console.log("form submission failed:", error);

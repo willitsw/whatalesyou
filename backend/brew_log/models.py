@@ -42,9 +42,7 @@ class BrewLog(WhatAlesYouBaseModel):
     owner = models.ForeignKey(User, related_name="brew_logs", on_delete=models.CASCADE)
 
     def __str__(self):
-        return (
-            f"{self.name} - {self.owner.email} - {self.brew_date.strftime('%d/%m/%Y')}"
-        )
+        return f"{self.name} - {self.owner.email} - {self.brew_date}"
 
 
 class GravityReading(WhatAlesYouBaseModel):

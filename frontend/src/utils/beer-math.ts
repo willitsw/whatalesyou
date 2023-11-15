@@ -139,7 +139,7 @@ export const calculateIbu = (
 };
 
 const getGrainPounds = (grains: Fermentable[]): number => {
-  return grains.reduce((pounds, currentFermentable) => {
+  return grains?.reduce((pounds, currentFermentable) => {
     if (
       !currentFermentable ||
       !currentFermentable.amount ||

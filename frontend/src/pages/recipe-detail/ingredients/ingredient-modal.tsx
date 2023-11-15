@@ -1,5 +1,5 @@
 import { AutoComplete, Input, InputNumber, Modal, Select } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { setPageIsClean } from "../../../redux/global-modals";
 import { useAppDispatch, useAppSelector } from "../../../redux/store";
 import DefaultGrains from "../../../data/default-grains";
@@ -21,7 +21,10 @@ import {
   StepLookup,
 } from "../../../types/shared";
 import ElementWithLabel from "../../../components/form-layouts/element-with-label";
-import { selectBrewSettings } from "../../../redux/brew-settings";
+import {
+  UserContext,
+  UserContextValue,
+} from "../../../components/user-context/user-context";
 interface IngredientModalProps {
   ingredientId: any;
   handleCancel: () => void;
@@ -58,7 +61,7 @@ const IngredientModal = ({
   recipeId,
 }: IngredientModalProps) => {
   const dispatch = useAppDispatch();
-  const brewSettings = useAppSelector(selectBrewSettings);
+  const { user }: UserContextValue = useContext(UserContext);
   const [ingredient, setIngredient] = useState<any>(null);
 
   useEffect(() => {
@@ -96,13 +99,13 @@ const IngredientModal = ({
         return {
           ingredient_type: "fermentables",
           amount_type:
-            brewSettings.measurement_type === "imperial" ? "lb" : "kg",
+            user.settings.measurement_type === "imperial" ? "lb" : "kg",
         } as Fermentable;
       case "hops":
         return {
           ingredient_type: "hops",
           amount_type:
-            brewSettings.measurement_type === "imperial" ? "oz" : "g",
+            user.settings.measurement_type === "imperial" ? "oz" : "g",
           timing: 60,
         } as Hop;
       case "non_fermentables":

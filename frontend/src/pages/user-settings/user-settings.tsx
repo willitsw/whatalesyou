@@ -1,20 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import {
-  createNewUser,
-  loginUser,
-  selectCurrentUser,
-  selectUserName,
-  updateExistingUser,
-} from "../../redux/user";
+// import {
+//   createNewUser,
+//   loginUser,
+//   selectCurrentUser,
+//   selectUserName,
+//   updateExistingUser,
+// } from "../../redux/user";
 import { User } from "../../types/user";
 import { v4 as uuid } from "uuid";
 import Content from "../../components/content/content";
 import ElementWithLabel from "../../components/form-layouts/element-with-label";
 import { Affix, Button, Input, Space, message } from "antd";
 import { isEmail } from "../../utils/validators";
-import { createUser } from "../../utils/api-calls";
+import {
+  UserContext,
+  UserContextValue,
+} from "../../components/user-context/user-context";
+import { useCreateUser, useUpdateUser } from "../../utils/api-calls";
+// import { createUser } from "../../utils/api-calls";
 
 const defaultUser: User = {
   email: "",
@@ -27,31 +32,28 @@ const defaultUser: User = {
 
 const UserSettingsPage = () => {
   const location = useLocation();
-  const currentUser = useAppSelector(selectCurrentUser);
-  const [user, setUser] = useState<User>(null);
+  const { user, loginUser }: UserContextValue = useContext(UserContext);
+  const [updatedUser, setUpdatedUser] = useState<User>(null);
   const { id } = useParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState<string>(null);
   const [passwordConfirm, setPasswordConfirm] = useState<string>(null);
   const [passwordVisible, setPasswordVisible] = React.useState(false);
   const dispatch = useAppDispatch();
-  const userName = useAppSelector(selectUserName);
   const [validations, setValidations] = useState<any>({});
+  const { mutateAsync: createUser } = useCreateUser({
+    email: updatedUser?.email,
+    first_name: updatedUser?.first_name,
+    last_name: updatedUser?.last_name,
+    password: password,
+  });
+  const { mutateAsync: updateUser } = useUpdateUser(updatedUser);
+
+  if (user && !updatedUser) {
+    setUpdatedUser(user);
+  }
 
   const isCreateNewUser = id === "new";
-
-  useEffect(() => {
-    const onComponentLoad = async () => {
-      if (isCreateNewUser) {
-        setUser(defaultUser);
-      } else {
-        setUser({ ...currentUser });
-      }
-    };
-    if (currentUser) {
-      onComponentLoad();
-    }
-  }, [location.pathname, currentUser]);
 
   const validateForm = (key?: any, value?: any): boolean => {
     let isValid = true;
@@ -66,9 +68,9 @@ const UserSettingsPage = () => {
   };
 
   const handleFieldChange = (value: any, key: any) => {
-    const newUser = { ...user };
+    const newUser = { ...updatedUser };
     newUser[key] = value;
-    setUser(newUser);
+    setUpdatedUser(newUser);
   };
 
   const handleCreateUpdateUser = async () => {
@@ -78,32 +80,37 @@ const UserSettingsPage = () => {
     } else {
       if (isCreateNewUser) {
         const payload = {
-          email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
+          email: updatedUser.email,
+          first_name: updatedUser.first_name,
+          last_name: updatedUser.last_name,
           password: password,
         };
-        const response = await createUser(payload);
+        const response = await createUser();
         if (response.code === 400) {
           message.error(`Error creating user: ${Object.values(response)[1]}`);
         } else {
-          dispatch(loginUser(payload));
+          await loginUser(payload);
           navigate("/token-validator");
         }
       } else {
-        dispatch(updateExistingUser(user));
+        await updateUser();
+        message.success("User updated successfully!");
       }
     }
   };
 
   return (
     <Content
-      pageTitle={isCreateNewUser ? "Create New User" : `Edit ${userName}`}
+      pageTitle={
+        isCreateNewUser
+          ? "Create New User"
+          : `Edit ${updatedUser?.email ?? "User"}`
+      }
     >
       <ElementWithLabel
         formElement={
           <Input
-            value={user?.email}
+            value={updatedUser?.email}
             onChange={(value) => handleFieldChange(value.target.value, "email")}
             style={{ width: 300 }}
           />
@@ -118,7 +125,7 @@ const UserSettingsPage = () => {
       <ElementWithLabel
         formElement={
           <Input
-            value={user?.first_name}
+            value={updatedUser?.first_name}
             onChange={(value) =>
               handleFieldChange(value.target.value, "first_name")
             }
@@ -131,7 +138,7 @@ const UserSettingsPage = () => {
       <ElementWithLabel
         formElement={
           <Input
-            value={user?.last_name}
+            value={updatedUser?.last_name}
             onChange={(value) =>
               handleFieldChange(value.target.value, "last_name")
             }

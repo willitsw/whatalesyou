@@ -11,12 +11,8 @@ import {
   Switch,
   Typography,
 } from "antd";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Content from "../../components/content/content";
-import {
-  processCreateUpdateBrewSettings,
-  selectBrewSettings,
-} from "../../redux/brew-settings";
 import { setPageIsClean } from "../../redux/global-modals";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import {
@@ -26,6 +22,14 @@ import {
 import React from "react";
 import { BrewSettings } from "../../types/brew-settings";
 import ElementWithLabel from "../../components/form-layouts/element-with-label";
+import {
+  useCreateUpdateBrewSettings,
+  useGetCurrentUser,
+} from "../../utils/api-calls";
+import {
+  UserContext,
+  UserContextValue,
+} from "../../components/user-context/user-context";
 
 const defaultBrewSettings: BrewSettings = {
   batch_size: 0,
@@ -42,23 +46,23 @@ const defaultBrewSettings: BrewSettings = {
 };
 
 const BrewSettings = () => {
-  const brewSettings = useAppSelector(selectBrewSettings);
   const [localBrewSettings, setLocalBrewSettings] =
     useState<BrewSettings>(defaultBrewSettings);
+  const { user }: UserContextValue = useContext(UserContext);
+
+  const {
+    mutateAsync: createUpdateBrewSettings,
+    isPending: createUpdateBrewSettingsIsLoading,
+  } = useCreateUpdateBrewSettings(localBrewSettings);
+
+  if (user.settings && !localBrewSettings.id) {
+    setLocalBrewSettings(user.settings);
+  }
 
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    if (brewSettings) {
-      setLocalBrewSettings(brewSettings);
-    }
-  }, [brewSettings]);
-
-  const handleSave = () => {
-    const updatedBrewSettings: BrewSettings = {
-      ...localBrewSettings,
-    };
-    dispatch(processCreateUpdateBrewSettings(updatedBrewSettings));
+  const handleSave = async () => {
+    await createUpdateBrewSettings();
     message.success("Brew Settings have been updated.");
     dispatch(setPageIsClean(true));
   };
@@ -71,7 +75,10 @@ const BrewSettings = () => {
   };
 
   return (
-    <Content pageTitle="Brew Settings">
+    <Content
+      isLoading={createUpdateBrewSettingsIsLoading}
+      pageTitle="Brew Settings"
+    >
       <Typography.Title level={4}>General Defaults</Typography.Title>
       <div
         style={{

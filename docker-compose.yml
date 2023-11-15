@@ -23,6 +23,7 @@ services:
       - PG_PORT=${PG_PORT}
       - GOOGLE_EMAIL_USER=${GOOGLE_EMAIL_USER}
       - GOOGLE_EMAIL_PASSWORD=${GOOGLE_EMAIL_PASSWORD}
+      - EMAIL_BACKEND=${EMAIL_BACKEND}
     ports:
       - "8000:8000"
       - "3000:3000"

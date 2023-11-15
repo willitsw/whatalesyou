@@ -24,7 +24,7 @@ const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
         <ElementWithLabel
           formElement={
             <Input
-              value={recipe.name}
+              value={recipe?.name}
               onChange={(value) => onValuesChange(value.target.value, "name")}
               style={{ maxWidth: "100%" }}
             />
@@ -35,7 +35,7 @@ const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
         <ElementWithLabel
           formElement={
             <Input
-              value={recipe.author}
+              value={recipe?.author}
               onChange={(value) => onValuesChange(value.target.value, "author")}
             />
           }
@@ -46,7 +46,7 @@ const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
           formElement={
             <Input.TextArea
               style={{ width: 300 }}
-              value={recipe.description}
+              value={recipe?.description}
               onChange={(value) =>
                 onValuesChange(value.target.value, "description")
               }
@@ -62,8 +62,8 @@ const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
               max="100"
               step="0.5"
               style={{ width: 105 }}
-              addonAfter={recipe.measurement_type === "metric" ? "l" : "gal"}
-              value={recipe.batch_size.toString()}
+              addonAfter={recipe?.measurement_type === "metric" ? "l" : "gal"}
+              value={recipe?.batch_size?.toString()}
               onChange={(value: string) => onValuesChange(value, "batch_size")}
             />
           }
@@ -74,7 +74,7 @@ const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
           formElement={
             <InputNumber
               style={{ width: 105 }}
-              value={recipe.efficiency.toString()}
+              value={recipe?.efficiency?.toString()}
               onChange={(value: string) => onValuesChange(value, "efficiency")}
               min="0"
               max="100"
@@ -88,7 +88,7 @@ const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
         <ElementWithLabel
           formElement={
             <Radio.Group
-              value={recipe.type}
+              value={recipe?.type}
               onChange={(value) => onValuesChange(value.target.value, "type")}
             >
               <Radio.Button value="all_grain">All Grain</Radio.Button>
@@ -101,7 +101,7 @@ const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
         <ElementWithLabel
           formElement={
             <Radio.Group
-              value={recipe.measurement_type}
+              value={recipe?.measurement_type}
               onChange={(value) =>
                 onValuesChange(value.target.value, "measurement_type")
               }

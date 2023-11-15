@@ -8,6 +8,8 @@ import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "./constants";
 import jwt from "jwt-decode";
 import { TokenPayload } from "./types/user";
 import dayjs from "dayjs";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { UserContextProvider } from "./components/user-context/user-context";
 
 export enum RouteSegments {
   Home = "/home",
@@ -34,13 +36,26 @@ const App = () => {
     console.log("no token exists. Will be logged out.");
   }
 
+  const queryClient = new QueryClient();
+  queryClient.setDefaultOptions({
+    queries: {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
+  });
+
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <AnalyticsProvider>
-          <PageLayout />
-        </AnalyticsProvider>
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <UserContextProvider>
+          <BrowserRouter>
+            <AnalyticsProvider>
+              <PageLayout />
+            </AnalyticsProvider>
+          </BrowserRouter>
+        </UserContextProvider>
+      </QueryClientProvider>
     </Provider>
   );
 };

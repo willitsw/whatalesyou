@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tooltip } from "antd";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
-import { processDeleteBrewLog, refreshBrewLogList } from "../../redux/brew-log";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 
 import { DeleteOutlined } from "@ant-design/icons";
@@ -13,26 +12,21 @@ import { useAnalytics } from "../../utils/analytics";
 import { Breakpoint } from "antd/es/_util/responsiveObserver";
 import { BrewLog, BrewLogStatuses } from "../../types/brew-log";
 import { BrewLogStatusLookup } from "../../types/shared";
+import { useDeleteBrewLog, useGetBrewLogsByUser } from "../../utils/api-calls";
 
 const BrewLogListTable = () => {
-  const dispatch = useAppDispatch();
-  const brewLogList = useAppSelector((state) => state.brewLogs.brewLogList);
   const [idToDelete, setIdToDelete] = useState<string>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { data: brewLogList, isLoading: brewLogListIsLoading } =
+    useGetBrewLogsByUser();
+  const { mutateAsync: processDeleteBrewLog } = useDeleteBrewLog(idToDelete);
   const navigate = useNavigate();
   const { fireAnalyticsEvent } = useAnalytics();
 
-  useEffect(() => {
-    const getBrewLogList = async () => {
-      dispatch(refreshBrewLogList());
-      setLoading(false);
-    };
-    getBrewLogList();
-  }, []);
+  const loading = brewLogListIsLoading;
 
   const handleDeleteBrewLog = async () => {
     if (idToDelete) {
-      dispatch(processDeleteBrewLog(idToDelete));
+      processDeleteBrewLog();
       fireAnalyticsEvent("Brew Log Deleted", { brewLogId: idToDelete });
     }
     setIdToDelete(null);
@@ -79,7 +73,7 @@ const BrewLogListTable = () => {
     },
   ];
 
-  const preparedBrewLogData = brewLogList.map((brewLog) => {
+  const preparedBrewLogData = brewLogList?.results.map((brewLog) => {
     return {
       ...brewLog,
       key: brewLog.id,

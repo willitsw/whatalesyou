@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { getRecipeById } from "../../utils/api-calls";
 import Content from "../../components/content/content";
 import { Button } from "antd";
 import { useReactToPrint } from "react-to-print";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
-import { Recipe, RecipeDetailed } from "../../types/recipe";
+import { useGetRecipeById } from "../../utils/api-calls";
 
 const RecipePrinterFriendly = () => {
   const { id } = useParams();
@@ -14,16 +13,8 @@ const RecipePrinterFriendly = () => {
     content: () => printRef.current,
   });
 
-  const [recipe, setRecipe] = useState<RecipeDetailed>(null);
-
-  useEffect(() => {
-    const setNewRecipe = async () => {
-      const newRecipe = await getRecipeById(id);
-      document.title = `Print ${newRecipe.name}`;
-      setRecipe(newRecipe);
-    };
-    setNewRecipe();
-  }, [id]);
+  const { data: recipe } = useGetRecipeById(id);
+  document.title = `Print ${recipe?.name ?? "Recipe"}`;
 
   useEffect(() => {
     if (recipe) {

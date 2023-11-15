@@ -1,6 +1,5 @@
-import React, { Children, useEffect, useState } from "react";
+import React, { Children, useContext, useEffect, useState } from "react";
 import Content from "../../components/content/content";
-import { selectBrewSettings } from "../../redux/brew-settings";
 import {
   Affix,
   Button,
@@ -24,74 +23,82 @@ import {
 } from "antd";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
-  processCreateUpdateBrewLog,
-  refreshBrewLogList,
-  selectBrewLogCount,
-  selectBrewLogList,
-  selectCurrentBrewLog,
-  setCurrentBrewLog,
-} from "../../redux/brew-log";
-import {
-  getBrewLogById,
-  getRecipeById,
-  getRecipesByUser,
+  useCreateUpdateBrewLog,
+  useGetBrewLogsById,
+  useGetBrewLogsByUser,
+  useGetRecipeById,
+  useGetRecipesByUser,
 } from "../../utils/api-calls";
 import { setPageIsClean } from "../../redux/global-modals";
 import { DATE_FORMAT } from "../../constants";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
-import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import dayjs, { Dayjs } from "dayjs";
-import { Recipe, RecipeDetailed } from "../../types/recipe";
-import { BrewLog, BrewLogStatuses, GravityReading } from "../../types/brew-log";
+import dayjs from "dayjs";
+import { BrewLog, GravityReading } from "../../types/brew-log";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import ElementWithLabel from "../../components/form-layouts/element-with-label";
-import { selectCurrentUser } from "../../redux/user";
 import { v4 as uuid } from "uuid";
+import {
+  UserContext,
+  UserContextValue,
+} from "../../components/user-context/user-context";
 
 const BrewLogDetailPage = () => {
-  const brewSettings = useAppSelector(selectBrewSettings);
-  const user = useAppSelector(selectCurrentUser);
+  const { user }: UserContextValue = useContext(UserContext);
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [brewLog, setBrewLog] = useState<BrewLog>();
-  const brewLogList = useAppSelector(selectBrewLogList);
-  const brewLogCount = useAppSelector(selectBrewLogCount);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [recipe, setRecipe] = useState<RecipeDetailed>(null);
+  const [workingBrewLog, setWorkingBrewLog] = useState<BrewLog>();
+  const { data: brewLogList, isLoading: brewLogListIsLoading } =
+    useGetBrewLogsByUser();
+  const brewLogCount = brewLogList?.count;
+  // const [recipe, setRecipe] = useState<RecipeDetailed>(null);
   const [gravityReadingToDelete, setGravityReadingToDelete] =
     useState<string>(null);
   const [gravityReading, setGravityReading] = useState<GravityReading>(null);
-  const [recipeList, setRecipeList] = useState<Recipe[]>([]);
+  // const [recipeList, setRecipeList] = useState<Recipe[]>([]);
+
+  const { data: recipeList, isLoading: recipeListIsLoading } =
+    useGetRecipesByUser();
+
+  const { data: recipe, isLoading: recipeIsLoading } = useGetRecipeById(
+    workingBrewLog?.recipe
+  );
+
+  const { data: brewLog, isLoading: brewLogIsLoading } = useGetBrewLogsById(id);
+
+  const { mutateAsync: processCreateUpdateBrewLog } = useCreateUpdateBrewLog({
+    ...workingBrewLog,
+    brew_date: dayjs(workingBrewLog?.brew_date).format("YYYY-MM-DD"),
+  });
+
+  const loading =
+    recipeListIsLoading || brewLogIsLoading || brewLogListIsLoading;
 
   useEffect(() => {
     const onComponentLoad = async () => {
-      if (brewLogList?.length === 0) {
-        dispatch(refreshBrewLogList());
-      }
-      let workingBrewLog: BrewLog;
+      let newBrewLog: BrewLog;
       if (location.pathname.includes("/brew-log/edit") && id) {
-        workingBrewLog = await getBrewLogById(id);
+        newBrewLog = brewLog;
       } else {
-        workingBrewLog = {
+        newBrewLog = {
           ...getBrewLog(),
           batch_number: brewLogCount + 1,
         };
       }
-      setBrewLog(workingBrewLog);
+      setWorkingBrewLog(newBrewLog);
 
-      if (workingBrewLog.recipe) {
-        const recipe = await getRecipeById(workingBrewLog.recipe);
-        setRecipe(recipe);
-      }
-      const recipeResponse = await getRecipesByUser();
-      setRecipeList(recipeResponse.results);
-      setLoading(false);
+      // if (workingBrewLog.recipe) {
+      //   const recipe = await RecipeApi.getById(workingBrewLog.recipe);
+      //   setRecipe(recipe);
+      // }
+      // const recipeResponse = {} = RecipeApi.getByUser(user.id));
+      // setRecipeList(recipeResponse.results);
+      // setLoading(false);
     };
     onComponentLoad();
-  }, [location.pathname, brewSettings, user]);
+  }, [location.pathname, user.settings, user]);
 
   const getBrewLog = (): BrewLog => ({
     name: "New Brew Log Entry",
@@ -115,7 +122,7 @@ const BrewLogDetailPage = () => {
     date: dayjs().toISOString(),
     gravity: 1,
     notes: "",
-    brew_log: brewLog.id,
+    brew_log: workingBrewLog.id,
   });
 
   const handleAddGravityReading = () => {
@@ -123,24 +130,16 @@ const BrewLogDetailPage = () => {
   };
 
   const handleSave = () => {
-    const brewLogToSave = { ...brewLog };
-
-    if (recipe) {
-      brewLogToSave.recipe = recipe.id;
-    }
-
-    brewLogToSave.brew_date = dayjs(brewLog.brew_date).format("YYYY-MM-DD");
-
-    dispatch(processCreateUpdateBrewLog(brewLogToSave));
+    processCreateUpdateBrewLog();
     dispatch(setPageIsClean(true));
     message.success("Brew Log has been saved.");
   };
 
   const handleFieldChange = (value: any, key: any) => {
     dispatch(setPageIsClean(false));
-    const newBrewLog = { ...brewLog };
+    const newBrewLog = { ...workingBrewLog };
     newBrewLog[key] = value;
-    setBrewLog(newBrewLog);
+    setWorkingBrewLog(newBrewLog);
   };
 
   const handleGravityReadingChange = (value: any, key: any) => {
@@ -150,7 +149,7 @@ const BrewLogDetailPage = () => {
   };
 
   const handleGravityReadingOk = () => {
-    const newBrewLog = { ...brewLog };
+    const newBrewLog = { ...workingBrewLog };
     const idxToReplace = newBrewLog.gravity_readings.findIndex(
       (reading) => reading.id === gravityReading.id
     );
@@ -159,16 +158,16 @@ const BrewLogDetailPage = () => {
     } else {
       newBrewLog.gravity_readings.push(gravityReading);
     }
-    setBrewLog(newBrewLog);
+    setWorkingBrewLog(newBrewLog);
     setGravityReading(null);
   };
 
   const handleGravityReadingDelete = () => {
-    const newBrewLog = { ...brewLog };
+    const newBrewLog = { ...workingBrewLog };
     newBrewLog.gravity_readings = newBrewLog.gravity_readings.filter(
       (g) => g.id !== gravityReadingToDelete
     );
-    setBrewLog(newBrewLog);
+    setWorkingBrewLog(newBrewLog);
     setGravityReadingToDelete(null);
   };
 
@@ -179,7 +178,7 @@ const BrewLogDetailPage = () => {
   return (
     <>
       <Content
-        pageTitle={!loading ? brewLog?.name ?? "" : ""}
+        pageTitle={!loading ? workingBrewLog?.name ?? "" : ""}
         isLoading={loading}
       >
         <Tabs
@@ -204,7 +203,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Input
-                          value={brewLog?.name}
+                          value={workingBrewLog?.name}
                           onChange={(value) =>
                             handleFieldChange(value.target.value, "name")
                           }
@@ -220,7 +219,7 @@ const BrewLogDetailPage = () => {
                           format={(date) =>
                             dayjs(date.toISOString()).format(DATE_FORMAT)
                           }
-                          value={dayjs(brewLog?.brew_date)}
+                          value={dayjs(workingBrewLog?.brew_date)}
                           onChange={(date) =>
                             handleFieldChange(date.toISOString(), "brew_date")
                           }
@@ -232,7 +231,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Radio.Group
-                          value={brewLog?.status}
+                          value={workingBrewLog?.status}
                           onChange={(value) =>
                             handleFieldChange(value.target.value, "status")
                           }
@@ -249,7 +248,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <InputNumber
-                          value={brewLog?.batch_number.toString()}
+                          value={workingBrewLog?.batch_number?.toString()}
                           onChange={(value) =>
                             handleFieldChange(value, "batch_number")
                           }
@@ -330,7 +329,7 @@ const BrewLogDetailPage = () => {
                           />
                         </List.Item>
                       )}
-                      dataSource={brewLog?.gravity_readings}
+                      dataSource={workingBrewLog?.gravity_readings}
                     />
                   </ConfigProvider>
                   <Typography.Title level={4}>Process Notes</Typography.Title>
@@ -347,7 +346,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Input.TextArea
-                          value={brewLog?.brewing_notes}
+                          value={workingBrewLog?.brewing_notes}
                           onChange={(value) =>
                             handleFieldChange(
                               value.target.value,
@@ -362,7 +361,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Input.TextArea
-                          value={brewLog?.fermentation_notes}
+                          value={workingBrewLog?.fermentation_notes}
                           onChange={(value) =>
                             handleFieldChange(
                               value.target.value,
@@ -377,7 +376,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Input.TextArea
-                          value={brewLog?.hop_notes}
+                          value={workingBrewLog?.hop_notes}
                           onChange={(value) =>
                             handleFieldChange(value.target.value, "hop_notes")
                           }
@@ -389,7 +388,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Input.TextArea
-                          value={brewLog?.yeast_notes}
+                          value={workingBrewLog?.yeast_notes}
                           onChange={(value) =>
                             handleFieldChange(value.target.value, "yeast_notes")
                           }
@@ -401,7 +400,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Input.TextArea
-                          value={brewLog?.other_notes}
+                          value={workingBrewLog?.other_notes}
                           onChange={(value) =>
                             handleFieldChange(value.target.value, "other_notes")
                           }
@@ -413,7 +412,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Input.TextArea
-                          value={brewLog?.packaging_notes}
+                          value={workingBrewLog?.packaging_notes}
                           onChange={(value) =>
                             handleFieldChange(
                               value.target.value,
@@ -428,7 +427,7 @@ const BrewLogDetailPage = () => {
                     <ElementWithLabel
                       formElement={
                         <Input.TextArea
-                          value={brewLog?.tasting_notes}
+                          value={workingBrewLog?.tasting_notes}
                           onChange={(value) =>
                             handleFieldChange(
                               value.target.value,
@@ -454,12 +453,11 @@ const BrewLogDetailPage = () => {
                     value={recipe ? recipe.name : "Select a recipe"}
                     optionFilterProp="children"
                     onChange={async (newRecipeId) => {
-                      const newRecipe = await getRecipeById(newRecipeId);
-                      setRecipe(newRecipe);
+                      handleFieldChange(newRecipeId, "recipe");
                     }}
                     style={{ width: 240, marginLeft: 10, marginRight: 10 }}
                   >
-                    {recipeList.map((recipe) => {
+                    {recipeList?.results.map((recipe) => {
                       return (
                         <Select.Option key={recipe.id} value={recipe.id}>
                           {recipe.name}

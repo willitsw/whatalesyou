@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Content from "../../components/content/content";
-import { getRecipeById, createUpdateRecipe } from "../../utils/api-calls";
 import {
   Form,
   Button,
@@ -17,102 +16,134 @@ import { getStats } from "../../utils/beer-math";
 import GeneralInfo from "./general/general-info";
 import StatsSection from "./statistics/stats";
 import { setPageIsClean } from "../../redux/global-modals";
-import { selectBrewSettings } from "../../redux/brew-settings";
 import React from "react";
 import Ingredients from "./ingredients/ingredients";
 import { useAnalytics } from "../../utils/analytics";
 import dayjs from "dayjs";
-import { Ingredient, IngredientType, RecipeDetailed } from "../../types/recipe";
+import {
+  Ingredient,
+  IngredientType,
+  Recipe,
+  RecipeDetailed,
+} from "../../types/recipe";
 import { Stats } from "../../types/stats";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
 import { v4 as uuid } from "uuid";
-import { selectCurrentUser } from "../../redux/user";
+import { useCreateUpdateRecipe, useGetRecipeById } from "../../utils/api-calls";
+import {
+  UserContext,
+  UserContextValue,
+} from "../../components/user-context/user-context";
+import brewSettings from "../brew-settings/brew-settings";
+import { UserResponse } from "../../types/user";
+
+const getDefaultRecipe = (user: UserResponse): RecipeDetailed => ({
+  id: uuid(),
+  name: "New Recipe",
+  description: "",
+  author:
+    user.first_name && user.last_name
+      ? `${user.first_name} ${user.last_name}`
+      : user.email,
+  batch_size: user.settings.batch_size,
+  owner: user.id,
+  type: "all_grain",
+  measurement_type: user.settings.measurement_type,
+  efficiency: user.settings.brewhouse_efficiency,
+  created_at: dayjs().toISOString(),
+  updated_at: dayjs().toISOString(),
+  chemistry: [],
+  cultures: [],
+  fermentables: [],
+  hops: [],
+  non_fermentables: [],
+});
+
+const duplicateRecipe = (oldRecipe: RecipeDetailed): RecipeDetailed => {
+  const newRecipeId = uuid();
+  return {
+    ...oldRecipe,
+    id: newRecipeId,
+    name: `Copy of ${oldRecipe.name}`,
+    created_at: dayjs().toISOString(),
+    updated_at: dayjs().toISOString(),
+    chemistry: oldRecipe.chemistry.map((c) => ({
+      ...c,
+      recipe: newRecipeId,
+      id: null,
+    })),
+    fermentables: oldRecipe.fermentables.map((c) => ({
+      ...c,
+      recipe: newRecipeId,
+      id: null,
+    })),
+    cultures: oldRecipe.cultures.map((c) => ({
+      ...c,
+      recipe: newRecipeId,
+      id: null,
+    })),
+    hops: oldRecipe.hops.map((c) => ({
+      ...c,
+      recipe: newRecipeId,
+      id: null,
+    })),
+  };
+};
+
+const getDefaultStats = (): Stats => ({
+  abv: 0,
+  ibu: 0,
+  og: 0,
+  fg: 0,
+  srm: 0,
+  strikeWater: 0,
+  hotLiquor: 0,
+  waterLoss: 0,
+});
 
 const RecipeDetailPage = () => {
-  const brewSettings = useAppSelector(selectBrewSettings);
-  const user = useAppSelector(selectCurrentUser);
+  const { user }: UserContextValue = useContext(UserContext);
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [recipe, setRecipe] = useState<RecipeDetailed>();
-  const [stats, setStats] = useState<Stats>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [stats, setStats] = useState<Stats>(getDefaultStats());
   const [isDesktop] = useState<boolean>(
     window.matchMedia("(min-width: 1200px)").matches
   );
   const { fireAnalyticsEvent } = useAnalytics();
+  const [workingRecipe, setWorkingRecipe] = useState<RecipeDetailed>();
 
-  useEffect(() => {
-    const onComponentLoad = async () => {
-      let workingRecipe: RecipeDetailed;
-      if (location.pathname.includes("/recipes/duplicate") && id) {
-        workingRecipe = await getRecipeById(id);
-        workingRecipe.id = uuid();
-        workingRecipe.name = `Copy of ${workingRecipe.name}`;
-      } else if (location.pathname.includes("/recipes/edit") && id) {
-        workingRecipe = await getRecipeById(id);
-      } else {
-        workingRecipe = { ...getDefaultRecipe() };
+  const { data: recipe, isLoading: recipeIsLoading } = useGetRecipeById(id);
 
-        workingRecipe.owner = user.id;
-        workingRecipe.batch_size = brewSettings.batch_size;
-        workingRecipe.efficiency = brewSettings.brewhouse_efficiency;
-        workingRecipe.measurement_type = brewSettings.measurement_type;
-      }
-      setRecipe(workingRecipe);
-      setLoading(false);
-    };
-    if (brewSettings && user) {
-      onComponentLoad();
+  const { mutateAsync: createUpdateRecipe } =
+    useCreateUpdateRecipe(workingRecipe);
+
+  const isLoading = recipeIsLoading;
+
+  if (!workingRecipe && !recipeIsLoading && user) {
+    if (location.pathname.includes("duplicate") && recipe) {
+      setWorkingRecipe(duplicateRecipe(recipe));
+    } else if (location.pathname.includes("new")) {
+      setWorkingRecipe(getDefaultRecipe(user));
+    } else if (location.pathname.includes("edit") && recipe) {
+      setWorkingRecipe(recipe);
     }
-  }, [location.pathname, brewSettings, user]);
+  }
 
   useEffect(() => {
-    if (recipe && brewSettings) {
-      setStats(getStats(recipe, brewSettings));
+    if (workingRecipe && brewSettings) {
+      setStats(getStats(workingRecipe, user.settings));
     } else {
       setStats(getDefaultStats());
     }
-  }, [recipe, brewSettings]);
-
-  const getDefaultRecipe = (): RecipeDetailed => ({
-    id: uuid(),
-    name: "New Recipe",
-    description: "",
-    author: "",
-    batch_size: 5,
-    owner: "",
-    type: "all_grain",
-    measurement_type: "imperial",
-    efficiency: 70,
-    created_at: dayjs().toISOString(),
-    updated_at: dayjs().toISOString(),
-    chemistry: [],
-    cultures: [],
-    fermentables: [],
-    hops: [],
-    non_fermentables: [],
-  });
-
-  const getDefaultStats = (): Stats => ({
-    abv: 0,
-    ibu: 0,
-    og: 0,
-    fg: 0,
-    srm: 0,
-    strikeWater: 0,
-    hotLiquor: 0,
-    waterLoss: 0,
-  });
+  }, [workingRecipe, brewSettings]);
 
   const handleSave = async () => {
-    setLoading(true);
-    await createUpdateRecipe(recipe);
+    await createUpdateRecipe();
     dispatch(setPageIsClean(true));
-    setLoading(false);
-    message.success(`${recipe.name} has been saved.`);
-    fireAnalyticsEvent("Recipe Saved", { recipeId: recipe.id });
+    message.success(`${workingRecipe?.name} has been saved.`);
+    fireAnalyticsEvent("Recipe Saved", { recipeId: workingRecipe.id });
   };
 
   const goBackToRecipeList = () => {
@@ -121,13 +152,13 @@ const RecipeDetailPage = () => {
 
   const handleFieldChange = (value: any, key: any) => {
     dispatch(setPageIsClean(false));
-    const newRecipe = { ...recipe };
+    const newRecipe = { ...workingRecipe };
     newRecipe[key] = value;
-    setRecipe(newRecipe);
+    setWorkingRecipe(newRecipe);
   };
 
   const handleUpdateIngredient = (newIngredient: Ingredient) => {
-    const updatedRecipe: RecipeDetailed = { ...recipe };
+    const updatedRecipe: RecipeDetailed = { ...workingRecipe };
 
     const ingredientIdToUpdate = updatedRecipe[
       newIngredient.ingredient_type
@@ -140,15 +171,15 @@ const RecipeDetailPage = () => {
       updatedRecipe[newIngredient.ingredient_type].push(newIngredient as any);
     }
 
-    setRecipe(updatedRecipe);
+    setWorkingRecipe(updatedRecipe);
   };
 
   const handleDeleteIngredient = (idToDelete: string, type: IngredientType) => {
-    const updatedRecipe: RecipeDetailed = { ...recipe };
+    const updatedRecipe: RecipeDetailed = { ...workingRecipe };
     updatedRecipe[type] = updatedRecipe[type].filter(
       (ingredient) => ingredient.id !== idToDelete
     ) as any;
-    setRecipe(updatedRecipe);
+    setWorkingRecipe(updatedRecipe);
   };
 
   const getLayout = () => {
@@ -160,7 +191,10 @@ const RecipeDetailPage = () => {
             key: "1",
             label: "General Info",
             children: (
-              <GeneralInfo onValuesChange={handleFieldChange} recipe={recipe} />
+              <GeneralInfo
+                onValuesChange={handleFieldChange}
+                recipe={workingRecipe}
+              />
             ),
           },
           {
@@ -168,7 +202,7 @@ const RecipeDetailPage = () => {
             label: "Ingredients",
             children: (
               <Ingredients
-                recipe={recipe}
+                recipe={workingRecipe}
                 onIngredientChange={handleUpdateIngredient}
                 onIngredientDelete={handleDeleteIngredient}
               />
@@ -186,7 +220,7 @@ const RecipeDetailPage = () => {
           </Col>
           <Col xs={0} sm={0} md={0} lg={8} xl={8}>
             <Affix offsetTop={10}>
-              <StatsSection stats={stats} recipe={recipe} />
+              <StatsSection stats={stats} recipe={workingRecipe} />
             </Affix>
           </Col>
         </Row>
@@ -196,14 +230,17 @@ const RecipeDetailPage = () => {
     return (
       <>
         {formSections}
-        <StatsSection stats={stats} recipe={recipe} />
+        <StatsSection stats={stats} recipe={workingRecipe} />
         <Divider />
       </>
     );
   };
 
   return (
-    <Content isLoading={loading} pageTitle={!loading ? recipe?.name ?? "" : ""}>
+    <Content
+      isLoading={isLoading}
+      pageTitle={!isLoading ? workingRecipe?.name ?? "" : ""}
+    >
       {getLayout()}
       <Affix offsetBottom={10} style={{ float: "right" }}>
         <Space>

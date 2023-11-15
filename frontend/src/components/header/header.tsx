@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Layout,
@@ -13,11 +13,6 @@ import {
 import beerIcon from "./beer-icon.png";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
 import {
-  logoutUser,
-  selectCurrentUser,
-  userIsAuthenticated,
-} from "../../redux/user";
-import {
   LoginOutlined,
   LogoutOutlined,
   UserOutlined,
@@ -30,13 +25,12 @@ import {
 } from "../../redux/global-modals";
 import React from "react";
 import { useAnalytics } from "../../utils/analytics";
+import { UserContext, UserContextValue } from "../user-context/user-context";
 
 const Header = () => {
   const { Header } = Layout;
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
-  const isAuthenticated = useAppSelector(userIsAuthenticated);
-  const currentUser = useAppSelector(selectCurrentUser);
   const pageIsClean = useAppSelector(selectPageIsClean);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -44,6 +38,11 @@ const Header = () => {
     window.matchMedia("(max-width: 500px)").matches
   );
   const { fireAnalyticsEvent } = useAnalytics();
+  const {
+    logoutUser,
+    isAuthenticated,
+    user: currentUser,
+  }: UserContextValue = useContext(UserContext);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -68,7 +67,7 @@ const Header = () => {
   };
 
   const handleSignOut = () => {
-    dispatch(logoutUser());
+    logoutUser();
     navigate("/home");
   };
 

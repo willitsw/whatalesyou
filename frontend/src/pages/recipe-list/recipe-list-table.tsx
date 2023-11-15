@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Table, Button, Space, Tooltip } from "antd";
 import OkCancelModal from "../../components/ok-cancel-modal/ok-cancel-modal";
@@ -12,33 +12,37 @@ import {
 import React from "react";
 import { useAnalytics } from "../../utils/analytics";
 import { Recipe } from "../../types/recipe";
-import { deleteRecipe, getRecipesByUser } from "../../utils/api-calls";
+import { useDeleteRecipe, useGetRecipesByUser } from "../../utils/api-calls";
 import { RecipeTypesLookup } from "../../types/shared";
 
 const RecipeListTable = () => {
-  const [recipeList, setRecipeList] = useState<Recipe[]>([]);
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const { fireAnalyticsEvent } = useAnalytics();
 
-  useEffect(() => {
-    const getRecipeList = async () => {
-      const recipeResponse = await getRecipesByUser();
-      setRecipeList(recipeResponse.results);
-      setLoading(false);
-    };
-    getRecipeList();
-  }, []);
+  const { data: recipeList, isLoading: recipesAreLoading } =
+    useGetRecipesByUser();
+
+  const { mutateAsync: deleteRecipe, isPending: deleteRecipeIsLoading } =
+    useDeleteRecipe(recipeToDelete?.id);
+
+  const isLoading = recipesAreLoading && deleteRecipeIsLoading;
+
+  // useEffect(() => {
+  //   const getRecipeList = async () => {
+  //     const recipeResponse = await RecipeApi.getByUser();
+  //     setRecipeList(recipeResponse.results);
+  //     setLoading(false);
+  //   };
+  //   getRecipeList();
+  // }, []);
 
   const handleDeleteRecipe = async () => {
-    setLoading(true);
-    deleteRecipe(recipeToDelete.id);
-    setRecipeList(
-      recipeList.filter((recipe) => recipe.id !== recipeToDelete.id)
-    );
+    await deleteRecipe();
+    // RecipeAsetRecipeList(
+    //   recipeList.filter((recipe) => recipe.id !== recipeToDelete.id)
+    // );
     setRecipeToDelete(null);
-    setLoading(false);
   };
 
   const showOnlyDesktop: Breakpoint[] = ["md"];
@@ -104,7 +108,7 @@ const RecipeListTable = () => {
               icon={<DeleteOutlined />}
               onClick={() =>
                 setRecipeToDelete(
-                  recipeList.find((recipe) => record.id === recipe.id)
+                  recipeList.results.find((recipe) => record.id === recipe.id)
                 )
               }
             />
@@ -114,7 +118,8 @@ const RecipeListTable = () => {
     },
   ];
 
-  const preparedRecipeData = recipeList.map((recipe) => {
+  // todo: give default value to query so its never null
+  const preparedRecipeData = recipeList?.results.map((recipe) => {
     return {
       ...recipe,
       key: recipe.id,
@@ -136,7 +141,7 @@ const RecipeListTable = () => {
       <Table
         columns={columnDefinitions}
         dataSource={preparedRecipeData}
-        loading={loading}
+        loading={isLoading}
       />
       <OkCancelModal
         onCancel={() => setRecipeToDelete(null)}

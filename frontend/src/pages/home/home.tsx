@@ -2,14 +2,17 @@ import { Button, Col, Row, Space, Typography } from "antd";
 import Content from "../../components/content/content";
 import { setShowLoginModal } from "../../redux/global-modals";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
-import { selectCurrentUser, userIsAuthenticated } from "../../redux/user";
-import React from "react";
+import React, { useContext } from "react";
 import { useAnalytics } from "../../utils/analytics";
 import YoutubeEmbed from "./youtube-container";
+import {
+  UserContext,
+  UserContextValue,
+} from "../../components/user-context/user-context";
 
 const HomePage = () => {
-  const isAuthenticated = useAppSelector(userIsAuthenticated);
-  const currentUser = useAppSelector(selectCurrentUser);
+  const { user: currentUser, isAuthenticated }: UserContextValue =
+    useContext(UserContext);
   const dispatch = useAppDispatch();
   const { fireAnalyticsEvent } = useAnalytics();
 

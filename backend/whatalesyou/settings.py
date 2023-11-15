@@ -173,7 +173,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email config
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = os.environ["EMAIL_BACKEND"]
 EMAIL_USE_SSL = True
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_HOST_USER = os.environ["GOOGLE_EMAIL_USER"]

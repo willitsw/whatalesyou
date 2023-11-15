@@ -64,13 +64,13 @@ export const recipeToMetric = (recipe: RecipeDetailed): RecipeDetailed => {
 };
 
 export const recipeToImperial = (recipe: RecipeDetailed): RecipeDetailed => {
-  recipe.hops.forEach((hop) => {
+  recipe?.hops?.forEach((hop) => {
     if (hop.amount_type === "g") {
       hop.amount = gramsToOunces(hop.amount);
     }
   });
 
-  recipe.fermentables.forEach((fermentable) => {
+  recipe?.fermentables?.forEach((fermentable) => {
     if (fermentable.amount_type === "kg") {
       fermentable.amount = kilogramsToPounds(fermentable.amount);
     }

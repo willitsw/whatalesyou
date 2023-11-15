@@ -2,9 +2,10 @@ import React, { useContext, useEffect, useState } from "react";
 import ReactGA from "react-ga4";
 import { useLocation } from "react-router-dom";
 import constants from "../constants";
-import { selectBrewSettings } from "../redux/brew-settings";
-import { useAppSelector } from "../redux/store";
-import { selectCurrentUser } from "../redux/user";
+import {
+  UserContext,
+  UserContextValue,
+} from "../components/user-context/user-context";
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -38,11 +39,10 @@ const AnalyticsContext = React.createContext<{
 }>(null);
 
 export const AnalyticsProvider = ({ children }: AnalyticsProviderProps) => {
+  const { user }: UserContextValue = useContext(UserContext);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(null);
   const location = useLocation();
-  const user = useAppSelector(selectCurrentUser);
-  const brewSettings = useAppSelector(selectBrewSettings);
 
   useEffect(() => {
     if (!isInitialized && constants.enableAnalytics) {
@@ -68,7 +68,7 @@ export const AnalyticsProvider = ({ children }: AnalyticsProviderProps) => {
       setAnalyticsData(newData);
       ReactGA.set(newData);
     }
-  }, [user, brewSettings]);
+  }, [user, user?.settings]);
 
   useEffect(() => {
     if (isInitialized && constants.enableAnalytics) {
