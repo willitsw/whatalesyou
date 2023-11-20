@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Layout,
   Menu,
@@ -9,6 +9,7 @@ import {
   Button,
   Typography,
   MenuProps,
+  Affix,
 } from "antd";
 import beerIcon from "./beer-icon.png";
 import { useAppSelector, useAppDispatch } from "../../redux/store";
@@ -157,35 +158,40 @@ const Header = () => {
 
   const userMenuItems = getUserMenuItems();
 
-  const menuStyle: any = { justifyContent: "flex-end", flexGrow: 1 };
+  const menuStyle: any = {
+    justifyContent: "flex-end",
+    flexGrow: 1,
+    width: 600,
+    alignItems: "stretch",
+    marginRight: 10,
+  };
   if (isPhone) {
-    menuStyle.width = 100;
+    menuStyle.width = 50;
+    menuStyle.flexGrow = 0;
   }
 
   return (
-    <Header>
+    <Affix offsetTop={0}>
       <div
-        className="beer-max-width"
         style={{
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
-          margin: "auto",
+          backgroundColor: "#001529",
+          paddingLeft: "20px",
+          paddingRight: "20px",
+          alignItems: "center",
+          height: "70px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            width: "100%",
-            marginRight: "20px",
-          }}
-        >
+        <Link style={{ textDecoration: "none" }} to="/home">
           <div
             style={{
               display: "flex",
               flexDirection: "row",
-              alignItems: "flex-end",
+              alignItems: "center",
+              paddingTop: "10px",
+              paddingBottom: "10px",
             }}
           >
             <Image
@@ -195,12 +201,24 @@ const Header = () => {
               preview={false}
             />
             <Typography.Title
-              style={{ color: "rgba(255, 255, 255, 0.85)", marginLeft: 10 }}
+              style={{
+                color: "rgba(255, 255, 255, 0.85)",
+                marginLeft: 10,
+                marginBottom: 0,
+              }}
               level={isPhone ? 5 : 3}
             >
               What Ales You
             </Typography.Title>
           </div>
+        </Link>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            height: "70px",
+          }}
+        >
           <Menu
             theme="dark"
             mode="horizontal"
@@ -208,32 +226,46 @@ const Header = () => {
             selectedKeys={[currentPage]}
             style={menuStyle}
             items={[
-              { key: "/home", label: "Home", disabled: !isAuthenticated },
+              {
+                key: "/home",
+                label: "Home",
+                disabled: !isAuthenticated,
+                style: { paddingTop: isPhone ? 0 : 12 },
+              },
               {
                 key: "/recipes/list",
                 label: "Recipes",
                 disabled: !isAuthenticated,
+                style: { paddingTop: isPhone ? 0 : 12 },
               },
               {
                 key: "/brew-log/list",
                 label: "Brew Log",
                 disabled: !isAuthenticated,
+                style: { paddingTop: isPhone ? 0 : 12 },
               },
               {
                 key: "/brew-settings",
                 label: "Brew Settings",
                 disabled: !isAuthenticated,
+                style: { paddingTop: isPhone ? 0 : 12 },
               },
             ]}
           />
+          <Dropdown menu={{ items: userMenuItems }} trigger={["click"]}>
+            <div
+              style={{
+                paddingTop: "15px",
+                paddingBottom: "10px",
+                cursor: "pointer",
+              }}
+            >
+              <Avatar size="large" icon={<UserOutlined />} />
+            </div>
+          </Dropdown>
         </div>
-        <Dropdown menu={{ items: userMenuItems }} trigger={["click"]}>
-          <div style={{ paddingTop: 0, cursor: "pointer" }}>
-            <Avatar size="large" icon={<UserOutlined />} />
-          </div>
-        </Dropdown>
       </div>
-    </Header>
+    </Affix>
   );
 };
 

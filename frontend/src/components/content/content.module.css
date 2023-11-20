@@ -1,19 +1,19 @@
-.content{
-    padding: 20px;
-    margin: auto;
-    min-height: 100vh;
+.content {
+  padding: 20px;
+  margin: auto;
+  min-height: calc(100vh - 140px);
 }
 
-.content-area-space{
-    width: 100%;
+.content-area-space {
+  width: 100%;
 }
 
-.title-with-nav{
-    margin-top:10px;
+.title-with-nav {
+  margin-top: 10px;
 }
 
-.title-bar{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+.title-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }

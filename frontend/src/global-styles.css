@@ -24,11 +24,14 @@ body {
 }
 
 .beer-max-width {
-  max-width: 1280px;
 }
 
 .ant-form-item-control {
   max-width: 100%;
+}
+
+.ant-menu-submenu-title {
+  padding-top: 12px;
 }
 
 .srm-0 {
