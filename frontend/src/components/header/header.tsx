@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
-  Layout,
   Menu,
   Image,
   Avatar,
@@ -29,7 +28,6 @@ import { useAnalytics } from "../../utils/analytics";
 import { UserContext, UserContextValue } from "../user-context/user-context";
 
 const Header = () => {
-  const { Header } = Layout;
   const [currentPage, setCurrentPage] = useState("");
   const location = useLocation();
   const pageIsClean = useAppSelector(selectPageIsClean);
@@ -91,6 +89,20 @@ const Header = () => {
           ),
         },
         {
+          key: "create-new-account",
+          icon: <UserOutlined />,
+          label: (
+            <Button
+              type="link"
+              onClick={() => {
+                navigate("/user/new");
+              }}
+            >
+              Create New User
+            </Button>
+          ),
+        },
+        {
           key: "donate",
           icon: <MoneyCollectOutlined />,
           label: (
@@ -98,6 +110,7 @@ const Header = () => {
               type="link"
               href="https://www.paypal.com/donate/?hosted_button_id=UJZ4HJW2BWWLG"
               target="_blank"
+              style={{ color: "#1677ff" }}
               onClick={() =>
                 fireAnalyticsEvent("Donate button clicked", {
                   source: "header",
