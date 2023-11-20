@@ -12,7 +12,7 @@ let constants: Constants = {
 };
 
 if (constants.environment === "production") {
-  constants.apiUrl = "http://api.whatalesyou.net";
+  constants.apiUrl = "https://what-ales-you.herokuapp.com";
 }
 
 export const DATE_FORMAT = "MM/DD/YYYY";
