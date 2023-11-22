@@ -24,6 +24,7 @@ export interface User {
   last_name: string;
   is_staff: boolean;
   is_verified: boolean;
+  password?: string;
 }
 
 export interface UserResponse extends User, Response {
@@ -40,3 +41,5 @@ export interface UserRequest {
 export interface EmailValidationRequest {
   token: string;
 }
+
+export type UserForm = User & UserRequest;

@@ -10,12 +10,6 @@ interface RequestOptions {
   useAuth?: boolean;
 }
 
-interface Response {
-  code: number;
-  ok: boolean;
-  body: any;
-}
-
 const makeRequest = async (
   route: string,
   verb: RequestMethod,
@@ -55,19 +49,7 @@ const makeRequest = async (
     fetchConfig.body = JSON.stringify(body);
   }
 
-  const response = await fetch(url, fetchConfig);
-
-  let json: any;
-
-  if (response.status !== 204) {
-    json = await response.json();
-  }
-
-  return {
-    code: response.status,
-    ok: response.ok,
-    body: { ...json },
-  };
+  return await fetch(url, fetchConfig);
 };
 
 export default makeRequest;

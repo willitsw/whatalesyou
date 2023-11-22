@@ -2,10 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import ReactGA from "react-ga4";
 import { useLocation } from "react-router-dom";
 import constants from "../constants";
-import {
-  UserContext,
-  UserContextValue,
-} from "../components/user-context/user-context";
+import { useCurrentUser } from "../components/user-context/user-context";
 
 interface AnalyticsProviderProps {
   children: React.ReactNode;
@@ -39,7 +36,7 @@ const AnalyticsContext = React.createContext<{
 }>(null);
 
 export const AnalyticsProvider = ({ children }: AnalyticsProviderProps) => {
-  const { user }: UserContextValue = useContext(UserContext);
+  const { user } = useCurrentUser();
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(null);
   const location = useLocation();

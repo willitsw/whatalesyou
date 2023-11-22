@@ -1,4 +1,10 @@
-import React, { createContext, useCallback, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { message } from "antd";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../../constants";
 import { TokenPayload, TokenRequest, UserResponse } from "../../types/user";
@@ -15,7 +21,7 @@ export interface UserContextValue {
   isLoading: boolean;
 }
 
-export const UserContext = createContext(null);
+const UserContext = createContext(null);
 
 interface UserContextProps {
   children: React.ReactNode;
@@ -52,9 +58,17 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
   const loginUser = useCallback(async (payload: TokenRequest) => {
     setIsLoading(true);
     const response = await getToken(payload);
-    localStorage.setItem(ACCESS_TOKEN_KEY, response.access);
-    localStorage.setItem(REFRESH_TOKEN_KEY, response.refresh);
-    setToken(response.access);
+    if (!response.ok) {
+      const body = await response.json();
+      message.error(
+        body.detail ?? "An error occurred loging in the user. Please try again."
+      );
+    } else {
+      const body = await response.json();
+      localStorage.setItem(ACCESS_TOKEN_KEY, body.access);
+      localStorage.setItem(REFRESH_TOKEN_KEY, body.refresh);
+      setToken(body.access);
+    }
   }, []);
 
   const logoutUser = useCallback(() => {
@@ -76,4 +90,8 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+};
+
+export const useCurrentUser = (): UserContextValue => {
+  return useContext(UserContext);
 };

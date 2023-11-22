@@ -1,6 +1,6 @@
 import { Button, Form, Input, Modal, Space } from "antd";
 
-import { useContext, useState } from "react";
+import { useState } from "react";
 
 import styles from "./login.module.css";
 import {
@@ -12,11 +12,11 @@ import React from "react";
 import { useAnalytics } from "../../../utils/analytics";
 import { TokenRequest } from "../../../types/user";
 import { useNavigate } from "react-router-dom";
-import { UserContext, UserContextValue } from "../../user-context/user-context";
+import { useCurrentUser } from "../../user-context/user-context";
 
 const LoginModal = () => {
   const [form] = Form.useForm();
-  const { loginUser }: UserContextValue = useContext(UserContext);
+  const { loginUser } = useCurrentUser();
   const [modalLoading, setModalLoading] = useState<boolean>(false);
   const showLoginModal = useAppSelector(selectShowLoginModal);
   const dispatch = useAppDispatch();

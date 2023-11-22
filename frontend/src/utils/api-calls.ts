@@ -3,11 +3,9 @@ import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "../constants";
 import { BrewLog, BrewLogListResponse } from "../types/brew-log";
 import { BrewSettings } from "../types/brew-settings";
 import { Recipe, RecipeDetailed, RecipeListResponse } from "../types/recipe";
-import { Response } from "../types/shared";
 import {
   UserRequest,
   TokenRequest,
-  TokenResponse,
   UserResponse,
   User,
   EmailValidationRequest,
@@ -26,7 +24,10 @@ import makeRequest from "./request";
 export const useGetRecipesByUser = () =>
   useQuery<RecipeListResponse>({
     queryKey: ["recipe", "list"],
-    queryFn: async () => (await makeRequest("/recipes/", "GET")).body,
+    queryFn: async () => {
+      const res = await makeRequest("/recipes/", "GET");
+      return await res.json();
+    },
   });
 
 export const useGetRecipeById = (recipeId: string) =>
@@ -34,7 +35,8 @@ export const useGetRecipeById = (recipeId: string) =>
     queryKey: ["recipe", recipeId],
     queryFn: async () => {
       if (recipeId) {
-        return (await makeRequest(`/recipes/${recipeId}/`, "GET")).body;
+        const rest = await makeRequest(`/recipes/${recipeId}/`, "GET");
+        return await rest.json();
       }
       return null;
     },
@@ -43,8 +45,10 @@ export const useGetRecipeById = (recipeId: string) =>
 export const useDeleteRecipe = (recipeId: string) => {
   const queryClient = useQueryClient();
   return useMutation<void>({
-    mutationFn: async () =>
-      (await makeRequest(`/recipes/${recipeId}/`, "DELETE")).body,
+    mutationFn: async () => {
+      const res = await makeRequest(`/recipes/${recipeId}/`, "DELETE");
+      return await res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recipe"] });
     },
@@ -54,8 +58,10 @@ export const useDeleteRecipe = (recipeId: string) => {
 export const useCreateUpdateRecipe = (recipe: Recipe) => {
   const queryClient = useQueryClient();
   return useMutation<void>({
-    mutationFn: async () =>
-      (await makeRequest(`/recipes/${recipe.id}/`, "PUT", recipe)).body,
+    mutationFn: async () => {
+      const res = await makeRequest(`/recipes/${recipe.id}/`, "PUT", recipe);
+      return await res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recipe"] });
     },
@@ -105,14 +111,14 @@ export const useCreateUpdateRecipe = (recipe: Recipe) => {
 export const useCreateUpdateBrewSettings = (brewSettings: BrewSettings) => {
   const queryClient = useQueryClient();
   return useMutation<void>({
-    mutationFn: async () =>
-      (
-        await makeRequest(
-          `/brew-settings/${brewSettings.id}/`,
-          "PUT",
-          brewSettings
-        )
-      ).body,
+    mutationFn: async () => {
+      const res = await makeRequest(
+        `/brew-settings/${brewSettings.id}/`,
+        "PUT",
+        brewSettings
+      );
+      return await res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brewSettings"] });
     },
@@ -136,21 +142,32 @@ export const useCreateUpdateBrewSettings = (brewSettings: BrewSettings) => {
 export const useGetBrewLogsByUser = () =>
   useQuery<BrewLogListResponse>({
     queryKey: ["brewLogs"],
-    queryFn: async () => (await makeRequest("/brew-logs/", "GET")).body,
+    queryFn: async () => {
+      const res = await makeRequest("/brew-logs/", "GET");
+      return await res.json();
+    },
   });
 
 export const useGetBrewLogsById = (brewLogId: string) =>
   useQuery<BrewLog>({
     queryKey: ["brewLogById"],
-    queryFn: async () =>
-      (await makeRequest(`/brew-logs/${brewLogId}/`, "GET")).body,
+    queryFn: async () => {
+      const res = await makeRequest(`/brew-logs/${brewLogId}/`, "GET");
+      return await res.json();
+    },
   });
 
 export const useCreateUpdateBrewLog = (brewLog: BrewLog) => {
   const queryClient = useQueryClient();
   return useMutation<BrewLog>({
-    mutationFn: async () =>
-      (await makeRequest(`/brew-logs/${brewLog.id}/`, "PUT", brewLog)).body,
+    mutationFn: async () => {
+      const res = await makeRequest(
+        `/brew-logs/${brewLog.id}/`,
+        "PUT",
+        brewLog
+      );
+      return await res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brewLogById"] });
       queryClient.invalidateQueries({ queryKey: ["brewLogs"] });
@@ -161,8 +178,10 @@ export const useCreateUpdateBrewLog = (brewLog: BrewLog) => {
 export const useDeleteBrewLog = (brewLogId: string) => {
   const queryClient = useQueryClient();
   return useMutation<void>({
-    mutationFn: async () =>
-      (await makeRequest(`/brew-logs/${brewLogId}/`, "DELETE")).body,
+    mutationFn: async () => {
+      const res = await makeRequest(`/brew-logs/${brewLogId}/`, "DELETE");
+      return await res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brewLogById"] });
       queryClient.invalidateQueries({ queryKey: ["brewLogs"] });
@@ -190,11 +209,11 @@ export const useDeleteBrewLog = (brewLogId: string) => {
 
 // TOKEN ENDPOINTS
 
-export const getToken = async (body: TokenRequest): Promise<TokenResponse> => {
+export const getToken = async (body: TokenRequest): Promise<Response> => {
   const response = await makeRequest("/token/", "POST", body, {
     useAuth: false,
   });
-  return response.body;
+  return response;
 };
 
 export const refreshToken = async (): Promise<void> => {
@@ -208,8 +227,9 @@ export const refreshToken = async (): Promise<void> => {
     { useAuth: false }
   );
   if (response.ok) {
-    localStorage.setItem(ACCESS_TOKEN_KEY, response.body.access);
-    localStorage.setItem(REFRESH_TOKEN_KEY, response.body.refresh);
+    const body = await response.json();
+    localStorage.setItem(ACCESS_TOKEN_KEY, body.access);
+    localStorage.setItem(REFRESH_TOKEN_KEY, body.refresh);
     console.log("refreshed the token");
   }
 };
@@ -221,31 +241,41 @@ export const refreshToken = async (): Promise<void> => {
 // };
 
 export const getCurrentUser = async (id: string): Promise<UserResponse> => {
-  return (await makeRequest(`/users/${id}/`, "GET")).body;
+  const result = await makeRequest(`/users/${id}/`, "GET");
+  return await result.json();
 };
 
 export const useGetCurrentUser = (id: string) =>
   useQuery<UserResponse>({
     queryKey: ["currentUser"],
-    queryFn: async () => (await makeRequest(`/users/${id}/`, "GET")).body,
+    queryFn: async () => {
+      const response = await makeRequest(`/users/${id}/`, "GET");
+      return await response.json();
+    },
   });
 
-export const useCreateUser = (body: UserRequest) => {
+export const useCreateUser = () => {
   const queryClient = useQueryClient();
-  return useMutation<UserResponse>({
-    mutationFn: async () =>
-      (await makeRequest("/users/", "POST", body, { useAuth: false })).body,
+  return useMutation<UserResponse, Error, UserRequest>({
+    mutationFn: async (body: UserRequest) => {
+      const res = await makeRequest("/users/", "POST", body, {
+        useAuth: false,
+      });
+      return await res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
   });
 };
 
-export const useUpdateUser = (body: User) => {
+export const useUpdateUser = () => {
   const queryClient = useQueryClient();
-  return useMutation<UserResponse>({
-    mutationFn: async () =>
-      (await makeRequest(`/users/${body.id}/`, "PUT", body)).body,
+  return useMutation<UserResponse, Error, User>({
+    mutationFn: async (body: User) => {
+      const res = await makeRequest(`/users/${body.id}/`, "PUT", body);
+      return await res.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
@@ -266,5 +296,5 @@ export const validateEmailToken = async (
 ): Promise<Response> => {
   const result = await makeRequest(`/validate-new-user/`, "POST", body);
 
-  return { code: result.code };
+  return result;
 };

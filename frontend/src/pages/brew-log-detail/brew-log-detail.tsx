@@ -1,9 +1,8 @@
-import React, { Children, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Content from "../../components/content/content";
 import {
   Affix,
   Button,
-  Col,
   ConfigProvider,
   DatePicker,
   Descriptions,
@@ -14,7 +13,6 @@ import {
   message,
   Modal,
   Radio,
-  Row,
   Select,
   Space,
   Tabs,
@@ -35,16 +33,13 @@ import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { BrewLog, GravityReading } from "../../types/brew-log";
-import { useAppSelector, useAppDispatch } from "../../redux/store";
+import { useAppDispatch } from "../../redux/store";
 import ElementWithLabel from "../../components/form-layouts/element-with-label";
 import { v4 as uuid } from "uuid";
-import {
-  UserContext,
-  UserContextValue,
-} from "../../components/user-context/user-context";
+import { useCurrentUser } from "../../components/user-context/user-context";
 
 const BrewLogDetailPage = () => {
-  const { user }: UserContextValue = useContext(UserContext);
+  const { user } = useCurrentUser();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();

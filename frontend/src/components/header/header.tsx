@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Menu,
@@ -25,7 +25,7 @@ import {
 } from "../../redux/global-modals";
 import React from "react";
 import { useAnalytics } from "../../utils/analytics";
-import { UserContext, UserContextValue } from "../user-context/user-context";
+import { useCurrentUser } from "../user-context/user-context";
 
 const Header = () => {
   const [currentPage, setCurrentPage] = useState("");
@@ -37,11 +37,7 @@ const Header = () => {
     window.matchMedia("(max-width: 500px)").matches
   );
   const { fireAnalyticsEvent } = useAnalytics();
-  const {
-    logoutUser,
-    isAuthenticated,
-    user: currentUser,
-  }: UserContextValue = useContext(UserContext);
+  const { logoutUser, isAuthenticated, user: currentUser } = useCurrentUser();
 
   useEffect(() => {
     if (!isAuthenticated) {

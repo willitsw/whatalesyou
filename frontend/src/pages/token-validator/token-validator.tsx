@@ -11,10 +11,12 @@ export const TokenValidator = () => {
 
   const handleSubmitVerificationCode = async () => {
     const result = await validateEmailToken({ token: verificationCode });
-    if (result.code < 300) {
+    if (!result.ok) {
       navigate("/home");
     } else {
-      message.error("Invalid token supplied, please try again or resend.");
+      message.error(
+        "Invalid token supplied, please try again or generate a new token."
+      );
     }
   };
 

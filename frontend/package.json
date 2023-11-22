@@ -23,7 +23,7 @@
     "@ant-design/icons": "^5.0.1",
     "@reduxjs/toolkit": "^1.8.6",
     "@tanstack/react-query": "^5.7.2",
-    "antd": "^5.2.3",
+    "antd": "^5.11.2",
     "brewing-shared": "github:willitsw/brewing-shared#v0.0.17",
     "dayjs": "^1.11.7",
     "jwt-decode": "^3.1.2",

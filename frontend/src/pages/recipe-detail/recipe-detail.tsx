@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Content from "../../components/content/content";
 import {
@@ -20,20 +20,12 @@ import React from "react";
 import Ingredients from "./ingredients/ingredients";
 import { useAnalytics } from "../../utils/analytics";
 import dayjs from "dayjs";
-import {
-  Ingredient,
-  IngredientType,
-  Recipe,
-  RecipeDetailed,
-} from "../../types/recipe";
+import { Ingredient, IngredientType, RecipeDetailed } from "../../types/recipe";
 import { Stats } from "../../types/stats";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
+import { useAppDispatch } from "../../redux/store";
 import { v4 as uuid } from "uuid";
 import { useCreateUpdateRecipe, useGetRecipeById } from "../../utils/api-calls";
-import {
-  UserContext,
-  UserContextValue,
-} from "../../components/user-context/user-context";
+import { useCurrentUser } from "../../components/user-context/user-context";
 import brewSettings from "../brew-settings/brew-settings";
 import { UserResponse } from "../../types/user";
 
@@ -102,7 +94,7 @@ const getDefaultStats = (): Stats => ({
 });
 
 const RecipeDetailPage = () => {
-  const { user }: UserContextValue = useContext(UserContext);
+  const { user } = useCurrentUser();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();

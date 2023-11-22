@@ -1,7 +1,7 @@
 import { AutoComplete, Input, InputNumber, Modal, Select } from "antd";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { setPageIsClean } from "../../../redux/global-modals";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
+import { useAppDispatch } from "../../../redux/store";
 import DefaultGrains from "../../../data/default-grains";
 import DefaultHops from "../../../data/default-hops";
 import {
@@ -21,10 +21,7 @@ import {
   StepLookup,
 } from "../../../types/shared";
 import ElementWithLabel from "../../../components/form-layouts/element-with-label";
-import {
-  UserContext,
-  UserContextValue,
-} from "../../../components/user-context/user-context";
+import { useCurrentUser } from "../../../components/user-context/user-context";
 interface IngredientModalProps {
   ingredientId: any;
   handleCancel: () => void;
@@ -61,7 +58,7 @@ const IngredientModal = ({
   recipeId,
 }: IngredientModalProps) => {
   const dispatch = useAppDispatch();
-  const { user }: UserContextValue = useContext(UserContext);
+  const { user } = useCurrentUser();
   const [ingredient, setIngredient] = useState<any>(null);
 
   useEffect(() => {

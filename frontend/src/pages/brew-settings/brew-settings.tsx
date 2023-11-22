@@ -4,32 +4,21 @@ import {
   Button,
   Divider,
   Form,
-  Input,
   InputNumber,
   message,
   Radio,
   Switch,
   Typography,
 } from "antd";
-import { useContext, useEffect, useState } from "react";
+import { useState } from "react";
 import Content from "../../components/content/content";
 import { setPageIsClean } from "../../redux/global-modals";
-import { useAppDispatch, useAppSelector } from "../../redux/store";
-import {
-  brewSettingsToMetric,
-  brewSettingsToImperial,
-} from "../../utils/converters";
+import { useAppDispatch } from "../../redux/store";
 import React from "react";
 import { BrewSettings } from "../../types/brew-settings";
 import ElementWithLabel from "../../components/form-layouts/element-with-label";
-import {
-  useCreateUpdateBrewSettings,
-  useGetCurrentUser,
-} from "../../utils/api-calls";
-import {
-  UserContext,
-  UserContextValue,
-} from "../../components/user-context/user-context";
+import { useCreateUpdateBrewSettings } from "../../utils/api-calls";
+import { useCurrentUser } from "../../components/user-context/user-context";
 
 const defaultBrewSettings: BrewSettings = {
   batch_size: 0,
@@ -48,7 +37,7 @@ const defaultBrewSettings: BrewSettings = {
 const BrewSettings = () => {
   const [localBrewSettings, setLocalBrewSettings] =
     useState<BrewSettings>(defaultBrewSettings);
-  const { user }: UserContextValue = useContext(UserContext);
+  const { user } = useCurrentUser();
 
   const {
     mutateAsync: createUpdateBrewSettings,
