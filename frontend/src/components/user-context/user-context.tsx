@@ -17,6 +17,7 @@ export interface UserContextValue {
   token: string;
   loginUser: (payload: TokenRequest) => Promise<void>;
   logoutUser: () => void;
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -55,6 +56,21 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
     changeUser();
   }, [token]);
 
+  const refreshUser = async () => {
+    setIsLoading(true);
+    let userId = "";
+    if (token) {
+      userId = (jwt(token) as TokenPayload).user_id;
+      const newUser = await getCurrentUser(userId);
+      if (newUser) {
+        setUser(newUser);
+      }
+    } else {
+      setUser(null);
+    }
+    setIsLoading(false);
+  };
+
   const loginUser = useCallback(async (payload: TokenRequest) => {
     setIsLoading(true);
     const response = await getToken(payload);
@@ -85,6 +101,7 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
     token,
     loginUser,
     logoutUser,
+    refreshUser,
     isAuthenticated: !!user,
     isLoading,
   };

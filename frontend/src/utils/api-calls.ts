@@ -108,10 +108,10 @@ export const useCreateUpdateRecipe = (recipe: Recipe) => {
 //     queryFn: async () => (await makeRequest("/brew-settings/", "GET")).body,
 //   });
 
-export const useCreateUpdateBrewSettings = (brewSettings: BrewSettings) => {
+export const useCreateUpdateBrewSettings = () => {
   const queryClient = useQueryClient();
-  return useMutation<void>({
-    mutationFn: async () => {
+  return useMutation<void, Error, BrewSettings>({
+    mutationFn: async (brewSettings: BrewSettings) => {
       const res = await makeRequest(
         `/brew-settings/${brewSettings.id}/`,
         "PUT",
