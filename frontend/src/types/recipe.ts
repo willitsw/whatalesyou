@@ -42,6 +42,7 @@ export interface Ingredient {
   amount: number;
   amount_type: IngredientAmountType;
   ingredient_type?: IngredientType;
+  recipe: string;
 }
 
 export interface Hop extends Ingredient {

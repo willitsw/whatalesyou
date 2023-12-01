@@ -50,20 +50,20 @@ export const useDeleteRecipe = (recipeId: string) => {
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recipe"] });
+      queryClient.invalidateQueries({ queryKey: ["recipe", "list"] });
     },
   });
 };
 
-export const useCreateUpdateRecipe = (recipe: Recipe) => {
+export const useCreateUpdateRecipe = () => {
   const queryClient = useQueryClient();
-  return useMutation<void>({
-    mutationFn: async () => {
+  return useMutation<void, Error, Recipe>({
+    mutationFn: async (recipe: Recipe) => {
       const res = await makeRequest(`/recipes/${recipe.id}/`, "PUT", recipe);
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recipe"] });
+      queryClient.invalidateQueries({ queryKey: ["recipe", "list"] });
     },
   });
 };

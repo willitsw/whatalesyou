@@ -1,119 +1,79 @@
-import { Typography, Input, InputNumber, Radio } from "antd";
+import {
+  Typography,
+  Input,
+  InputNumber,
+  Radio,
+  FormInstance,
+  Form,
+} from "antd";
 import React from "react";
 import ElementWithLabel from "../../../components/form-layouts/element-with-label";
 import { RecipeDetailed } from "../../../types/recipe";
+import { FormFlex } from "../../../components/form-layouts/form-flex";
+import { useWatch } from "antd/es/form/Form";
 
 interface GeneralInfoProps {
-  recipe: RecipeDetailed;
-  onValuesChange: (key: string, value: any) => void;
+  form: FormInstance<RecipeDetailed>;
 }
 
-const GeneralInfo = ({ recipe, onValuesChange }: GeneralInfoProps) => {
+const GeneralInfo = ({ form }: GeneralInfoProps) => {
+  const measurementType = useWatch("measurement_type", form);
   return (
     <>
       <Typography.Title level={4}>General Info</Typography.Title>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          gap: 10,
-        }}
-      >
-        <ElementWithLabel
-          formElement={
-            <Input
-              value={recipe?.name}
-              onChange={(value) => onValuesChange(value.target.value, "name")}
-              style={{ maxWidth: "100%" }}
-            />
-          }
-          label="Recipe Name"
-          orientation="column"
-        />
-        <ElementWithLabel
-          formElement={
-            <Input
-              value={recipe?.author}
-              onChange={(value) => onValuesChange(value.target.value, "author")}
-            />
-          }
-          label="Author"
-          orientation="column"
-        />
-        <ElementWithLabel
-          formElement={
-            <Input.TextArea
-              style={{ width: 300 }}
-              value={recipe?.description}
-              onChange={(value) =>
-                onValuesChange(value.target.value, "description")
-              }
-            />
-          }
-          label="Recipe Description"
-          orientation="column"
-        />
-        <ElementWithLabel
-          formElement={
-            <InputNumber
-              min="0"
-              max="100"
-              step="0.5"
-              style={{ width: 105 }}
-              addonAfter={recipe?.measurement_type === "metric" ? "l" : "gal"}
-              value={recipe?.batch_size?.toString()}
-              onChange={(value: string) => onValuesChange(value, "batch_size")}
-            />
-          }
+      <FormFlex>
+        <Form.Item label="Recipe Name" name="name" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item label="Author" name="author" rules={[{ required: true }]}>
+          <Input />
+        </Form.Item>
+        <Form.Item label="Recipe Description" name="description">
+          <Input.TextArea style={{ width: 300 }} />
+        </Form.Item>
+        <Form.Item
           label="Batch Size"
-          orientation="column"
-        />
-        <ElementWithLabel
-          formElement={
-            <InputNumber
-              style={{ width: 105 }}
-              value={recipe?.efficiency?.toString()}
-              onChange={(value: string) => onValuesChange(value, "efficiency")}
-              min="0"
-              max="100"
-              step="1"
-              addonAfter="%"
-            />
-          }
+          name="batch_size"
+          rules={[{ required: true }]}
+        >
+          <InputNumber
+            min="0"
+            max="100"
+            step="0.5"
+            style={{ width: 120 }}
+            addonAfter={measurementType === "metric" ? "l" : "gal"}
+          />
+        </Form.Item>
+        <Form.Item
           label="Efficiency"
-          orientation="column"
-        />
-        <ElementWithLabel
-          formElement={
-            <Radio.Group
-              value={recipe?.type}
-              onChange={(value) => onValuesChange(value.target.value, "type")}
-            >
-              <Radio.Button value="all_grain">All Grain</Radio.Button>
-              <Radio.Button value="extract">Extract</Radio.Button>
-            </Radio.Group>
-          }
-          label="Brew Type"
-          orientation="column"
-        />
-        <ElementWithLabel
-          formElement={
-            <Radio.Group
-              value={recipe?.measurement_type}
-              onChange={(value) =>
-                onValuesChange(value.target.value, "measurement_type")
-              }
-            >
-              <Radio.Button value="imperial">Imperial</Radio.Button>
-              <Radio.Button value="metric">Metric</Radio.Button>
-            </Radio.Group>
-          }
+          name="efficiency"
+          rules={[{ required: true }]}
+        >
+          <InputNumber
+            style={{ width: 120 }}
+            min="0"
+            max="100"
+            step="1"
+            addonAfter="%"
+          />
+        </Form.Item>
+        <Form.Item label="Brew Type" name="type" rules={[{ required: true }]}>
+          <Radio.Group>
+            <Radio.Button value="all_grain">All Grain</Radio.Button>
+            <Radio.Button value="extract">Extract</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item
           label="Measurement Type"
-          orientation="column"
-        />
-      </div>
+          name="measurement_type"
+          rules={[{ required: true }]}
+        >
+          <Radio.Group>
+            <Radio.Button value="imperial">Imperial</Radio.Button>
+            <Radio.Button value="metric">Metric</Radio.Button>
+          </Radio.Group>
+        </Form.Item>
+      </FormFlex>
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import Content from "../../components/content/content";
 import {
@@ -15,19 +15,17 @@ import {
 import { getStats } from "../../utils/beer-math";
 import GeneralInfo from "./general/general-info";
 import StatsSection from "./statistics/stats";
-import { setPageIsClean } from "../../redux/global-modals";
 import React from "react";
 import Ingredients from "./ingredients/ingredients";
 import { useAnalytics } from "../../utils/analytics";
 import dayjs from "dayjs";
 import { Ingredient, IngredientType, RecipeDetailed } from "../../types/recipe";
 import { Stats } from "../../types/stats";
-import { useAppDispatch } from "../../redux/store";
 import { v4 as uuid } from "uuid";
 import { useCreateUpdateRecipe, useGetRecipeById } from "../../utils/api-calls";
 import { useCurrentUser } from "../../components/user-context/user-context";
-import brewSettings from "../brew-settings/brew-settings";
 import { UserResponse } from "../../types/user";
+import { useForm, useWatch } from "antd/es/form/Form";
 
 const getDefaultRecipe = (user: UserResponse): RecipeDetailed => ({
   id: uuid(),
@@ -98,80 +96,80 @@ const RecipeDetailPage = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const [stats, setStats] = useState<Stats>(getDefaultStats());
   const [isDesktop] = useState<boolean>(
     window.matchMedia("(min-width: 1200px)").matches
   );
   const { fireAnalyticsEvent } = useAnalytics();
-  const [workingRecipe, setWorkingRecipe] = useState<RecipeDetailed>();
+  const [form] = useForm<RecipeDetailed>();
+  const measurementType = useWatch("measurement_type", form);
 
   const { data: recipe, isLoading: recipeIsLoading } = useGetRecipeById(id);
 
-  const { mutateAsync: createUpdateRecipe } =
-    useCreateUpdateRecipe(workingRecipe);
+  const { mutateAsync: createUpdateRecipe } = useCreateUpdateRecipe();
 
   const isLoading = recipeIsLoading;
 
-  if (!workingRecipe && !recipeIsLoading && user) {
-    if (location.pathname.includes("duplicate") && recipe) {
-      setWorkingRecipe(duplicateRecipe(recipe));
-    } else if (location.pathname.includes("new")) {
-      setWorkingRecipe(getDefaultRecipe(user));
-    } else if (location.pathname.includes("edit") && recipe) {
-      setWorkingRecipe(recipe);
-    }
-  }
-
   useEffect(() => {
-    if (workingRecipe && brewSettings) {
-      setStats(getStats(workingRecipe, user.settings));
-    } else {
-      setStats(getDefaultStats());
+    if (recipe) {
+      setStats(getStats(recipe, user.settings));
     }
-  }, [workingRecipe, brewSettings]);
+  }, [recipe]);
 
   const handleSave = async () => {
-    await createUpdateRecipe();
-    dispatch(setPageIsClean(true));
-    message.success(`${workingRecipe?.name} has been saved.`);
-    fireAnalyticsEvent("Recipe Saved", { recipeId: workingRecipe.id });
+    const values: RecipeDetailed = form.getFieldsValue(true);
+    let recipePayload: RecipeDetailed;
+
+    if (location.pathname.includes("duplicate")) {
+      const newRecipe = duplicateRecipe(recipe);
+      recipePayload = { ...newRecipe, ...values };
+    } else if (location.pathname.includes("new")) {
+      const newRecipe = getDefaultRecipe(user);
+      recipePayload = { ...newRecipe, ...values };
+    } else if (location.pathname.includes("edit")) {
+      recipePayload = { ...recipe, ...values };
+    }
+    await createUpdateRecipe(recipePayload);
+    message.success("Recipe has been saved.");
+    fireAnalyticsEvent("Recipe Saved", { recipeId: recipePayload.id });
   };
 
   const goBackToRecipeList = () => {
     navigate("/recipes/list/");
   };
 
-  const handleFieldChange = (value: any, key: any) => {
-    dispatch(setPageIsClean(false));
-    const newRecipe = { ...workingRecipe };
-    newRecipe[key] = value;
-    setWorkingRecipe(newRecipe);
-  };
-
   const handleUpdateIngredient = (newIngredient: Ingredient) => {
-    const updatedRecipe: RecipeDetailed = { ...workingRecipe };
+    const allIngredientTypes: IngredientType[] = [
+      "hops",
+      "chemistry",
+      "cultures",
+      "fermentables",
+      "non_fermentables",
+    ];
+    allIngredientTypes.forEach((type) =>
+      handleDeleteIngredient(newIngredient.id, type)
+    );
 
-    const ingredientIdToUpdate = updatedRecipe[
-      newIngredient.ingredient_type
-    ].findIndex(({ id }) => newIngredient.id === id);
+    const ingredientList: Ingredient[] = [
+      ...form.getFieldValue(newIngredient.ingredient_type),
+    ];
 
-    if (ingredientIdToUpdate >= 0 && newIngredient.id) {
-      updatedRecipe[newIngredient.ingredient_type][ingredientIdToUpdate] =
-        newIngredient;
-    } else {
-      updatedRecipe[newIngredient.ingredient_type].push(newIngredient as any);
-    }
+    ingredientList.push(newIngredient);
 
-    setWorkingRecipe(updatedRecipe);
+    form.setFieldValue(newIngredient.ingredient_type, ingredientList);
+    handleRunStats();
   };
 
   const handleDeleteIngredient = (idToDelete: string, type: IngredientType) => {
-    const updatedRecipe: RecipeDetailed = { ...workingRecipe };
-    updatedRecipe[type] = updatedRecipe[type].filter(
-      (ingredient) => ingredient.id !== idToDelete
-    ) as any;
-    setWorkingRecipe(updatedRecipe);
+    const values = form
+      .getFieldValue(type)
+      .filter((item: Ingredient) => item.id !== idToDelete);
+
+    form.setFieldValue(type, values);
+  };
+
+  const handleRunStats = () => {
+    setStats(getStats(form.getFieldsValue(true), user.settings));
   };
 
   const getLayout = () => {
@@ -182,19 +180,14 @@ const RecipeDetailPage = () => {
           {
             key: "1",
             label: "General Info",
-            children: (
-              <GeneralInfo
-                onValuesChange={handleFieldChange}
-                recipe={workingRecipe}
-              />
-            ),
+            children: <GeneralInfo form={form} />,
           },
           {
             key: "2",
             label: "Ingredients",
             children: (
               <Ingredients
-                recipe={workingRecipe}
+                form={form}
                 onIngredientChange={handleUpdateIngredient}
                 onIngredientDelete={handleDeleteIngredient}
               />
@@ -211,8 +204,8 @@ const RecipeDetailPage = () => {
             {formSections}
           </Col>
           <Col xs={0} sm={0} md={0} lg={8} xl={8}>
-            <Affix offsetTop={10}>
-              <StatsSection stats={stats} recipe={workingRecipe} />
+            <Affix offsetTop={100}>
+              <StatsSection stats={stats} measurementType={measurementType} />
             </Affix>
           </Col>
         </Row>
@@ -222,7 +215,7 @@ const RecipeDetailPage = () => {
     return (
       <>
         {formSections}
-        <StatsSection stats={stats} recipe={workingRecipe} />
+        <StatsSection stats={stats} measurementType={measurementType} />
         <Divider />
       </>
     );
@@ -231,21 +224,32 @@ const RecipeDetailPage = () => {
   return (
     <Content
       isLoading={isLoading}
-      pageTitle={!isLoading ? workingRecipe?.name ?? "" : ""}
+      pageTitle={!isLoading ? recipe?.name ?? "New Recipe" : ""}
     >
-      {getLayout()}
-      <Affix offsetBottom={10} style={{ float: "right" }}>
-        <Space>
-          <Form.Item>
-            <Button type="primary" onClick={handleSave}>
-              Save
-            </Button>
-          </Form.Item>
-          <Form.Item>
-            <Button onClick={goBackToRecipeList}>Back to Recipe List</Button>
-          </Form.Item>
-        </Space>
-      </Affix>
+      <Form
+        form={form}
+        initialValues={recipe ?? getDefaultRecipe(user)}
+        name="recipe-detail"
+        onFinish={handleSave}
+        autoComplete="off"
+        layout="vertical"
+        onFieldsChange={handleRunStats}
+        preserve
+      >
+        {getLayout()}
+        <div style={{ position: "fixed", bottom: "10px", right: "20px" }}>
+          <Space>
+            <Form.Item>
+              <Button type="primary" htmlType="submit">
+                Save
+              </Button>
+            </Form.Item>
+            <Form.Item>
+              <Button onClick={goBackToRecipeList}>Back to Recipe List</Button>
+            </Form.Item>
+          </Space>
+        </div>
+      </Form>
     </Content>
   );
 };

@@ -16,6 +16,7 @@ import { BrewSettings } from "../../types/brew-settings";
 import { useCreateUpdateBrewSettings } from "../../utils/api-calls";
 import { useCurrentUser } from "../../components/user-context/user-context";
 import { useForm } from "antd/es/form/Form";
+import { FormFlex } from "../../components/form-layouts/form-flex";
 
 const BrewSettings = () => {
   const { user, refreshUser } = useCurrentUser();
@@ -48,17 +49,7 @@ const BrewSettings = () => {
         layout="vertical"
       >
         <Typography.Title level={4}>General Defaults</Typography.Title>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            gap: 20,
-            marginLeft: 20,
-            marginRight: 20,
-            flexWrap: "wrap",
-          }}
-        >
+        <FormFlex>
           <Form.Item
             label="Batch Size"
             name="batch_size"
@@ -101,20 +92,10 @@ const BrewSettings = () => {
               <Radio.Button value="metric">Metric</Radio.Button>
             </Radio.Group>
           </Form.Item>
-        </div>
+        </FormFlex>
         <Divider />
         <Typography.Title level={4}>Water Loss Constants</Typography.Title>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            gap: 20,
-            marginLeft: 20,
-            marginRight: 20,
-            flexWrap: "wrap",
-          }}
-        >
+        <FormFlex>
           <Form.Item
             label="Grain Water Loss"
             name="water_loss_per_grain_unit"
@@ -167,20 +148,10 @@ const BrewSettings = () => {
               addonAfter={measurementType === "metric" ? "lit/hr" : "gal/hr"}
             />
           </Form.Item>
-        </div>
+        </FormFlex>
         <Divider />
         <Typography.Title level={4}>Mash Settings</Typography.Title>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            gap: 20,
-            marginLeft: 20,
-            marginRight: 20,
-            flexWrap: "wrap",
-          }}
-        >
+        <FormFlex>
           <Form.Item
             label="Sparging"
             name="do_sparge"
@@ -207,7 +178,7 @@ const BrewSettings = () => {
               />
             </Form.Item>
           )}
-        </div>
+        </FormFlex>
         <Divider />
         <Affix offsetBottom={10} style={{ float: "right" }}>
           <Form.Item>

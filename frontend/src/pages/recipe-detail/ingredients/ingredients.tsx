@@ -9,6 +9,7 @@ import {
   Tooltip,
   Typography,
   Modal,
+  FormInstance,
 } from "antd";
 import React, { useEffect, useState } from "react";
 import hop from "./hop.png";
@@ -18,13 +19,7 @@ import ingredient from "./ingredient.png";
 import yeast from "./yeast.png";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import IngredientModal from "./ingredient-modal";
-import { v4 as uuid } from "uuid";
-import { useAppDispatch, useAppSelector } from "../../../redux/store";
-import {
-  FermentableTypeLookup,
-  MeasurementType,
-  Step,
-} from "../../../types/shared";
+import { FermentableTypeLookup, Step } from "../../../types/shared";
 import {
   Culture,
   CultureFormLookup,
@@ -34,6 +29,7 @@ import {
   IngredientType,
   RecipeDetailed,
 } from "../../../types/recipe";
+import { useWatch } from "antd/es/form/Form";
 
 interface StepConfig {
   title: string;
@@ -42,18 +38,17 @@ interface StepConfig {
 }
 
 interface IngredientsProps {
-  recipe: RecipeDetailed;
+  form: FormInstance<RecipeDetailed>;
   onIngredientChange: (newIngredient: Ingredient) => void;
   onIngredientDelete: (ingredientId: string, type: IngredientType) => void;
 }
 
-interface SortedIngredients {
-  strikewater: Ingredient[];
-  mash: Ingredient[];
-  boil: Ingredient[];
-  fermentor: Ingredient[];
-  bottle: Ingredient[];
+interface IngredientSelectPayload {
+  step: Step;
+  ingredient?: Ingredient;
 }
+
+type SortedIngredients = Record<Step, Ingredient[]>;
 
 const ingredientIcons: Record<IngredientType, any> = {
   cultures: yeast,
@@ -63,92 +58,101 @@ const ingredientIcons: Record<IngredientType, any> = {
   chemistry: chemical,
 };
 
+const lookup = {
+  strikewater: 0,
+  mash: 1,
+  boil: 2,
+  fermentor: 3,
+  bottle: 4,
+};
+
 const Ingredients = ({
-  recipe,
+  form,
   onIngredientChange,
   onIngredientDelete,
 }: IngredientsProps) => {
-  const [selectedIngredientId, setSelectedIngredientId] = useState<any>(null);
+  // const [selectedIngredientId, setSelectedIngredientId] = useState<any>(null);
   const [ingredientToDelete, setIngredientToDelete] =
     useState<Ingredient>(null);
-  const [sortedIngredients, setSortedIngredients] = useState<SortedIngredients>(
-    {
-      strikewater: [],
-      mash: [],
-      boil: [],
-      fermentor: [],
-      bottle: [],
-    }
-  );
-  const [ingredientList, setIngredientList] = useState<Ingredient[]>([]);
+  const [sortedIngredients, setSortedIngredients] = useState<StepConfig[]>([]);
+  const [selectedIngredientData, setSelectedIngredientData] =
+    useState<IngredientSelectPayload>(null);
+  // const [ingredientList, setIngredientList] = useState<Ingredient[]>([]);
+  const hops = useWatch("hops", { form, preserve: true });
+  const chemistry = useWatch("chemistry", { form, preserve: true });
+  const fermentables = useWatch("fermentables", { form, preserve: true });
+  const nonFermentables = useWatch("non_fermentables", {
+    form,
+    preserve: true,
+  });
+  const cultures = useWatch("cultures", { form, preserve: true });
 
   useEffect(() => {
-    const newSortedIngredients: SortedIngredients = {
-      strikewater: [],
-      mash: [],
-      boil: [],
-      fermentor: [],
-      bottle: [],
-    };
-    const newIngredientList: Ingredient[] = [];
+    const newSortedIngredients: StepConfig[] = [
+      {
+        title: "Strike Water Additions",
+        step: "strikewater",
+        items: [],
+      },
+      {
+        title: "Mash Additions",
+        step: "mash",
+        items: [],
+      },
+      {
+        title: "Boil Additions",
+        step: "boil",
+        items: [],
+      },
+      {
+        title: "Fermentor Additions",
+        step: "fermentor",
+        items: [],
+      },
+      {
+        title: "Packaging Additions",
+        step: "bottle",
+        items: [],
+      },
+    ];
 
-    recipe.hops.forEach((hop) => {
+    hops?.forEach((hop) => {
       hop.ingredient_type = "hops";
-      newSortedIngredients[hop.step].push(hop);
-      newIngredientList.push(hop);
+      newSortedIngredients[lookup[hop.step]].items.push(hop);
     });
-    recipe.fermentables.forEach((fermentable) => {
+    fermentables?.forEach((fermentable) => {
       fermentable.ingredient_type = "fermentables";
-      newSortedIngredients[fermentable.step].push(fermentable);
-      newIngredientList.push(fermentable);
+      newSortedIngredients[lookup[fermentable.step]].items.push(fermentable);
     });
-    recipe.cultures.forEach((culture) => {
+    cultures?.forEach((culture) => {
       culture.ingredient_type = "cultures";
-      newSortedIngredients[culture.step].push(culture);
-      newIngredientList.push(culture);
+      newSortedIngredients[lookup[culture.step]].items.push(culture);
     });
-    recipe.non_fermentables.forEach((non_fermentable) => {
+    nonFermentables?.forEach((non_fermentable) => {
       non_fermentable.ingredient_type = "non_fermentables";
-      newSortedIngredients[non_fermentable.step].push(non_fermentable);
-      newIngredientList.push(non_fermentable);
+      newSortedIngredients[lookup[non_fermentable.step]].items.push(
+        non_fermentable
+      );
     });
-    recipe.chemistry.forEach((chem) => {
+    chemistry?.forEach((chem) => {
       chem.ingredient_type = "chemistry";
-      newSortedIngredients[chem.step].push(chem);
-      newIngredientList.push(chem);
+      newSortedIngredients[lookup[chem.step]].items.push(chem);
     });
 
     setSortedIngredients(newSortedIngredients);
-    setIngredientList(newIngredientList);
-  }, [recipe]);
+  }, [hops, fermentables, cultures, nonFermentables, chemistry]);
 
-  const steps: StepConfig[] = [
-    {
-      title: "Strike Water Additions",
-      step: "strikewater",
-      items: sortedIngredients.strikewater,
-    },
-    {
-      title: "Mash Additions",
-      step: "mash",
-      items: sortedIngredients.mash,
-    },
-    {
-      title: "Boil Additions",
-      step: "boil",
-      items: sortedIngredients.boil,
-    },
-    {
-      title: "Fermentor Additions",
-      step: "fermentor",
-      items: sortedIngredients.fermentor,
-    },
-    {
-      title: "Packaging Additions",
-      step: "bottle",
-      items: sortedIngredients.bottle,
-    },
-  ];
+  const handleSelectIngredientToEdit = (step: Step, id?: string) => {
+    const newIngredientData: IngredientSelectPayload = {
+      step,
+    };
+    if (id) {
+      newIngredientData.ingredient = sortedIngredients[lookup[step]].items.find(
+        (ingredient) => id === ingredient.id
+      );
+    }
+    setSelectedIngredientData(newIngredientData);
+  };
 
   const formatListTitle = (text: string, step: Step) => (
     <div
@@ -161,7 +165,7 @@ const Ingredients = ({
       <Button
         style={{ marginLeft: "15px" }}
         type="primary"
-        onClick={() => setSelectedIngredientId(step)}
+        onClick={() => handleSelectIngredientToEdit(step)}
       >
         Add Item
       </Button>
@@ -235,7 +239,7 @@ const Ingredients = ({
     }
   };
 
-  const getDetails = (item: Ingredient) => {
+  const getDetails = (item: Ingredient, step: Step) => {
     return (
       <Descriptions
         title={
@@ -246,7 +250,7 @@ const Ingredients = ({
                 <Button
                   shape="circle"
                   icon={<EditOutlined />}
-                  onClick={() => setSelectedIngredientId(item.id)}
+                  onClick={() => handleSelectIngredientToEdit(step, item.id)}
                 />
               </Tooltip>
               <Tooltip title="Delete">
@@ -271,20 +275,20 @@ const Ingredients = ({
 
   return (
     <ConfigProvider renderEmpty={() => null}>
-      {steps.map(({ title, items, step }, index) => {
+      {sortedIngredients.map(({ title, items, step }) => {
         return (
-          <div key={index}>
+          <div key={step}>
             <List
               header={formatListTitle(title, step)}
               itemLayout="horizontal"
               dataSource={items}
               renderItem={(item: Ingredient) => (
-                <List.Item>
+                <List.Item key={item.id}>
                   <List.Item.Meta
                     avatar={
                       <Avatar src={ingredientIcons[item.ingredient_type]} />
                     }
-                    description={getDetails(item)}
+                    description={getDetails(item, step)}
                   />
                 </List.Item>
               )}
@@ -293,16 +297,19 @@ const Ingredients = ({
           </div>
         );
       })}
-      <IngredientModal
-        handleCancel={() => setSelectedIngredientId(null)}
-        ingredientId={selectedIngredientId}
-        ingredientList={ingredientList}
-        commitIngredientChange={(newIngredient: Ingredient) => {
-          onIngredientChange(newIngredient);
-          setSelectedIngredientId(null);
-        }}
-        recipeId={recipe.id}
-      />
+      {selectedIngredientData && (
+        <IngredientModal
+          handleCancel={() => setSelectedIngredientData(null)}
+          commitIngredientChange={(newIngredient: Ingredient) => {
+            onIngredientChange(newIngredient);
+            setSelectedIngredientData(null);
+          }}
+          ingredient={selectedIngredientData.ingredient}
+          step={selectedIngredientData.step}
+          recipeId={form.getFieldValue("id")}
+        />
+      )}
+
       <Modal
         title="Delete Ingredient?"
         onCancel={() => setIngredientToDelete(null)}

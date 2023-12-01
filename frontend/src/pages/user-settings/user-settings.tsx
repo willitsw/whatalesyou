@@ -33,7 +33,6 @@ const UserSettingsPage = () => {
   const isCreateNewUser = id === "new";
 
   const handleCreateUpdateUser = async (values: UserForm) => {
-    console.log(values);
     if (isCreateNewUser) {
       await createUser(values);
       await loginUser(values);
