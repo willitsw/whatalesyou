@@ -35,7 +35,7 @@ jobs:
           # (Optional, default: "./")
           # Dockerfile directory.
           # For example, if you have a Dockerfile in the root of your project, leave it as follows:
-          dockerfile_directory: ./backend
+          dockerfile_directory: ./
 
           # (Optional, default: "")
           # Additional options of docker build command.

@@ -6,13 +6,13 @@ interface Constants {
 }
 
 let constants: Constants = {
-  apiUrl: "http://localhost:8000",
+  apiUrl: "http://localhost:8000/api",
   environment: process.env.APP_ENV as EnvironmentType,
   enableAnalytics: false,
 };
 
 if (constants.environment === "production") {
-  constants.apiUrl = "https://what-ales-you.herokuapp.com";
+  constants.apiUrl = "https://what-ales-you.herokuapp.com/api";
 }
 
 export const DATE_FORMAT = "MM/DD/YYYY";
