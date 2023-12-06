@@ -1,24 +1,9 @@
-#
-# Back End
-#
-
-# Pull base image
-FROM python:3.11.1-bullseye
-
-ARG ENVIRONMENT
-ARG DJANGO_DEBUG
-ARG DJANGO_SECRET_KEY
-ARG PG_NAME
-ARG PG_USER
-ARG PG_PASSWORD
-ARG PG_HOST
-ARG PG_PORT
+FROM node:18
 
 # Set environment variables
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV POETRY_VERSION 1.3.2
 ENV ENVIRONMENT ${ENVIRONMENT}
 ENV DJANGO_DEBUG ${DJANGO_DEBUG}
 ENV DJANGO_SECRET_KEY ${DJANGO_SECRET_KEY}
@@ -31,23 +16,33 @@ ENV GOOGLE_EMAIL_USER ${GOOGLE_EMAIL_USER}
 ENV GOOGLE_EMAIL_PASSWORD ${GOOGLE_EMAIL_PASSWORD}
 ENV EMAIL_BACKEND ${EMAIL_BACKEND}
 
-# Install poetry
-RUN pip install "poetry==$POETRY_VERSION"
+WORKDIR /opt/app
 
-# Set work directory
-WORKDIR /backend
+# install python
+RUN apt update \
+    && apt install python3-launchpadlib -y \
+    && apt install software-properties-common -y \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt update \
+    && apt install python3.11 -y \
+    && apt install python3-pip -y
 
-# Copy requirements
-COPY poetry.lock pyproject.toml ./
-
-# Project initialization:
-RUN poetry config virtualenvs.create false \
-  && poetry install --no-interaction --no-ansi
+ENV PATH="/opt/app/venv/bin:$PATH"
 
 # Copy project
 COPY . .
 
+# backend deps
+RUN pip install "poetry==1.3.2" --break-system-packages
+RUN poetry config virtualenvs.create false \
+  && poetry install --no-interaction --no-ansi
+
+# frontend deps and build
+RUN npm update
+RUN npm ci
+RUN npm run build
+
 # collect static files
-RUN python manage.py collectstatic --noinput
+RUN python3 manage.py collectstatic --noinput
 
 CMD gunicorn whatalesyou.wsgi:application --bind "0.0.0.0:$PORT"

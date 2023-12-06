@@ -3,10 +3,7 @@
 #
 
 # pull official base image
-FROM node:18-alpine
-
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
+FROM node:18
 
 COPY . .
 WORKDIR /frontend/

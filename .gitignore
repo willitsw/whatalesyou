@@ -5,3 +5,4 @@ node_modules
 .env
 .envrc
 frontend/static
+webpack/webpack-stats
