@@ -27,6 +27,7 @@ from user.views import (
     process_reset_password,
     verification_code_check,
 )
+from whatalesyou import views as core_views
 
 router = routers.DefaultRouter()
 router.register(r"recipes", RecipesViewSet)
@@ -44,4 +45,5 @@ urlpatterns = [
     path("api/initiate-password-reset/", initiate_reset_password),
     path("api/process-password-reset/", process_reset_password),
     path("", include("frontend.urls")),
+    path("favicon.ico", core_views.favicon),
 ]
