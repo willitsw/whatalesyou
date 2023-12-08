@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "what-ales-you.herokuapp.com",
     "api.whatalesyou.net",
+    "www.whatalesyou.net",
 ]
 
 CORS_ALLOWED_ORIGINS = [

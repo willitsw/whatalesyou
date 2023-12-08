@@ -27,7 +27,7 @@ services:
       - "8000:8000"
       - "3000:3000"
     volumes:
-      - .:/backend
+      - .:/opt/app
     depends_on:
       - db
     command: python3 ./manage.py runserver 0.0.0.0:8000
