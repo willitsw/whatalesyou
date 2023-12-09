@@ -35,7 +35,6 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "what-ales-you.herokuapp.com",
-    "api.whatalesyou.net",
     "www.whatalesyou.net",
     "whatalesyou.net",
 ]
@@ -175,7 +174,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "frontend/static/frontend/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

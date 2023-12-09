@@ -7,6 +7,6 @@ def index(request, **_):
 
 
 def java_script(request):
-    filename = request.path.strip("/")
+    filename = "frontend/static" + request.path.split("static")[1]
     data = open(filename, "rb").read()
-    return HttpResponse(data, mimetype="application/x-javascript")
+    return HttpResponse(data, content_type="application/x-javascript")
