@@ -10,3 +10,9 @@ def java_script(request):
     filename = "frontend/static" + request.path.split("static")[1]
     data = open(filename, "rb").read()
     return HttpResponse(data, content_type="application/x-javascript")
+
+
+def png(request):
+    filename = "frontend/static" + request.path.split("static")[1]
+    data = open(filename, "rb").read()
+    return HttpResponse(data, content_type="image/png")
