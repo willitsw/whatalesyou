@@ -11,8 +11,9 @@ from .models import User
 from .serializers import CreateUserSerializer, UpdateUserSerializer, UserSerializer
 from .services import (
     generate_verification_code,
+    reset_verification_code,
     send_forgot_password_email,
-    send_new_hire_email,
+    send_new_user_email,
 )
 
 
@@ -54,7 +55,7 @@ class UserViewSet(viewsets.ModelViewSet):
         request_data = create_user_serializer.data
         access_code = generate_verification_code()
 
-        send_new_hire_email(
+        send_new_user_email(
             request_data.get("email"),
             request_data.get("first_name", "New User"),
             access_code,
@@ -93,6 +94,21 @@ def verification_code_check(request: HttpRequest) -> Response:
     user.is_verified = True
     user.verification_code = ""
 
+    user.save()
+
+    return Response(
+        status=status.HTTP_200_OK,
+    )
+
+
+@api_view(["GET"])
+def send_new_code(request: HttpRequest) -> Response:
+    user: User = request.user
+
+    access_code = generate_verification_code()
+    user.verification_code = access_code
+    user.is_verified = False
+    reset_verification_code(user.email, user.first_name, access_code)
     user.save()
 
     return Response(

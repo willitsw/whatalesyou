@@ -25,6 +25,7 @@ from user.views import (
     UserViewSet,
     initiate_reset_password,
     process_reset_password,
+    send_new_code,
     verification_code_check,
 )
 from whatalesyou import views as core_views
@@ -44,6 +45,7 @@ urlpatterns = [
     path("api/validate-new-user/", verification_code_check),
     path("api/initiate-password-reset/", initiate_reset_password),
     path("api/process-password-reset/", process_reset_password),
+    path("api/verification-code/reset/", send_new_code),
     path("", include("frontend.urls")),
     path("favicon.ico", core_views.favicon),
 ]

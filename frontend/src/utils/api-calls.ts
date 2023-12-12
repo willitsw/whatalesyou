@@ -206,3 +206,9 @@ export const validateEmailToken = async (
 
   return result;
 };
+
+export const resetValidationCode = async (): Promise<Response> => {
+  const result = await makeRequest(`/verification-code/reset/`, "GET");
+
+  return result;
+};

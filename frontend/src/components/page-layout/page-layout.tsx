@@ -15,37 +15,46 @@ import { TokenValidator } from "../../pages/token-validator/token-validator";
 import { useCurrentUser } from "../user-context/user-context";
 
 const PageLayout = () => {
-  const { isAuthenticated } = useCurrentUser();
+  const { isAuthenticated, user } = useCurrentUser();
   return (
     <>
       <Header />
       <Routes>
-        <Route path={"/home"} element={<HomePage />} />
-        {isAuthenticated && (
+        {!!user && !user.is_verified ? (
+          <Route path="*" element={<TokenValidator />} />
+        ) : (
           <>
-            <Route path={"/recipes/list"} element={<RecipeListPage />} />
-            <Route path={"/recipes/new"} element={<RecipeDetailPage />} />
-            <Route path={"/recipes/edit/:id"} element={<RecipeDetailPage />} />
-            <Route
-              path={"/recipes/duplicate/:id"}
-              element={<RecipeDetailPage />}
-            />
-            <Route
-              path={"/recipes/print/:id"}
-              element={<RecipePrinterFriendly />}
-            />
-            <Route path={"/brew-settings"} element={<BrewSettingsPage />} />
-            <Route path={"/brew-log/list"} element={<BrewLogListPage />} />
-            <Route path={"/brew-log/new"} element={<BrewLogDetailPage />} />
-            <Route
-              path={"/brew-log/edit/:id"}
-              element={<BrewLogDetailPage />}
-            />
-            <Route path={"/token-validator"} element={<TokenValidator />} />
+            <Route path={"/home"} element={<HomePage />} />
+            {isAuthenticated && (
+              <>
+                <Route path={"/recipes/list"} element={<RecipeListPage />} />
+                <Route path={"/recipes/new"} element={<RecipeDetailPage />} />
+                <Route
+                  path={"/recipes/edit/:id"}
+                  element={<RecipeDetailPage />}
+                />
+                <Route
+                  path={"/recipes/duplicate/:id"}
+                  element={<RecipeDetailPage />}
+                />
+                <Route
+                  path={"/recipes/print/:id"}
+                  element={<RecipePrinterFriendly />}
+                />
+                <Route path={"/brew-settings"} element={<BrewSettingsPage />} />
+                <Route path={"/brew-log/list"} element={<BrewLogListPage />} />
+                <Route path={"/brew-log/new"} element={<BrewLogDetailPage />} />
+                <Route
+                  path={"/brew-log/edit/:id"}
+                  element={<BrewLogDetailPage />}
+                />
+                <Route path={"/token-validator"} element={<TokenValidator />} />
+              </>
+            )}
+            <Route path={"/user/:id"} element={<UserSettingsPage />} />
+            <Route path="*" element={<HomePage />} />
           </>
         )}
-        <Route path={"/user/:id"} element={<UserSettingsPage />} />
-        <Route path="*" element={<HomePage />} />
       </Routes>
       <Footer />
       <LoginModal />

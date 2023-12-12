@@ -1,6 +1,6 @@
 import { Button, Form, Input, Modal, Space } from "antd";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import styles from "./login.module.css";
 import {
@@ -25,19 +25,16 @@ const LoginModal = () => {
 
   const onCancel = () => dispatch(setShowLoginModal(false));
 
-  const handleCreateAccount = async () => {
-    setModalLoading(true);
-    try {
-      await form.validateFields();
-      const values: TokenRequest = form.getFieldsValue();
-      // dispatch(createNewUser(values));
-      fireAnalyticsEvent("Email/Password Account Created");
-    } catch (error) {
-      console.log("email / password signup failed:", error);
-    }
-    setModalLoading(false);
-    onCancel();
-  };
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === "Enter") {
+        handleSubmit();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const handleSubmit = async () => {
     setModalLoading(true);
@@ -46,23 +43,23 @@ const LoginModal = () => {
       const values: TokenRequest = form.getFieldsValue();
       loginUser(values);
       fireAnalyticsEvent("Email/Password Sign In");
+      onCancel();
     } catch (error) {
       console.log("form submission failed:", error);
     }
     setModalLoading(false);
-    onCancel();
   };
 
   return (
-    <Modal
-      title="Sign In"
-      open={showLoginModal}
-      onOk={handleSubmit}
-      onCancel={onCancel}
-      confirmLoading={modalLoading}
-      forceRender
-    >
-      <Form name="sign-up" form={form} autoComplete="off">
+    <Form name="sign-in" form={form} autoComplete="off">
+      <Modal
+        title="Sign In"
+        open={showLoginModal}
+        onOk={handleSubmit}
+        onCancel={onCancel}
+        confirmLoading={modalLoading}
+        forceRender
+      >
         <Form.Item
           label="Email"
           name="email"
@@ -93,13 +90,13 @@ const LoginModal = () => {
         >
           Create Account
         </Button>
-      </Form>
-      <Space
-        className={styles["other-providers"]}
-        align="center"
-        direction="vertical"
-      >
-        {/* <Typography.Title level={5}>- or -</Typography.Title>
+
+        <Space
+          className={styles["other-providers"]}
+          align="center"
+          direction="vertical"
+        >
+          {/* <Typography.Title level={5}>- or -</Typography.Title>
         <Button
           icon={<GoogleOutlined />}
           type="primary"
@@ -107,15 +104,16 @@ const LoginModal = () => {
         >
           Sign in with Google
         </Button> */}
-        {/* <Button
+          {/* <Button
           icon={<FacebookOutlined />}
           type="primary"
           onClick={handleFacebookSignIn}
         >
           Sign in with Facebook
         </Button> */}
-      </Space>
-    </Modal>
+        </Space>
+      </Modal>
+    </Form>
   );
 };
 
