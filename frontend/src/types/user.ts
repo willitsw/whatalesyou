@@ -43,3 +43,13 @@ export interface EmailValidationRequest {
 }
 
 export type UserForm = User & UserRequest;
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  password: string;
+}
+
+export interface InitiateResetPasswordRequest {
+  email: string;
+}

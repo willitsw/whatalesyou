@@ -1,8 +1,12 @@
-from typing import Any
+from typing import Any, Optional
 
 from django.http import HttpRequest
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -117,16 +121,18 @@ def send_new_code(request: HttpRequest) -> Response:
 
 
 @api_view(["POST"])
+@authentication_classes([])
+@permission_classes([])
 def initiate_reset_password(request: HttpRequest) -> Response:
-    user: User = request.user
-    access_code = generate_verification_code()
+    email: str = request.data.get("email", None)
 
-    send_forgot_password_email(user.email, user.first_name, access_code)
+    user: Optional[User] = User.objects.get_or_none(email=email)
 
-    user.is_verified = False
-    user.verification_code = access_code
-
-    user.save()
+    if user:
+        access_code = generate_verification_code()
+        send_forgot_password_email(user.email, user.first_name, access_code)
+        user.verification_code = access_code
+        user.save()
 
     return Response(
         status=status.HTTP_200_OK,
@@ -134,17 +140,24 @@ def initiate_reset_password(request: HttpRequest) -> Response:
 
 
 @api_view(["POST"])
+@authentication_classes([])
+@permission_classes([])
 def process_reset_password(request: HttpRequest) -> Response:
+    email: str = request.data.get("email", None)
     validation_code: str = request.data.get("code", None)
     new_password: str = request.data.get("password", None)
 
-    user: User = request.user
+    user: User = User.objects.get(email=email)
 
-    if not validation_code or validation_code != user.verification_code:
+    if (
+        not validation_code
+        or not user
+        or not new_password
+        or validation_code != user.verification_code
+    ):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     user.set_password(new_password)
-    user.is_verified = True
     user.verification_code = ""
 
     user.save()

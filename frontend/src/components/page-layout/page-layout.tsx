@@ -13,6 +13,7 @@ import LoginModal from "../modals/login/login";
 import UserSettingsPage from "../../pages/user-settings/user-settings";
 import { TokenValidator } from "../../pages/token-validator/token-validator";
 import { useCurrentUser } from "../user-context/user-context";
+import { ForgotPassword } from "../../pages/forgot-password/forgot-password";
 
 const PageLayout = () => {
   const { isAuthenticated, user } = useCurrentUser();
@@ -25,6 +26,7 @@ const PageLayout = () => {
         ) : (
           <>
             <Route path={"/home"} element={<HomePage />} />
+            <Route path={"/forgot-password"} element={<ForgotPassword />} />
             {isAuthenticated && (
               <>
                 <Route path={"/recipes/list"} element={<RecipeListPage />} />

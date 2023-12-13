@@ -9,6 +9,7 @@ import {
   UserResponse,
   User,
   EmailValidationRequest,
+  ResetPasswordRequest,
 } from "../types/user";
 import makeRequest from "./request";
 
@@ -209,6 +210,33 @@ export const validateEmailToken = async (
 
 export const resetValidationCode = async (): Promise<Response> => {
   const result = await makeRequest(`/verification-code/reset/`, "GET");
+
+  return result;
+};
+
+export const forgotPasswordValidationCodeReset = async (
+  email: string
+): Promise<Response> => {
+  const result = await makeRequest(
+    `/initiate-password-reset/`,
+    "POST",
+    {
+      email,
+    },
+    {
+      useAuth: false,
+    }
+  );
+
+  return result;
+};
+
+export const processForgotPassword = async (
+  body: ResetPasswordRequest
+): Promise<Response> => {
+  const result = await makeRequest(`/process-password-reset/`, "POST", body, {
+    useAuth: false,
+  });
 
   return result;
 };

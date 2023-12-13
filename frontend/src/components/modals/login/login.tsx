@@ -83,12 +83,12 @@ const LoginModal = () => {
         <Button
           style={{ float: "right" }}
           onClick={() => {
-            navigate("/user/new");
+            navigate("/forgot-password");
             onCancel();
           }}
           type="link"
         >
-          Create Account
+          Forgot Password?
         </Button>
 
         <Space

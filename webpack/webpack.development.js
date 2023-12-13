@@ -15,6 +15,7 @@ module.exports = merge(sharedConfig, {
   devtool: "inline-source-map",
   devServer: {
     historyApiFallback: true,
+    port: 8081,
   },
   devtool: "source-map",
   mode: "development",

@@ -3,8 +3,10 @@ import uuid
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
+from whatalesyou.models import WhatAlesYouManager
 
-class UserManager(BaseUserManager):
+
+class UserManager(BaseUserManager, WhatAlesYouManager):
     def create_user(
         self,
         email=None,
