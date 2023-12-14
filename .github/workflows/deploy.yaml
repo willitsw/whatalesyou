@@ -19,7 +19,6 @@ jobs:
         run: |
           touch .env
           echo ENVIRONMENT=testing >> .env
-          echo CYPRESS_BASE_URL=http://localhost:8000 >> .env
           echo DJANGO_DEBUG=False >> .env
           echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
           echo PG_NAME=${{ secrets.PG_NAME }} >> .env
@@ -37,7 +36,11 @@ jobs:
         run: docker-compose up -d
       - name: Cypress run
         uses: cypress-io/github-action@v6
+        env:
+          CYPRESS_host: localhost
+          CYPRESS_port: 8000
         with:
+          install: false
           start: docker-compose exec -T backend npm run cypress:run
       - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
         uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).
