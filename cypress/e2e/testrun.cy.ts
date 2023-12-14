@@ -1,5 +1,7 @@
+import constants from "../../frontend/src/constants";
+
 describe("template spec", () => {
   it("passes", () => {
-    cy.visit("http://localhost:8081/");
+    cy.visit(constants.cypressBaseUrl);
   });
 });
