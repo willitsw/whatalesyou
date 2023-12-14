@@ -14,12 +14,16 @@ let constants: Constants = {
 };
 
 if (constants.environment === "production") {
-  constants.apiUrl = "https://what-ales-you.herokuapp.com/api";
+  constants.apiUrl = "https://www.whatalesyou.net/api";
 }
 
+console.log(constants.environment);
+
 if (constants.environment === "testing") {
-  constants.cypressBaseUrl = "http://localhost:8080";
+  constants.cypressBaseUrl = "http://localhost:8000";
 }
+
+console.log(constants.cypressBaseUrl);
 
 export const DATE_FORMAT = "MM/DD/YYYY";
 export const ACCESS_TOKEN_KEY = "whatalesyou-access-token";
