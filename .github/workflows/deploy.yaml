@@ -41,7 +41,7 @@ jobs:
           CYPRESS_port: 8000
         with:
           install: false
-          start: docker-compose up -d
+          start: docker-compose -T up -d
           wait-on: "http://localhost:8000"
       - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
         uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).
