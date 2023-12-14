@@ -46,7 +46,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           install: false
-          start: docker-compose exec -T backend npm run cypress:run
+          start: npm run cypress:run
           wait-on: "http://localhost:8000"
           record: true
       - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
