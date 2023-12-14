@@ -15,6 +15,20 @@ jobs:
       # Check-out your repository.
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Create .env file
+        run: |
+          touch .env
+          echo ENVIRONMENT=production >> .env
+          echo DJANGO_DEBUG=False >> .env
+          echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
+          echo PG_NAME=${{ secrets.PG_NAME }} >> .env
+          echo PG_USER=${{ secrets.PG_USER }} >> .env
+          echo PG_PASSWORD=${{ secrets.PG_PASSWORD }} >> .env
+          echo PG_HOST=${{ secrets.PG_HOST }} >> .env
+          echo PG_PORT=${{ secrets.PG_PORT }} >> .env
+          echo GOOGLE_EMAIL_USER=${{ secrets.GOOGLE_EMAIL_USER }} >> .env
+          echo GOOGLE_EMAIL_PASSWORD=${{ secrets.GOOGLE_EMAIL_PASSWORD }} >> .env
+          cat .env
       - name: Build Docker Image
         run: docker-compose build
       - name: Start containers for testing
