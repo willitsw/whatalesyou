@@ -37,9 +37,6 @@ jobs:
         run: docker-compose up -d
       - name: Cypress run
         uses: cypress-io/github-action@v6
-        env:
-          CYPRESS_host: localhost
-          CYPRESS_port: 8000
         with:
           start: docker-compose exec -T backend npm run cypress:run
           wait-on: "http://localhost:8000"
