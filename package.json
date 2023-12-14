@@ -6,8 +6,9 @@
   "scripts": {
     "test": "jest",
     "dev": "webpack serve --config ./webpack/webpack.development.js",
-    "build": "rm -rf dist && webpack --config ./webpack/webpack.production.js",
-    "buildDev": "rm -rf dist && webpack --config ./webpack/webpack.development.js",
+    "build": "rm -rf frontend/static && webpack --config ./webpack/webpack.production.js",
+    "buildTest": "rm -rf frontend/static && webpack --config ./webpack/webpack.testing.js",
+    "buildDev": "rm -rf frontend/static && webpack --config ./webpack/webpack.development.js",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run"
   },
