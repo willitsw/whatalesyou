@@ -10,7 +10,7 @@ let constants: Constants = {
   apiUrl: "http://localhost:8000/api",
   environment: process.env.APP_ENV as EnvironmentType,
   enableAnalytics: false,
-  cypressBaseUrl: "http://localhost:8081",
+  cypressBaseUrl: "http://localhost:8000",
 };
 
 if (constants.environment === "production") {
