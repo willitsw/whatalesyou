@@ -32,47 +32,21 @@ jobs:
           cat .env
       - name: Build Docker Image
         run: docker-compose build
-      # - name: Start containers for testing
-      #   run: docker-compose up -d
+      - name: Start containers for testing
+        run: docker-compose up -d
       - name: Cypress run
         uses: cypress-io/github-action@v6
         env:
           CYPRESS_host: localhost
           CYPRESS_port: 8000
         with:
-          install: false
-          start: docker-compose -T up -d
+          start: docker-compose exec -T backend npm run cypress:run
           wait-on: "http://localhost:8000"
       - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
         uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).
         with:
-          # Below you must provide variables for your Heroku app.
-
-          # The email address associated with your Heroku account.
-          # If you don't want to use repository secrets (which is recommended) you can do:
-          # email: my.email@example.com
           email: ${{ secrets.HEROKU_EMAIL }}
-
-          # Heroku API key associated with provided user's email.
-          # Api Key is available under your Heroku account settings.
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-
-          # Name of the heroku application to which the build is to be sent.
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-
-          # (Optional, default: "./")
-          # Dockerfile directory.
-          # For example, if you have a Dockerfile in the root of your project, leave it as follows:
-          dockerfile_directory: ./
-
-          # (Optional, default: "")
-          # Additional options of docker build command.
-          docker_options: ""
-
-          # (Optional, default: "web")
-          # Select the process type for which you want the docker container to be uploaded.
-          # By default, this argument is set to "web".
-          # For more information look at https://devcenter.heroku.com/articles/process-model
-          process_type: web
       - name: Migrate DB
         run: heroku run ./manage.py migrate -a what-ales-you
