@@ -35,6 +35,8 @@ jobs:
         run: docker-compose build
       - name: Start containers for testing
         run: docker-compose up -d
+      - name: Install deps for static testing build
+        run: npm ci
       - name: Build testing js assets
         run: npm run buildTest
       - name: Cypress run
