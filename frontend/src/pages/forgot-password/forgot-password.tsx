@@ -56,7 +56,7 @@ export const ForgotPassword = () => {
       <Typography.Paragraph>
         {!codeSent
           ? "Enter your email, and send a code to it:"
-          : "Enter the code sent to your email, and choose a new password"}
+          : "Enter the code sent to your email, and choose a new password."}
       </Typography.Paragraph>
       <Form
         form={form}

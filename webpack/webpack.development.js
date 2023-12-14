@@ -9,12 +9,13 @@ module.exports = merge(sharedConfig, {
   output: {
     path: path.resolve("./frontend/static/frontend/"),
     filename: "[name]-[hash].js",
-    publicPath: "auto",
+    publicPath: "/",
   },
   mode: "development",
   devtool: "inline-source-map",
   devServer: {
     historyApiFallback: true,
+    hot: true,
     port: 8081,
   },
   devtool: "source-map",
