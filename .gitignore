@@ -6,3 +6,4 @@ node_modules
 .envrc
 frontend/static
 webpack/webpack-stats.json
+cypress.env.json

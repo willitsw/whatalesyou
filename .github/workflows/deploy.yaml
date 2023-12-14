@@ -19,6 +19,7 @@ jobs:
         run: |
           touch .env
           echo ENVIRONMENT=testing >> .env
+          echo CYPRESS_BASE_URL=http://localhost:8000 >> .env
           echo DJANGO_DEBUG=False >> .env
           echo DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} >> .env
           echo PG_NAME=${{ secrets.PG_NAME }} >> .env
