@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Check-out your repository.
+      - name: Build Docker Image
+        uses: docker-compose build
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
