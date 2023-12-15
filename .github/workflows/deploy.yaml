@@ -29,7 +29,6 @@ jobs:
           echo GOOGLE_EMAIL_USER=${{ secrets.GOOGLE_EMAIL_USER }} >> .env
           echo GOOGLE_EMAIL_PASSWORD=${{ secrets.GOOGLE_EMAIL_PASSWORD }} >> .env
           echo EMAIL_BACKEND=${{ secrets.EMAIL_BACKEND }} >> .env
-          echo CYPRESS_baseUrl=http://localhost:8000 >> .env
           cat .env
       - name: Build Docker Image
         run: docker-compose build

@@ -9,8 +9,9 @@
     "build": "rm -rf frontend/static && webpack --config ./webpack/webpack.production.js",
     "buildTest": "rm -rf frontend/static && webpack --config ./webpack/webpack.testing.js",
     "buildDev": "rm -rf frontend/static && webpack --config ./webpack/webpack.development.js",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run --record"
+    "cypress:open": "cypress open --env baseUrl=http://localhost:8081",
+    "cypress:run": "cypress run --record",
+    "cypress:runLocal": "cypress run"
   },
   "author": "",
   "license": "ISC",
