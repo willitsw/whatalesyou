@@ -2,7 +2,7 @@ import constants from "../../frontend/src/constants";
 
 describe("Login / User Creation", () => {
   beforeEach(() => {
-    cy.visit("http://localhost:8081/");
+    cy.visit("/");
   });
   it("has a logged in and logged out state", () => {
     cy.findByRole("menuitem", { name: /Recipes/i }).should(
