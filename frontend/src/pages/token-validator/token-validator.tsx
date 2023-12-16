@@ -6,17 +6,21 @@ import { useForm } from "antd/es/form/Form";
 import { EmailValidationRequest } from "../../types/user";
 import { FormFlex } from "../../components/form-layouts/form-flex";
 import { useCurrentUser } from "../../components/user-context/user-context";
+import { useNavigate } from "react-router";
 
 export const TokenValidator = () => {
   const [form] = useForm<EmailValidationRequest>();
-  const { user, logoutUser } = useCurrentUser();
+  const { user, logoutUser, refreshUser } = useCurrentUser();
+  const navigate = useNavigate();
 
   const handleSubmitVerificationCode = async (
     values: EmailValidationRequest
   ) => {
     const result = await validateEmailToken(values);
     if (result.ok) {
-      window.location.reload();
+      refreshUser();
+      message.success(`${user.email} is now validated.`);
+      navigate("/");
     } else {
       message.error(
         "Invalid token supplied, please try again or send a new token."

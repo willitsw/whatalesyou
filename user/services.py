@@ -3,6 +3,8 @@ import string
 
 from django.core.mail import send_mail
 
+from user.models import AUTOMATION_PREFIX, User
+
 
 def send_new_user_email(email: str, first_name: str, verification_code: str) -> None:
     send_mail(
@@ -38,5 +40,7 @@ def send_forgot_password_email(
     )
 
 
-def generate_verification_code() -> str:
+def generate_verification_code(user: User) -> str:
+    if user.email.startswith(AUTOMATION_PREFIX):
+        return "ABCDE"
     return "".join(random.choices(string.ascii_uppercase, k=5))

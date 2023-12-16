@@ -50,16 +50,16 @@ const LoginModal = () => {
     setModalLoading(false);
   };
 
-  return (
-    <Form name="sign-in" form={form} autoComplete="off">
-      <Modal
-        title="Sign In"
-        open={showLoginModal}
-        onOk={handleSubmit}
-        onCancel={onCancel}
-        confirmLoading={modalLoading}
-        forceRender
-      >
+  return showLoginModal ? (
+    <Modal
+      title="Sign In"
+      open={true}
+      onOk={handleSubmit}
+      onCancel={onCancel}
+      confirmLoading={modalLoading}
+      forceRender
+    >
+      <Form name="sign-in" form={form} autoComplete="off">
         <Form.Item
           label="Email"
           name="email"
@@ -73,6 +73,7 @@ const LoginModal = () => {
         <Form.Item
           label="Password"
           name="password"
+          data-testid="password"
           rules={[
             { required: true, message: "Password is required" },
             { min: 6, message: "Password must be minimum 6 characters." },
@@ -112,9 +113,9 @@ const LoginModal = () => {
           Sign in with Facebook
         </Button> */}
         </Space>
-      </Modal>
-    </Form>
-  );
+      </Form>
+    </Modal>
+  ) : null;
 };
 
 export default LoginModal;

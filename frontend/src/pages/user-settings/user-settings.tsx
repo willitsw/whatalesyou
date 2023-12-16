@@ -80,6 +80,7 @@ const UserSettingsPage = () => {
             <Form.Item
               label="Password"
               name="password"
+              data-testid="password"
               rules={[
                 {
                   required: true,
@@ -94,6 +95,7 @@ const UserSettingsPage = () => {
               label="Confirm Password"
               dependencies={["password"]}
               hasFeedback
+              data-testid="confirm-password"
               rules={[
                 {
                   required: true,

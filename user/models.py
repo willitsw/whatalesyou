@@ -5,6 +5,8 @@ from django.db import models
 
 from whatalesyou.models import WhatAlesYouManager
 
+AUTOMATION_PREFIX = "automationUser"
+
 
 class UserManager(BaseUserManager, WhatAlesYouManager):
     def create_user(

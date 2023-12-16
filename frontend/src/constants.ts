@@ -18,5 +18,6 @@ if (constants.environment === "production") {
 export const DATE_FORMAT = "MM/DD/YYYY";
 export const ACCESS_TOKEN_KEY = "whatalesyou-access-token";
 export const REFRESH_TOKEN_KEY = "whatalesyou-refresh-token";
+export const AUTOMATION_USER_PREFIX = "automationUser";
 
 export default constants;

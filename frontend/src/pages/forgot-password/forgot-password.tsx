@@ -92,7 +92,14 @@ export const ForgotPassword = () => {
             <Form.Item label="Verification Code" name="code">
               <Input style={{ width: 250 }} />
             </Form.Item>
-            <Form.Item label="Password" name="password">
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[
+                { required: true, message: "Password is required" },
+                { min: 6, message: "Password must be minimum 6 characters." },
+              ]}
+            >
               <Input.Password style={{ width: 250 }} />
             </Form.Item>
             <Form.Item

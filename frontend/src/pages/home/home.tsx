@@ -68,7 +68,7 @@ const HomePage = () => {
         <Col span={24}>
           <Typography.Title level={4}>A Quick Tour:</Typography.Title>
         </Col>
-        <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+        {/* <Col xs={24} sm={24} md={12} lg={12} xl={12}>
           <YoutubeEmbed
             id="6A3X6cWE4zQ"
             title="Build a Recipe"
@@ -88,7 +88,7 @@ const HomePage = () => {
             title="Build a Recipe"
             description="Record a Brew Log."
           />
-        </Col>
+        </Col> */}
       </Row>
 
       {/* <Typography.Title level={5}>Current Features</Typography.Title>

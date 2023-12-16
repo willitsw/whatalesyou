@@ -19,7 +19,6 @@ export interface UserContextValue {
   logoutUser: () => void;
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
-  isLoading: boolean;
 }
 
 const UserContext = createContext(null);
@@ -34,11 +33,9 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
     localStorage.getItem(ACCESS_TOKEN_KEY)
   );
   const [user, setUser] = useState<UserResponse>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const changeUser = async () => {
-      setIsLoading(true);
       let userId = "";
       if (token) {
         userId = (jwt(token) as TokenPayload).user_id;
@@ -50,14 +47,12 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
       } else {
         setUser(null);
       }
-      setIsLoading(false);
     };
 
     changeUser();
   }, [token]);
 
   const refreshUser = async () => {
-    setIsLoading(true);
     let userId = "";
     if (token) {
       userId = (jwt(token) as TokenPayload).user_id;
@@ -68,11 +63,9 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
     } else {
       setUser(null);
     }
-    setIsLoading(false);
   };
 
   const loginUser = useCallback(async (payload: TokenRequest) => {
-    setIsLoading(true);
     const response = await getToken(payload);
     if (!response.ok) {
       const body = await response.json();
@@ -88,7 +81,6 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
   }, []);
 
   const logoutUser = useCallback(() => {
-    setIsLoading(true);
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     message.success("Successfully logged out.");
@@ -103,7 +95,6 @@ export const UserContextProvider = ({ children }: UserContextProps) => {
     logoutUser,
     refreshUser,
     isAuthenticated: !!user,
-    isLoading,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

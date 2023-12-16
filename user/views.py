@@ -12,7 +12,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User
+from .models import AUTOMATION_PREFIX, User
 from .serializers import CreateUserSerializer, UpdateUserSerializer, UserSerializer
 from .services import (
     generate_verification_code,
@@ -58,20 +58,23 @@ class UserViewSet(viewsets.ModelViewSet):
         create_user_serializer.is_valid(raise_exception=True)
 
         request_data = create_user_serializer.data
-        access_code = generate_verification_code()
+
+        new_user: User = User.objects.create_user(
+            email=request_data.get("email"),
+            first_name=request_data.get("first_name", ""),
+            last_name=request_data.get("last_name", ""),
+            password=request_data.get("password"),
+        )
+
+        access_code = generate_verification_code(new_user)
+
+        new_user.verification_code = access_code
+        new_user.save()
 
         send_new_user_email(
             request_data.get("email"),
             request_data.get("first_name", "New User"),
             access_code,
-        )
-
-        new_user = User.objects.create_user(
-            email=request_data.get("email"),
-            first_name=request_data.get("first_name", ""),
-            last_name=request_data.get("last_name", ""),
-            password=request_data.get("password"),
-            verification_code=access_code,
         )
 
         new_user_serializer = UserSerializer(new_user)
@@ -110,7 +113,7 @@ def verification_code_check(request: HttpRequest) -> Response:
 def send_new_code(request: HttpRequest) -> Response:
     user: User = request.user
 
-    access_code = generate_verification_code()
+    access_code = generate_verification_code(user)
     user.verification_code = access_code
     user.is_verified = False
     reset_verification_code(user.email, user.first_name, access_code)
@@ -130,7 +133,7 @@ def initiate_reset_password(request: HttpRequest) -> Response:
     user: Optional[User] = User.objects.get_or_none(email=email)
 
     if user:
-        access_code = generate_verification_code()
+        access_code = generate_verification_code(user)
         send_forgot_password_email(user.email, user.first_name, access_code)
         user.verification_code = access_code
         user.save()
@@ -173,14 +176,14 @@ def process_reset_password(request: HttpRequest) -> Response:
 @permission_classes([])
 def setup_test_user(_: HttpRequest) -> Response:
     users_to_delete: list[User] = list(
-        User.objects.filter(email__startswith="automationUser")
+        User.objects.filter(email__startswith=AUTOMATION_PREFIX)
     )
 
     for user in users_to_delete:
         user.delete()
 
     new_user: User = User.objects.create_user(
-        email="automationUser@whatalesyou.net",
+        email=f"{AUTOMATION_PREFIX}@whatalesyou.net",
         first_name="Joe",
         last_name="Bob",
         password="password",
@@ -202,7 +205,7 @@ def setup_test_user(_: HttpRequest) -> Response:
 @permission_classes([])
 def delete_test_users(_: HttpRequest) -> Response:
     users_to_delete: list[User] = list(
-        User.objects.filter(email__startswith="automationUser")
+        User.objects.filter(email__startswith=AUTOMATION_PREFIX)
     )
 
     for user in users_to_delete:

@@ -270,7 +270,11 @@ const Header = () => {
                 cursor: "pointer",
               }}
             >
-              <Avatar size="large" icon={<UserOutlined />} />
+              <Avatar
+                data-testid="user-menu"
+                size="large"
+                icon={<UserOutlined />}
+              />
             </div>
           </Dropdown>
         </div>
