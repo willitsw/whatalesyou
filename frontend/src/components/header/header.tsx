@@ -233,6 +233,7 @@ const Header = () => {
             mode="horizontal"
             onClick={handleMenuClick}
             selectedKeys={[currentPage]}
+            disabled={!isAuthenticated}
             style={menuStyle}
             items={[
               {

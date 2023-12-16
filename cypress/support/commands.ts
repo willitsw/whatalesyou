@@ -25,13 +25,27 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 //
-// declare global {
-//   namespace Cypress {
-//     interface Chainable {
-//       login(email: string, password: string): Chainable<void>
-//       drag(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       dismiss(subject: string, options?: Partial<TypeOptions>): Chainable<Element>
-//       visit(originalFn: CommandOriginalFn, url: string, options: Partial<VisitOptions>): Chainable<Element>
-//     }
-//   }
-// }
+
+import "@testing-library/cypress/add-commands";
+import { ACCESS_TOKEN_KEY } from "../../frontend/src/constants";
+
+Cypress.Commands.add("login", () => {
+  cy.request("POST", "http://localhost:8000/api/setup-test-user/").then(
+    (response) => {
+      window.localStorage.setItem(ACCESS_TOKEN_KEY, response.body.token);
+    }
+  );
+  cy.reload();
+});
+
+Cypress.Commands.add("logout", () => {
+  cy.request("POST", "http://localhost:8000/api/delete-test-user/");
+  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  cy.reload();
+});
+
+Cypress.Commands.overwrite("visit", (originalFn, url, options) => {
+  cy.intercept("https://youtube.com/*", (req) => req.destroy()).then(() =>
+    originalFn(url, options)
+  );
+});

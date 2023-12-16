@@ -10,6 +10,7 @@ from rest_framework.decorators import (
 from rest_framework.permissions import BasePermission
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
 from .serializers import CreateUserSerializer, UpdateUserSerializer, UserSerializer
@@ -165,3 +166,46 @@ def process_reset_password(request: HttpRequest) -> Response:
     return Response(
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([])
+def setup_test_user(_: HttpRequest) -> Response:
+    users_to_delete: list[User] = list(
+        User.objects.filter(email__startswith="automationUser")
+    )
+
+    for user in users_to_delete:
+        user.delete()
+
+    new_user: User = User.objects.create_user(
+        email="automationUser@whatalesyou.net",
+        first_name="Joe",
+        last_name="Bob",
+        password="password",
+        verification_code="ABCD",
+    )
+
+    new_user.is_verified = True
+    new_user.save()
+
+    token_payload = RefreshToken.for_user(new_user)
+
+    return Response(
+        status=status.HTTP_200_OK, data={"token": str(token_payload.access_token)}
+    )
+
+
+@api_view(["POST"])
+@authentication_classes([])
+@permission_classes([])
+def delete_test_users(_: HttpRequest) -> Response:
+    users_to_delete: list[User] = list(
+        User.objects.filter(email__startswith="automationUser")
+    )
+
+    for user in users_to_delete:
+        user.delete()
+
+    return Response(status=status.HTTP_200_OK)

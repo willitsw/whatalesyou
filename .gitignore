@@ -7,3 +7,4 @@ node_modules
 frontend/static
 webpack/webpack-stats.json
 cypress.env.json
+cypress/screenshots

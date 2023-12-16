@@ -23,9 +23,11 @@ from brew_settings.views import BrewSettingViewSet
 from recipes.views import RecipesViewSet
 from user.views import (
     UserViewSet,
+    delete_test_users,
     initiate_reset_password,
     process_reset_password,
     send_new_code,
+    setup_test_user,
     verification_code_check,
 )
 from whatalesyou import views as core_views
@@ -46,6 +48,8 @@ urlpatterns = [
     path("api/initiate-password-reset/", initiate_reset_password),
     path("api/process-password-reset/", process_reset_password),
     path("api/verification-code/reset/", send_new_code),
+    path("api/setup-test-user/", setup_test_user),
+    path("api/delete-test-user/", delete_test_users),
     path("", include("frontend.urls")),
     path("favicon.ico", core_views.favicon),
 ]

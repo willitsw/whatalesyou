@@ -20,6 +20,6 @@
     "noImplicitThis": true,
     "types": ["cypress", "node"]
   },
-  "include": ["frontend/src", "cypress"],
+  "include": ["frontend/src", "cypress", "@testing-library/cypress"],
   "exclude": ["node_modules"]
 }
