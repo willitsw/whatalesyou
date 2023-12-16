@@ -47,7 +47,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           install: false
-          start: npm run cypress:run --env baseUrl=http://localhost:8000
+          start: npm run dev
+          command: npm run cypress:run --env baseUrl=http://localhost:8081
           wait-on: "http://localhost:8000"
           record: true
       - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
