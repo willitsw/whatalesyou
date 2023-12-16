@@ -43,9 +43,3 @@ Cypress.Commands.add("logout", () => {
   window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   cy.reload();
 });
-
-Cypress.Commands.overwrite("visit", (originalFn, url, options) => {
-  cy.intercept("https://youtube.com/*", (req) => req.destroy()).then(() =>
-    originalFn(url, options)
-  );
-});
