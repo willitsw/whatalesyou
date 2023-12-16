@@ -35,7 +35,7 @@ jobs:
       - name: Start containers for testing
         run: docker-compose up -d
       - name: Run migrations for testing
-        run: docker-compose exec -T backend python backend/manage.py migrate
+        run: docker-compose exec -T backend python3 manage.py migrate
       - name: Install deps for static testing build
         run: npm ci
       - name: Cypress run
