@@ -2,8 +2,7 @@ import constants from "../../frontend/src/constants";
 
 describe("Login / User Creation", () => {
   beforeEach(() => {
-    cy.intercept("https://youtube.com/*", (req) => req.destroy());
-    cy.visit(Cypress.env("baseUrl"));
+    cy.visit("http://localhost:8081/");
   });
   it("has a logged in and logged out state", () => {
     cy.findByRole("menuitem", { name: /Recipes/i }).should(

@@ -10,7 +10,6 @@ declare global {
       dataCy(value: string): Chainable<JQuery<HTMLElement>>;
       login(): Chainable<JQuery<HTMLElement>>;
       logout(): Chainable<JQuery<HTMLElement>>;
-      visit(originalFn: any, url: any): Cypress.Chainable<any>;
     }
   }
 }
