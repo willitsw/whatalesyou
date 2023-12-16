@@ -49,7 +49,7 @@ jobs:
           install: false
           start: npm run dev
           command: npm run cypress:run --env baseUrl=http://localhost:8081
-          wait-on: "http://localhost:8000"
+          wait-on: "http://localhost:8081"
           record: true
       - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
         uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).
