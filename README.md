@@ -17,7 +17,7 @@ export PORT=8000
 
 # Useful commands
 
-- exec into docker container: `docker-compose exec backend python backend/manage.py blah blah`
+- exec into docker container: `docker-compose exec backend python3 manage.py blah blah`
 - enter postgres container: `docker-compose exec db psql -U postgres -W postgres` (password also postgres)
 - see docker containers: `docker ps`
 
@@ -27,4 +27,4 @@ export PORT=8000
 - `DROP SCHEMA public CASCADE;`
 - `CREATE SCHEMA public;`
 - `\q` (to quit)
-- `docker-compose exec backend python backend/manage.py migrate`
+- `docker-compose exec backend python3 manage.py migrate`

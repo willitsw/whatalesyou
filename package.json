@@ -10,7 +10,7 @@
     "buildTest": "rm -rf frontend/static && webpack --config ./webpack/webpack.testing.js",
     "buildDev": "rm -rf frontend/static && webpack --config ./webpack/webpack.development.js",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run --record"
   },
   "author": "",
   "license": "ISC",
