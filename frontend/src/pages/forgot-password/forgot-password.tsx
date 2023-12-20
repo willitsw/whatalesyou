@@ -73,7 +73,7 @@ export const ForgotPassword = () => {
               alignItems: "flex-end",
             }}
           >
-            <Form.Item label="Email" rules={[{ required: true }]}>
+            <Form.Item label="Email" name="email" rules={[{ required: true }]}>
               <Input
                 onChange={(e) => setEmail(e.target.value)}
                 style={{ width: 250 }}
@@ -100,7 +100,7 @@ export const ForgotPassword = () => {
                 { min: 6, message: "Password must be minimum 6 characters." },
               ]}
             >
-              <Input.Password style={{ width: 250 }} />
+              <Input.Password data-testid="password" style={{ width: 250 }} />
             </Form.Item>
             <Form.Item
               name="confirm"
@@ -126,7 +126,10 @@ export const ForgotPassword = () => {
                 }),
               ]}
             >
-              <Input.Password style={{ width: 250 }} />
+              <Input.Password
+                data-testid="confirm-password"
+                style={{ width: 250 }}
+              />
             </Form.Item>
             <div
               style={{

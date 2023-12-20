@@ -211,7 +211,11 @@ const IngredientModal = ({
             <Form.Item label="Type" name="type" rules={[{ required: true }]}>
               <Select style={{ width: 150 }}>
                 {Object.entries(FermentableTypeLookup).map(([key, label]) => (
-                  <Select.Option key={key} value={key}>
+                  <Select.Option
+                    data-testid={`fermentable-type ${label}`}
+                    key={key}
+                    value={key}
+                  >
                     {label}
                   </Select.Option>
                 ))}
@@ -470,7 +474,11 @@ const IngredientModal = ({
           >
             <Select style={{ width: 130 }}>
               {Object.entries(StepLookup).map(([key, label]) => (
-                <Select.Option key={key} value={key}>
+                <Select.Option
+                  data-testid={`brewing-step ${label}`}
+                  key={key}
+                  value={key}
+                >
                   {label}
                 </Select.Option>
               ))}
@@ -486,7 +494,11 @@ const IngredientModal = ({
               onChange={handleChangeIngredientType}
             >
               {Object.entries(IngredientTypeLookup).map(([key, label]) => (
-                <Select.Option key={key} value={key}>
+                <Select.Option
+                  data-testid={`ingredient-type ${label}`}
+                  key={key}
+                  value={key}
+                >
                   {label}
                 </Select.Option>
               ))}

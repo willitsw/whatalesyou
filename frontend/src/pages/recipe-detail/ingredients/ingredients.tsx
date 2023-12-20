@@ -90,27 +90,27 @@ const Ingredients = ({
   useEffect(() => {
     const newSortedIngredients: StepConfig[] = [
       {
-        title: "Strike Water Additions",
+        title: "Strike Water",
         step: "strikewater",
         items: [],
       },
       {
-        title: "Mash Additions",
+        title: "Mash",
         step: "mash",
         items: [],
       },
       {
-        title: "Boil Additions",
+        title: "Boil",
         step: "boil",
         items: [],
       },
       {
-        title: "Fermentor Additions",
+        title: "Fermentor",
         step: "fermentor",
         items: [],
       },
       {
-        title: "Packaging Additions",
+        title: "Packaging",
         step: "bottle",
         items: [],
       },
@@ -161,13 +161,13 @@ const Ingredients = ({
         justifyContent: "space-between",
       }}
     >
-      <Typography.Title level={4}>{text}</Typography.Title>
+      <Typography.Title level={4}>{text} Additions</Typography.Title>
       <Button
         style={{ marginLeft: "15px" }}
         type="primary"
         onClick={() => handleSelectIngredientToEdit(step)}
       >
-        Add Item
+        Add {text} Ingredient
       </Button>
     </div>
   );

@@ -31,9 +31,7 @@ export const TokenValidator = () => {
   const handleResetCode = async () => {
     const result = await resetValidationCode();
     if (result.ok) {
-      message.success(
-        `A new validation code was sent to your email (${user.email}). Please check your email and enter the new code.`
-      );
+      message.success(`A new validation code was sent to your email.`);
     } else {
       message.error(
         "There was a problem generating your new validation code. Please try again."

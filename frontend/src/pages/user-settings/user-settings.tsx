@@ -125,15 +125,17 @@ const UserSettingsPage = () => {
               {isCreateNewUser ? "Create" : "Save User"}
             </Button>
             <Button onClick={() => navigate("/home")}>Go Home</Button>
-            <Button
-              style={{ float: "right" }}
-              onClick={() => {
-                navigate("/forgot-password");
-              }}
-              type="link"
-            >
-              Forgot Password?
-            </Button>
+            {!isCreateNewUser && (
+              <Button
+                style={{ float: "right" }}
+                onClick={() => {
+                  navigate("/forgot-password");
+                }}
+                type="link"
+              >
+                Change Password?
+              </Button>
+            )}
           </Space>
         </Affix>
       </Form>

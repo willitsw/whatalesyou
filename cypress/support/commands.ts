@@ -36,10 +36,18 @@ Cypress.Commands.add("login", () => {
     }
   );
   cy.reload();
+  cy.findByRole("menuitem", { name: /Recipes/i }).should(
+    "not.have.class",
+    "ant-menu-item-disabled"
+  );
 });
 
 Cypress.Commands.add("logout", () => {
   cy.request("POST", "http://localhost:8000/api/delete-test-user/");
   window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   cy.reload();
+  cy.findByRole("menuitem", { name: /Recipes/i }).should(
+    "have.class",
+    "ant-menu-item-disabled"
+  );
 });

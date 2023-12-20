@@ -38,8 +38,7 @@ export const useDeleteRecipe = (recipeId: string) => {
   const queryClient = useQueryClient();
   return useMutation<void>({
     mutationFn: async () => {
-      const res = await makeRequest(`/recipes/${recipeId}/`, "DELETE");
-      return await res.json();
+      await makeRequest(`/recipes/${recipeId}/`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recipe", "list"] });
@@ -49,13 +48,15 @@ export const useDeleteRecipe = (recipeId: string) => {
 
 export const useCreateUpdateRecipe = () => {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, Recipe>({
+  return useMutation({
     mutationFn: async (recipe: Recipe) => {
-      const res = await makeRequest(`/recipes/${recipe.id}/`, "PUT", recipe);
-      return await res.json();
+      return await makeRequest(`/recipes/${recipe.id}/`, "PUT", recipe);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recipe", "list"] });
+      queryClient.invalidateQueries({
+        queryKey: ["recipe", "list"],
+        refetchType: "all",
+      });
     },
   });
 };

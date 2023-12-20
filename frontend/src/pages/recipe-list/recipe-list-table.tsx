@@ -20,28 +20,20 @@ const RecipeListTable = () => {
   const navigate = useNavigate();
   const { fireAnalyticsEvent } = useAnalytics();
 
-  const { data: recipeList, isLoading: recipesAreLoading } =
-    useGetRecipesByUser();
+  const {
+    data: recipeList,
+    isLoading: recipesAreLoading,
+    isFetching: recipesAreFetching,
+  } = useGetRecipesByUser();
 
   const { mutateAsync: deleteRecipe, isPending: deleteRecipeIsLoading } =
     useDeleteRecipe(recipeToDelete?.id);
 
-  const isLoading = recipesAreLoading && deleteRecipeIsLoading;
-
-  // useEffect(() => {
-  //   const getRecipeList = async () => {
-  //     const recipeResponse = await RecipeApi.getByUser();
-  //     setRecipeList(recipeResponse.results);
-  //     setLoading(false);
-  //   };
-  //   getRecipeList();
-  // }, []);
+  const isLoading =
+    recipesAreLoading && deleteRecipeIsLoading && recipesAreFetching;
 
   const handleDeleteRecipe = async () => {
     await deleteRecipe();
-    // RecipeAsetRecipeList(
-    //   recipeList.filter((recipe) => recipe.id !== recipeToDelete.id)
-    // );
     setRecipeToDelete(null);
   };
 
