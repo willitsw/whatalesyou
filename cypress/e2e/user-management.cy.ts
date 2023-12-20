@@ -49,6 +49,7 @@ describe("Login / User Creation", () => {
     // log out
     cy.findByTestId("user-menu").click();
     cy.findByRole("menuitem", { name: /Logout/i }).click();
+    cy.wait(1000);
     cy.findByRole("menuitem", { name: /Recipes/i }).should(
       "have.class",
       "ant-menu-item-disabled"
@@ -62,7 +63,7 @@ describe("Login / User Creation", () => {
     );
     cy.findByTestId("password").type(`password`);
     cy.findByRole("button", { name: "OK" }).click();
-    cy.wait(1000);
+
     cy.findByRole("menuitem", { name: /Recipes/i }).should(
       "not.have.class",
       "ant-menu-item-disabled"
