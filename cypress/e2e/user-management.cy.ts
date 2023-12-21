@@ -45,7 +45,6 @@ describe("Login / User Creation", () => {
       "not.have.class",
       "ant-menu-item-disabled"
     );
-    cy.wait(3000);
 
     // log out
     cy.findByTestId("user-menu").click();
