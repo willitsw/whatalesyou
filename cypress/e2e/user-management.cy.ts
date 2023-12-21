@@ -45,11 +45,11 @@ describe("Login / User Creation", () => {
       "not.have.class",
       "ant-menu-item-disabled"
     );
+    cy.wait(3000);
 
     // log out
     cy.findByTestId("user-menu").click();
     cy.findByRole("menuitem", { name: /Logout/i }).click();
-    cy.wait(1000);
     cy.findByRole("menuitem", { name: /Recipes/i }).should(
       "have.class",
       "ant-menu-item-disabled"
