@@ -38,8 +38,8 @@ describe("Login / User Creation", () => {
     cy.findByRole("button", { name: "Create" }).click();
 
     // Enter the verification code
-    cy.findByRole("textbox", { name: "Verification Code" }).type(`ABCDE`);
     cy.findByRole("button", { name: "Send New Code" }).click();
+    cy.findByRole("textbox", { name: "Verification Code" }).type(`ABCDE`);
     cy.findByRole("button", { name: "Submit" }).click();
     cy.findByRole("menuitem", { name: /Recipes/i }).should(
       "not.have.class",
