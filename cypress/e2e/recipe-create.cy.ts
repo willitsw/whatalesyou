@@ -236,6 +236,9 @@ describe("Recipe Creation", () => {
     cy.findByRole("radio", { name: "Imperial" }).should("be.checked");
 
     // delete the recipe
-    // cy.findByRole('button', {name:'Delete Recipe'})
+    cy.findByRole("button", { name: "Back to Recipe List" }).click();
+    cy.findByTestId("delete-recipe-0").click();
+    cy.findByRole("button", { name: "OK" }).click();
+    cy.findByText("No data").should("exist");
   });
 });

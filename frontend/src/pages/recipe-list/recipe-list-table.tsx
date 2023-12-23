@@ -64,7 +64,7 @@ const RecipeListTable = () => {
     {
       title: "Action",
       key: "action",
-      render: (text: string, record: Recipe) => (
+      render: (text: string, record: Recipe, idx: number) => (
         <Space>
           <Tooltip title="Printer Friendly Version">
             <Link to={"/recipes/print/" + record.id} target="_blank">
@@ -95,6 +95,7 @@ const RecipeListTable = () => {
           </Tooltip>
           <Tooltip title="Delete">
             <Button
+              data-testid={`delete-recipe-${idx}`}
               type="primary"
               shape="circle"
               icon={<DeleteOutlined />}
