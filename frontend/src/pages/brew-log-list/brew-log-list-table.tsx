@@ -18,7 +18,7 @@ const BrewLogListTable = () => {
   const [idToDelete, setIdToDelete] = useState<string>(null);
   const { data: brewLogList, isLoading: brewLogListIsLoading } =
     useGetBrewLogsByUser();
-  const { mutateAsync: processDeleteBrewLog } = useDeleteBrewLog(idToDelete);
+  const { mutateAsync: processDeleteBrewLog } = useDeleteBrewLog();
   const navigate = useNavigate();
   const { fireAnalyticsEvent } = useAnalytics();
 
@@ -26,7 +26,7 @@ const BrewLogListTable = () => {
 
   const handleDeleteBrewLog = async () => {
     if (idToDelete) {
-      processDeleteBrewLog();
+      processDeleteBrewLog(idToDelete);
       fireAnalyticsEvent("Brew Log Deleted", { brewLogId: idToDelete });
     }
     setIdToDelete(null);
@@ -102,7 +102,7 @@ const BrewLogListTable = () => {
         onCancel={() => setIdToDelete(null)}
         onSubmit={() => handleDeleteBrewLog()}
         showModal={idToDelete !== null}
-        title="Delete brew log?"
+        title={"Delete brew log?" + { idToDelete }}
       >
         This cannot be undone.
       </OkCancelModal>

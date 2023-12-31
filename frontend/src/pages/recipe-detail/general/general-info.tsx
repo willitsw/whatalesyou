@@ -7,7 +7,6 @@ import {
   Form,
 } from "antd";
 import React from "react";
-import ElementWithLabel from "../../../components/form-layouts/element-with-label";
 import { RecipeDetailed } from "../../../types/recipe";
 import { FormFlex } from "../../../components/form-layouts/form-flex";
 import { useWatch } from "antd/es/form/Form";

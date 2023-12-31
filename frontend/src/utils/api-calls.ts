@@ -91,17 +91,20 @@ export const useGetBrewLogsByUser = () =>
 
 export const useGetBrewLogsById = (brewLogId: string) =>
   useQuery<BrewLog>({
-    queryKey: ["brewLogById"],
+    queryKey: ["brewLogById", brewLogId],
     queryFn: async () => {
+      if (!brewLogId) {
+        return null;
+      }
       const res = await makeRequest(`/brew-logs/${brewLogId}/`, "GET");
       return await res.json();
     },
   });
 
-export const useCreateUpdateBrewLog = (brewLog: BrewLog) => {
+export const useCreateUpdateBrewLog = () => {
   const queryClient = useQueryClient();
-  return useMutation<BrewLog>({
-    mutationFn: async () => {
+  return useMutation<BrewLog, Error, BrewLog>({
+    mutationFn: async (brewLog: BrewLog) => {
       const res = await makeRequest(
         `/brew-logs/${brewLog.id}/`,
         "PUT",
@@ -116,12 +119,11 @@ export const useCreateUpdateBrewLog = (brewLog: BrewLog) => {
   });
 };
 
-export const useDeleteBrewLog = (brewLogId: string) => {
+export const useDeleteBrewLog = () => {
   const queryClient = useQueryClient();
-  return useMutation<void>({
-    mutationFn: async () => {
-      const res = await makeRequest(`/brew-logs/${brewLogId}/`, "DELETE");
-      return await res.json();
+  return useMutation<void, Error, string>({
+    mutationFn: async (brewLogId: string) => {
+      await makeRequest(`/brew-logs/${brewLogId}/`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["brewLogById"] });

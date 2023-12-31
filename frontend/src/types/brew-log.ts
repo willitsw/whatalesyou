@@ -8,7 +8,7 @@ export interface BrewLog {
   name: string;
   batch_number: number;
   status: BrewLogStatuses;
-  brew_date: string;
+  brew_date: any;
   secondary_date?: string;
   packaging_date?: string;
   brewing_notes: string;
