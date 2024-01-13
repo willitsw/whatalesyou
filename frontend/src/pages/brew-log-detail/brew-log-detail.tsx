@@ -41,6 +41,8 @@ import { useCurrentUser } from "../../components/user-context/user-context";
 import { useForm, useWatch } from "antd/es/form/Form";
 import { User } from "../../types/user";
 import { FormFlex } from "../../components/form-layouts/form-flex";
+import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
+import { Recipe } from "../../types/recipe";
 
 const getDefaultBrewLog = (
   user: User,
@@ -72,15 +74,16 @@ const BrewLogDetailPage = () => {
     useState<string>(null);
   const [gravityReading, setGravityReading] = useState<GravityReading>(null);
   const [form] = useForm<BrewLog>();
+  const [recipeId, setRecipeId] = useState<string>();
 
   const logName = useWatch("name", form);
+  const recipeFromLog = useWatch("recipe", form);
+
+  const { data: recipeFromSelectBox, isLoading: recipeIsLoading } =
+    useGetRecipeById(recipeId);
 
   const { data: recipeList, isLoading: recipeListIsLoading } =
     useGetRecipesByUser();
-
-  // const { data: recipe, isLoading: recipeIsLoading } = useGetRecipeById(
-  //   workingBrewLog?.recipe
-  // );
 
   const { data: brewLog, isLoading: brewLogIsLoading } = useGetBrewLogsById(id);
 
@@ -106,6 +109,7 @@ const BrewLogDetailPage = () => {
     processCreateUpdateBrewLog({
       ...values,
       brew_date: dayjs(values.brew_date).format("YYYY-MM-DD"),
+      recipe: recipeFromSelectBox ?? brewLog?.recipe ?? null,
     });
     message.success("Brew Log has been saved.");
   };
@@ -142,6 +146,10 @@ const BrewLogDetailPage = () => {
   const goBackToBrewLogList = () => {
     navigate("/brew-log/list/");
   };
+
+  console.log("select box", recipeFromSelectBox, "log", recipeFromLog);
+
+  const recipeToShow = recipeFromSelectBox ?? brewLog?.recipe ?? null;
 
   return (
     <>
@@ -313,11 +321,13 @@ const BrewLogDetailPage = () => {
                 children: (
                   <>
                     Select an existing recipe:
-                    {/* <Select
-                      value={recipe ? recipe.name : "Select a recipe"}
+                    <Select
+                      value={
+                        recipeToShow ? recipeToShow.name : "Select a recipe"
+                      }
                       optionFilterProp="children"
                       onChange={async (newRecipeId) => {
-                        handleFieldChange(newRecipeId, "recipe");
+                        setRecipeId(newRecipeId);
                       }}
                       style={{ width: 240, marginLeft: 10, marginRight: 10 }}
                     >
@@ -331,12 +341,12 @@ const BrewLogDetailPage = () => {
                     </Select>{" "}
                     or <Link to={"/recipes/new/"}>create a new recipe</Link>.
                     <div style={{ marginTop: 20 }}>
-                      {recipe ? (
-                        <ReadOnlyRecipe recipe={recipe} />
+                      {recipeToShow ? (
+                        <ReadOnlyRecipe recipe={recipeToShow} />
                       ) : (
                         "No recipe is selected. Please choose one from the dropdown above."
                       )}
-                    </div> */}
+                    </div>
                   </>
                 ),
               },

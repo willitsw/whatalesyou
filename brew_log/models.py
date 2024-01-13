@@ -32,17 +32,11 @@ class BrewLog(WhatAlesYouBaseModel):
     tasting_notes = models.TextField(blank=True, null=True)
     other_notes = models.TextField(blank=True, null=True)
 
-    recipe = models.ForeignKey(
-        Recipe,
-        related_name="brew_logs",
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-    )
+    recipe = models.JSONField(blank=True, null=True)
     owner = models.ForeignKey(User, related_name="brew_logs", on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.name} - {self.owner.email} - {self.brew_date}"
+        return f"{self.name} - {self.owner} - {self.brew_date}"
 
 
 class GravityReading(WhatAlesYouBaseModel):

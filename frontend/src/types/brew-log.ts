@@ -1,3 +1,4 @@
+import { RecipeDetailed } from "./recipe";
 import { PagedResponse } from "./shared";
 
 export type BrewLogStatuses = "in_progress" | "complete";
@@ -18,7 +19,7 @@ export interface BrewLog {
   packaging_notes: string;
   tasting_notes: string;
   other_notes: string;
-  recipe?: string;
+  recipe?: RecipeDetailed;
   owner: string;
 }
 
