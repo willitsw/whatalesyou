@@ -45,6 +45,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "https://whatalesyou.net",
     "https://www.whatalesyou.net",
+    "https://whatalesyou.net",
 ]
 
 # Application definition
