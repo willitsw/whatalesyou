@@ -2,7 +2,6 @@ import uuid
 
 from django.db import models
 
-from recipes.models import Recipe
 from shared.models import WhatAlesYouBaseModel
 from user.models import User
 
@@ -42,7 +41,7 @@ class BrewLog(WhatAlesYouBaseModel):
 class GravityReading(WhatAlesYouBaseModel):
     notes = models.CharField(max_length=200)
     gravity = models.FloatField()
-    date = models.DateTimeField(auto_now=True)
+    date = models.DateTimeField()
     brew_log = models.ForeignKey(
         BrewLog, related_name="gravity_readings", on_delete=models.CASCADE
     )

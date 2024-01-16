@@ -35,14 +35,13 @@ import {
   BrewLogListResponse,
   GravityReading,
 } from "../../types/brew-log";
-import ElementWithLabel from "../../components/form-layouts/element-with-label";
 import { v4 as uuid } from "uuid";
 import { useCurrentUser } from "../../components/user-context/user-context";
 import { useForm, useWatch } from "antd/es/form/Form";
 import { User } from "../../types/user";
 import { FormFlex } from "../../components/form-layouts/form-flex";
 import ReadOnlyRecipe from "../../components/read-only-recipe/read-only-recipe";
-import { Recipe } from "../../types/recipe";
+import { GravityReadingModal } from "./gravity-reading-modal";
 
 const getDefaultBrewLog = (
   user: User,
@@ -77,10 +76,11 @@ const BrewLogDetailPage = () => {
   const [recipeId, setRecipeId] = useState<string>();
 
   const logName = useWatch("name", form);
-  const recipeFromLog = useWatch("recipe", form);
+  const gravityReadings = useWatch("gravity_readings", form);
 
-  const { data: recipeFromSelectBox, isLoading: recipeIsLoading } =
-    useGetRecipeById(recipeId);
+  console.log("current selected gravity reading", gravityReading);
+  console.log("all gravity reading", form.getFieldValue("gravity_readings"));
+  const { data: recipeFromSelectBox } = useGetRecipeById(recipeId);
 
   const { data: recipeList, isLoading: recipeListIsLoading } =
     useGetRecipesByUser();
@@ -114,21 +114,20 @@ const BrewLogDetailPage = () => {
     message.success("Brew Log has been saved.");
   };
 
-  const handleGravityReadingChange = (value: any, key: any) => {
-    const newGravityReading = { ...gravityReading };
-    newGravityReading[key] = value;
-    setGravityReading(newGravityReading);
-  };
-
-  const handleGravityReadingOk = () => {
+  const handleGravityReadingOk = (gravityReadingIncoming: GravityReading) => {
+    const committedGravityReading: GravityReading = {
+      ...gravityReading,
+      ...gravityReadingIncoming,
+      date: dayjs(gravityReadingIncoming.date).toISOString(),
+    };
     const newGravityReadings = form.getFieldValue("gravity_readings");
     const idxToReplace = newGravityReadings.findIndex(
-      (reading) => reading.id === gravityReading.id
+      (reading) => reading.id === committedGravityReading.id
     );
     if (idxToReplace >= 0) {
-      newGravityReadings[idxToReplace] = gravityReading;
+      newGravityReadings[idxToReplace] = committedGravityReading;
     } else {
-      newGravityReadings.push(gravityReading);
+      newGravityReadings.push(committedGravityReading);
     }
     form.setFieldValue("gravity_readings", newGravityReadings);
     setGravityReading(null);
@@ -146,8 +145,6 @@ const BrewLogDetailPage = () => {
   const goBackToBrewLogList = () => {
     navigate("/brew-log/list/");
   };
-
-  console.log("select box", recipeFromSelectBox, "log", recipeFromLog);
 
   const recipeToShow = recipeFromSelectBox ?? brewLog?.recipe ?? null;
 
@@ -368,48 +365,13 @@ const BrewLogDetailPage = () => {
           </Affix>
         </Form>
       </Content>
-      <Modal
-        title="Add/Edit Gravity Reading"
-        onCancel={() => setGravityReading(null)}
-        onOk={handleGravityReadingOk}
-        open={gravityReading !== null}
-      >
-        <>
-          <ElementWithLabel
-            formElement={
-              <Input
-                value={gravityReading?.notes}
-                onChange={(value) =>
-                  handleGravityReadingChange(value.target.value, "notes")
-                }
-                style={{ maxWidth: "100%" }}
-              />
-            }
-            label="Notes"
-            orientation="column"
-          />
-          <ElementWithLabel
-            formElement={
-              <InputNumber
-                value={gravityReading?.gravity.toString()}
-                onChange={(value) =>
-                  handleGravityReadingChange(value, "gravity")
-                }
-                min="0"
-                max="2"
-                step=".001"
-              />
-            }
-            label="Gravity"
-            orientation="column"
-          />
-          {/* <ElementWithLabel
-            formElement={<DatePicker />}
-            label="Reading Date"
-            orientation="column"
-          /> */}
-        </>
-      </Modal>
+      {!!gravityReading && (
+        <GravityReadingModal
+          onCancel={() => setGravityReading(null)}
+          onOk={handleGravityReadingOk}
+          gravityReading={gravityReading}
+        />
+      )}
       <Modal
         title="Delete Gravity Reading?"
         onCancel={() => setGravityReadingToDelete(null)}
