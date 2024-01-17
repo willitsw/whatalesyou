@@ -78,7 +78,7 @@ class User(AbstractUser):
         return self.email
 
     def __str__(self):
-        return f"{self.pk} {self.email}"
+        return f"{self.email}"
 
     class Meta(AbstractUser.Meta):
         swappable = "AUTH_USER_MODEL"

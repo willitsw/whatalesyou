@@ -14,9 +14,13 @@ import UserSettingsPage from "../../pages/user-settings/user-settings";
 import { TokenValidator } from "../../pages/token-validator/token-validator";
 import { useCurrentUser } from "../user-context/user-context";
 import { ForgotPassword } from "../../pages/forgot-password/forgot-password";
+import { useAppSelector } from "../../redux/store";
+import { selectShowLoginModal } from "../../redux/global-modals";
 
 const PageLayout = () => {
   const { isAuthenticated, user } = useCurrentUser();
+  const showLoginModal = useAppSelector(selectShowLoginModal);
+
   return (
     <>
       <Header />
@@ -59,7 +63,7 @@ const PageLayout = () => {
         )}
       </Routes>
       <Footer />
-      <LoginModal />
+      {showLoginModal && <LoginModal />}
     </>
   );
 };
