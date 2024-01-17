@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-CSRF_TRUSTED_ORIGINS = ["https://what-ales-you.herokuapp.com"]
+CSRF_TRUSTED_ORIGINS = ["https://what-ales-you.herokuapp.com", "whatalesyou.net"]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -36,7 +36,6 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "what-ales-you.herokuapp.com",
     "www.whatalesyou.net",
-    "whatalesyou.net",
 ]
 
 CORS_ALLOWED_ORIGINS = [
