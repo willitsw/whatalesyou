@@ -1,11 +1,11 @@
 # Your workflow name.
-name: Deploy BE to Heroku
+name: Run Tests
 
 # Run workflow on every push to master branch.
 on:
   push:
     branches: [main]
-  workflow_dispatch:
+  pull_request:
 
 # Your workflows jobs.
 jobs:
@@ -29,35 +29,23 @@ jobs:
           echo GOOGLE_EMAIL_USER=${{ secrets.GOOGLE_EMAIL_USER }} >> .env
           echo GOOGLE_EMAIL_PASSWORD=${{ secrets.GOOGLE_EMAIL_PASSWORD }} >> .env
           echo EMAIL_BACKEND=${{ secrets.EMAIL_BACKEND }} >> .env
-          echo HEROKU_API_KEY=${{ secrets.HEROKU_API_KEY }} >> .env
           cat .env
-      # - name: Build Docker Image
-      #   run: docker-compose build
-      # - name: Start containers for testing
-      #   run: docker-compose up -d
-      # - name: Run migrations for testing
-      #   run: docker-compose exec -T backend python3 manage.py migrate
-      # - name: Install deps for static testing build
-      #   run: npm ci
-      # - name: Cypress run
-      #   uses: cypress-io/github-action@v6
-      #   env:
-      #     CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     install: false
-      #     start: npm run dev
-      #     command: npm run cypress:run
-      #     wait-on: "http://localhost:8081"
-      #     record: true
-      # - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
-      #   uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).
-      #   with:
-      #     email: ${{ secrets.HEROKU_EMAIL }}
-      #     heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-      #     heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-      - name: Migrate DB
+      - name: Build Docker Image
+        run: docker-compose build
+      - name: Start containers for testing
+        run: docker-compose up -d
+      - name: Run migrations for testing
+        run: docker-compose exec -T backend python3 manage.py migrate
+      - name: Install deps for static testing build
+        run: npm ci
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
         env:
-          EMAIL: ${{ secrets.HEROKU_EMAIL }}
-          API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku login
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          install: false
+          start: npm run dev
+          command: npm run cypress:run
+          wait-on: "http://localhost:8081"
+          record: true
