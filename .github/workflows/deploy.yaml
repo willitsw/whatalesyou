@@ -57,6 +57,6 @@ jobs:
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
       - name: Migrate DB
         env:
-          EMAIL: willitsw@gmail.com
+          EMAIL: ${{ secrets.HEROKU_EMAIL }}
           API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku run ./manage.py migrate -a what-ales-you
+        run: heroku login
