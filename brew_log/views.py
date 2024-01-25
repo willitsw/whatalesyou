@@ -20,5 +20,4 @@ class BrewLogViewSet(viewsets.ModelViewSet):
         brew_log_id = request.data.get("id")
 
         BrewLog.objects.get_or_create(id=brew_log_id, owner=request.user)
-        print("brew log created now")
         return super().update(request, *args, **kwargs)

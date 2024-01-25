@@ -46,7 +46,6 @@ class UserManager(BaseUserManager, WhatAlesYouManager):
         return user
 
     def create_superuser(self, email, password=None):
-        print("hit it")
         user = self.create_user(
             email=email,
             password=password,
