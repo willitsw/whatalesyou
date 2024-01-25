@@ -10,6 +10,7 @@ import { TokenPayload } from "./types/user";
 import dayjs from "dayjs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserContextProvider } from "./components/user-context/user-context";
+import { ConfigProvider } from "antd";
 
 export enum RouteSegments {
   Home = "/home",
@@ -51,7 +52,9 @@ const App = () => {
         <UserContextProvider>
           <BrowserRouter>
             <AnalyticsProvider>
-              <PageLayout />
+              <ConfigProvider theme={{ token: { fontSize: 16 } }}>
+                <PageLayout />
+              </ConfigProvider>
             </AnalyticsProvider>
           </BrowserRouter>
         </UserContextProvider>
