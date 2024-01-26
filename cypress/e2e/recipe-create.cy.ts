@@ -134,9 +134,11 @@ describe("Recipe Creation", () => {
     cy.wait(100);
     cy.findByLabelText("Name").type("Ap");
     cy.findAllByText("Apollo").last().click({ force: true });
-    cy.findByLabelText("Timing").clear({ force: true }).type("45");
-    cy.findByLabelText("Amount").type("1.5");
-    cy.findByLabelText("Notes").type("The main hop");
+    cy.findByLabelText("Timing")
+      .clear({ force: true })
+      .type("45", { force: true });
+    cy.findByLabelText("Amount").type("1.5", { force: true });
+    cy.findByLabelText("Notes").type("The main hop", { force: true });
     cy.findByRole("button", { name: "OK" }).click();
 
     // add a fermentor ingredient
