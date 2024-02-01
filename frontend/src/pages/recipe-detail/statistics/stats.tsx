@@ -21,7 +21,7 @@ const Stats = ({ stats, measurementType }: StatsProps) => {
   const waterUnit = measurementType === "imperial" ? "gal" : "lit";
   const strikeWaterDisplay = `${strikeWater?.toFixed(1)} ${waterUnit}` ?? null;
   const hotLiquorDisplay =
-    hotLiquor !== 0 ? `${hotLiquor?.toFixed(1)} ${waterUnit}` ?? null : "N/A";
+    hotLiquor !== 0 ? `${hotLiquor?.toFixed(1)} ${waterUnit}` ?? null : null;
   const waterLossDisplay = `${waterLoss?.toFixed(1)} ${waterUnit}` ?? null;
 
   const colorValue = srm == null ? 0 : srm < 40 ? srm : 40;
@@ -86,9 +86,11 @@ const Stats = ({ stats, measurementType }: StatsProps) => {
         <Col span={6}>
           <Statistic title="Strike Water" value={strikeWaterDisplay ?? "-"} />
         </Col>
-        <Col span={6}>
-          <Statistic title="Sparge Water" value={hotLiquorDisplay ?? "-"} />
-        </Col>
+        {hotLiquorDisplay && (
+          <Col span={6}>
+            <Statistic title="Sparge Water" value={hotLiquorDisplay ?? "-"} />
+          </Col>
+        )}
         <Col span={6}>
           <Statistic title="Water Loss" value={waterLossDisplay ?? "-"} />
         </Col>

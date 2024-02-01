@@ -10,7 +10,7 @@ describe("Recipe Creation", () => {
     cy.findByRole("button", { name: "New Recipe" }).click();
 
     cy.findByRole("tab", { name: "Ingredients" }).click({ force: true });
-    cy.findByRole("button", { name: "Add Strike Water Ingredient" }).click();
+    cy.findByRole("button", { name: "plus Strike Water" }).click();
     cy.wait(100);
 
     // verify strike water step attributes
@@ -112,7 +112,7 @@ describe("Recipe Creation", () => {
     cy.findByRole("button", { name: "Cancel" }).click();
 
     // add a strike water ingredient
-    cy.findByRole("button", { name: "Add Strike Water Ingredient" }).click();
+    cy.findByRole("button", { name: "plus Strike Water" }).click();
     cy.wait(100);
     cy.findByLabelText("Name").type("Gypsum");
     cy.findByLabelText("Amount").type("6");
@@ -120,7 +120,7 @@ describe("Recipe Creation", () => {
     cy.findByRole("button", { name: "OK" }).click();
 
     // add a mash ingredient
-    cy.findByRole("button", { name: "Add Mash Ingredient" }).click();
+    cy.findByRole("button", { name: "plus Mash" }).click();
     cy.wait(100);
     cy.findByLabelText("Name").type("Pal");
     cy.findByText("Pale Ale Malt").click({ force: true });
@@ -130,7 +130,7 @@ describe("Recipe Creation", () => {
     cy.findByRole("button", { name: "OK" }).click();
 
     // add a boil ingredient
-    cy.findByRole("button", { name: "Add Boil Ingredient" }).click();
+    cy.findByRole("button", { name: "plus Boil" }).click();
     cy.wait(100);
     cy.findByLabelText("Name").type("Ap");
     cy.findAllByText("Apollo").last().click({ force: true });
@@ -142,7 +142,7 @@ describe("Recipe Creation", () => {
     cy.findByRole("button", { name: "OK" }).click();
 
     // add a fermentor ingredient
-    cy.findByRole("button", { name: "Add Fermentor Ingredient" }).click();
+    cy.findByRole("button", { name: "plus Fermentor" }).click();
     cy.wait(100);
     cy.findByLabelText("Name").type("US05");
     cy.findByLabelText("Timing")
@@ -156,7 +156,7 @@ describe("Recipe Creation", () => {
     cy.findByRole("button", { name: "OK" }).click();
 
     // add a packaging ingredient
-    cy.findByRole("button", { name: "Add Packaging Ingredient" }).click();
+    cy.findByRole("button", { name: "plus Packaging" }).click();
     cy.wait(100);
     cy.findByLabelText("Name").type("Orange Slices");
     cy.findByLabelText("Amount").type("25");

@@ -119,8 +119,16 @@ const UserSettingsPage = () => {
             </Form.Item>
           </>
         )}
-        <Affix offsetBottom={10} style={{ float: "right" }}>
-          <Space>
+        <Affix offsetBottom={10}>
+          <div
+            style={{
+              float: "right",
+              display: "flex",
+              flexDirection: "row",
+              gap: "5px",
+              flexWrap: "wrap",
+            }}
+          >
             <Button type="primary" htmlType="submit">
               {isCreateNewUser ? "Create" : "Save User"}
             </Button>
@@ -136,7 +144,7 @@ const UserSettingsPage = () => {
                 Change Password?
               </Button>
             )}
-          </Space>
+          </div>
         </Affix>
       </Form>
     </Content>

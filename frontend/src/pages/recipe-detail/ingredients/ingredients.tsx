@@ -17,7 +17,7 @@ import chemical from "./chemical.png";
 import grain from "./grain.png";
 import ingredient from "./ingredient.png";
 import yeast from "./yeast.png";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import IngredientModal from "./ingredient-modal";
 import { FermentableTypeLookup, Step } from "../../../types/shared";
 import {
@@ -48,8 +48,6 @@ interface IngredientSelectPayload {
   ingredient?: Ingredient;
 }
 
-type SortedIngredients = Record<Step, Ingredient[]>;
-
 const ingredientIcons: Record<IngredientType, any> = {
   cultures: yeast,
   fermentables: grain,
@@ -71,13 +69,11 @@ const Ingredients = ({
   onIngredientChange,
   onIngredientDelete,
 }: IngredientsProps) => {
-  // const [selectedIngredientId, setSelectedIngredientId] = useState<any>(null);
   const [ingredientToDelete, setIngredientToDelete] =
     useState<Ingredient>(null);
   const [sortedIngredients, setSortedIngredients] = useState<StepConfig[]>([]);
   const [selectedIngredientData, setSelectedIngredientData] =
     useState<IngredientSelectPayload>(null);
-  // const [ingredientList, setIngredientList] = useState<Ingredient[]>([]);
   const hops = useWatch("hops", { form, preserve: true });
   const chemistry = useWatch("chemistry", { form, preserve: true });
   const fermentables = useWatch("fermentables", { form, preserve: true });
@@ -161,13 +157,13 @@ const Ingredients = ({
         justifyContent: "space-between",
       }}
     >
-      <Typography.Title level={4}>{text} Additions</Typography.Title>
       <Button
         style={{ marginLeft: "15px" }}
         type="primary"
         onClick={() => handleSelectIngredientToEdit(step)}
+        icon={<PlusOutlined />}
       >
-        Add {text} Ingredient
+        {text}
       </Button>
     </div>
   );

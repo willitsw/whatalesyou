@@ -28,7 +28,7 @@ import {
   useGetRecipesByUser,
 } from "../../utils/api-calls";
 import { DATE_FORMAT } from "../../constants";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {
   BrewLog,
@@ -220,15 +220,12 @@ const BrewLogDetailPage = () => {
                               justifyContent: "space-between",
                             }}
                           >
-                            <Typography.Title level={4}>
-                              Gravity Readings
-                            </Typography.Title>
                             <Button
-                              style={{ marginLeft: "15px" }}
                               type="primary"
                               onClick={handleAddGravityReading}
+                              icon={<PlusOutlined />}
                             >
-                              Add Gravity Reading
+                              Gravity Reading
                             </Button>
                           </div>
                         }
